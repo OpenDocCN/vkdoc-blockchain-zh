@@ -1,0 +1,6269 @@
+<p><img src="images/978-1-4842-6969-5_CoverFigure.jpg"/></p>
+<p></p>
+
+
+
+
+
+
+<aside aria-label="Article Note 1" class="ArticleNote ArticleNoteESMHint BookFrontmatterArticleNote">
+<p>Any source code or other supplementary material referenced by the
+author in this book is available to readers on GitHub via the book’s
+product page, located at <a href="http://www.apress.com/9781484269688">www.​apress.​com/​9781484269688</a>. For
+more detailed information, please visit <a href="http://www.apress.com/source-code">http://​www.​apress.​com/​source-code</a>.</p>
+</aside>
+
+ ISBN 978-1-4842-6968-8e-ISBN 978-1-4842-6969-5
+
+
+<a href="https://doi.org/10.1007/978-1-4842-6969-5">https://doi.org/10.1007/978-1-4842-6969-5</a>
+
+
+© Boro Sitnikovski 2021
+
+
+This work is subject to copyright. All rights are solely and exclusively
+licensed by the Publisher, whether the whole or part of the material is
+concerned, specifically the rights of translation, reprinting, reuse of
+illustrations, recitation, broadcasting, reproduction on microfilms or
+in any other physical way, and transmission or information storage and
+retrieval, electronic adaptation, computer software, or by similar or
+dissimilar methodology now known or hereafter developed.
+
+
+The use of general descriptive names, registered names, trademarks,
+service marks, etc. in this publication does not imply, even in the
+absence of a specific statement, that such names are exempt from the
+relevant protective laws and regulations and therefore free for general
+use.
+
+
+The publisher, the authors and the editors are safe to assume that the
+advice and information in this book are believed to be true and accurate
+at the date of publication. Neither the publisher nor the authors or the
+editors give a warranty, expressed or implied, with respect to the
+material contained herein or for any errors or omissions that may have
+been made. The publisher remains neutral with regard to jurisdictional
+claims in published maps and institutional affiliations.
+
+
+Distributed to the book trade worldwide by Apress Media, LLC, 1 New York
+Plaza, New York, NY 10004, U.S.A. Phone 1-800-SPRINGER, fax (201)
+348-4505, e-mail orders-ny@springer-sbm.com, or visit
+www.springeronline.com. Apress Media, LLC is a California LLC and the
+sole member (owner) is Springer Science + Business Media Finance Inc
+(SSBM Finance Inc). SSBM Finance Inc is a Delaware corporation.
+
+
+
+
+Preface
+
+
+<p>This book aims to be accessible to novices who have some basic
+working experience with computers, and at least <em>some</em> experience
+with programming. Knowing how to program is not a strict necessity,
+although it may help in grasping some concepts. The book also assumes
+some experience with high school mathematics, such as functions.</p>
+<p>One of the reasons for writing this book is that I could not find a
+single book that explained how to implement blockchain from scratch,
+covering all the details. I had to do a lot of research on the Internet
+to come up with a complete picture of what blockchain is, how one can
+implement it, and what it is good for.</p>
+<p>Since it’s easy to get sidetracked by the amount of information,
+every chapter contains a summary to serve as recall. Moving back and
+forth between chapters until information sticks can be useful in aiding
+understanding.</p>
+<p>The recommended approach to the book is to follow along and write the
+code as it’s being explained instead of reading passively. This way you
+will get the most of it. All of the source code is available for
+download from <a href="https://github.com/bor0/racket-coin">
+<code>https://github.com/bor0/racket-coin</code>
+</a>.</p>
+<p>You can access my blog at <a href="https://bor0.wordpress.com/"> <code>https://bor0.wordpress.com</code>
+</a> and check out some of my latest work. Feel free to
+contact me at <code>buritomath@gmail.com</code>
+for any questions you might have, and I will do my best to answer.</p>
+<p>Thanks to my family, coworkers, and friends for all the support they
+give to me.</p>
+<p>Finally, thank you for purchasing this book! I hope that you will
+learn new techniques in reading this book and that it will spark more
+interest in Lisp and blockchain.</p>
+
+
+
+
+
+
+
+About the Author
+
+
+
+
+
+
+
+About the Technical Reviewer
+
+
+
+
+
+
+
+
+<p></p>
+
+
+<!--Begin Abstract-->
+
+<h1 class="ChapterTitle" lang="en">1. Introduction to Blockchain</h1>
+
+
+<!--End Abstract-->
+
+
+<p>
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figa_HTML.jpg" style="width:24.02em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figa_HTML.jpg"/>
+</p>
+
+<p><em>The blockchain bazaar, by D. Bozhinovski</em></p>
+<p>This chapter introduces some important blockchain definitions and examples.
+We will see what properties a blockchain has, what it allows us to do,
+and what it is good for.</p>
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figb_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figb_HTML.gif"/>
+Definition 1-1
+
+<p><strong>Blockchain</strong> is a system in which a record of
+transactions is maintained across several computers that are linked in a
+peer-to-peer network.<sup><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></sup></p>
+
+<p>We will give an example that will serve as a motivation, as well as
+define what encryption and hashing techniques are and how can they help
+us with our system.</p>
+<p>Note that we will hand-wave some of the technical bits in this
+chapter, as it serves as introductory material. The technical bits will
+be uncovered later when we start building the blockchain.</p>
+
+<h2 class="Heading">1.1 Motivation
+and Basic Definitions</h2>
+<p>Let’s assume that you and your friends exchange money often, for
+example, when paying for dinner or drinks. It can be inconvenient to
+exchange cash all the time.</p>
+<p>
+One possible solution is to keep records of all the bills that you and
+your friends have. This is called a <em>ledger</em> and is depicted in
+Figure <a href="#510363_1_En_1_Chapter.xhtml#Fig1">1-1</a>.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Fig1_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Fig1_HTML.jpg"/>
+</p>
+
+<p>Figure 1-1</p>
+<p>A ledger and a
+set of connected friends (peers)</p>
+
+
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figc_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figc_HTML.gif"/>
+Definition 1-2
+
+<p>A <strong>ledger</strong> is a book that contains a record of
+transactions.</p>
+
+<p>Further, at the end of every day, you all sit together and refer to
+the ledger to do the calculations to settle up. Let’s imagine that there
+is a pot, which is the place where all of the money is kept. If you
+spent more than you received, you put money into the pot; otherwise, you
+take money out.</p>
+<p>We want to design a system that functions similarly to a regular bank
+account. A holder of a wallet (the bank account) should only be able to
+send money from their wallet to other wallets. Thus, every person in the
+system will have a <em>wallet</em> of a kind, which can also be used to
+determine their balance. Note that with the current setup using a
+ledger, we have to go through all existing records to determine the
+balance of a specific wallet.</p>
+<p>If we want to avoid going through all existing records, there is a
+way we can optimize this, using <em>unspent transaction outputs</em>
+(UTXOs) , as we
+will see in Section 3.5.</p>
+<p>A problem that may arise is the so-called <em>double-spending</em>
+problem, where Bob
+can try to send all of his money to Alice and you at the same time. This
+would effectively double the money he sends in relation to what he has.
+There are several ways this can be resolved, and the solution that we
+will provide will be a simple check of the sum of the inputs and the sum
+of the outputs (UTXO).</p>
+<p>Another problem that might appear with this kind of system is that
+anyone can add a transaction. For example, Bob can add a transaction in
+which Alice pays him a few dollars without Alice’s approval. We need to
+rethink our system so that each transaction will be verified/signed.</p>
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figd_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figd_HTML.gif"/>
+Definition 1-3
+
+<p>A <strong>digital
+signature</strong>  is a way to verify the authenticity of
+digital messages and documents.</p>
+
+<p>
+To sign and verify transactions, we will rely on digital signatures
+(Figure <a href="#510363_1_En_1_Chapter.xhtml#Fig2">1-2</a>). For now, let’s
+assume that anyone who adds information to the ledger also adds a
+signature with each record, and others have no way to modify the
+signature, but can only verify it. We will cover the technical details
+in Section 1.2.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Fig2_HTML.jpg" style="width:14.98em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Fig2_HTML.jpg"/>
+</p>
+
+<p>Figure 1-2</p>
+<p>Our ledger now contains signatures</p>
+
+
+<p>Now let’s assume that Bob is keeping the ledger to himself, and
+everybody agrees to this. The ledger is now stored in what is called a
+<em>centralized place</em>
+. If Bob is unavailable at the end of the day when everybody
+gathers to settle up, nobody will be able to refer to the ledger.</p>
+<p>We need to find a way to decentralize the ledger, so that at any
+given time, anyone can make a transaction. For this, every person
+involved will keep a copy of the ledger to themselves, and when they
+meet at the end of the day, they will sync their ledgers.</p>
+<p>You are connected to your friends, and so are they to you.
+Informally, this makes it a peer-to-peer network.</p>
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Fige_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Fige_HTML.gif"/>
+Definition 1-4
+
+<p>A <strong>peer-to-peer
+network</strong>  is formed when two or more computers are
+connected to each other.</p>
+
+<p>For example, when you are accessing a web page on the Internet using
+a browser, your browser is the “client” and the web page you’re
+accessing is hosted by a “server.” This represents a centralized system
+since every user is getting the information from a single place—the
+“server.”</p>
+<p>
+In contrast, in a peer-to-peer network—which represents a decentralized
+system—the distinction between a “client” and a “server” is blurred.
+Every peer is both a “client” and a “server” at the same time.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Fig3_HTML.jpg" style="width:20em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Fig3_HTML.jpg"/>
+</p>
+
+<p>Figure 1-3</p>
+<p>A decentralized
+ledger</p>
+
+
+<p>With a decentralized system (see Figure <a href="#510363_1_En_1_Chapter.xhtml#Fig3">1-3</a>), as the list of
+peers (persons) grows, we might run into a problem of <em>trust</em> . When
+everybody meets at the end of the day to sync their ledgers, how can
+they believe that the transactions listed in other people’s ledgers are
+true? Even if everybody trusts everybody else’s ledger, what if a new
+person wants to join this network? It’s natural for existing users to
+ask this newcomer to prove that they can be trusted. We need to modify
+our system to support this kind of trust. One way to achieve that is
+through a <em>proof of work</em>, which we introduce next.</p>
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figf_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figf_HTML.gif"/>
+Definition 1-5
+
+<p>A <strong>proof of
+work</strong>  is data that is time-consuming to calculate, and
+easy for others to verify.</p>
+
+<p>For each record we will also include a special number (or a hash)
+that will represent <em>proof of work</em>, in that it will provide
+proof that the transaction is valid. We will cover the technical details
+in Section 1.3.</p>
+<p>At the end of the day, we agree that we will trust the ledger of the
+person who has put most of the work in it. If Bob has some errands to
+run, he can catch up the next day by trusting the rest of the peers in
+the network.</p>
+<p>
+In addition to all this, we want the transactions to have an order, so
+every record will also contain a link to the previous record. This
+represents the actual blockchain, as depicted in Figure <a href="#510363_1_En_1_Chapter.xhtml#Fig4">1-4</a>.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Fig4_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Fig4_HTML.jpg"/>
+</p>
+
+<p>Figure 1-4</p>
+<p>A chain of blocks, aptly called a blockchain</p>
+
+
+<p>If everybody agreed to use this ledger as a source of truth, there
+would be no need to exchange physical money at all. Everybody can just
+use the ledger to put money in or retrieve it.</p>
+<p>To understand the technical bits of digital signatures and proof of
+work, we will be looking at encryption and hashing, respectively.
+Fortunately for us, the programming language that we will be using has
+built-in functionalities for encryption and hashing. We don’t have to
+dig too deep into how hashing and encryption and decryption work,
+because a basic understanding will be sufficient.</p>
+<p>Observe how we started with a simple definition of a ledger and
+gradually built up to a complex system. We will use the same approach in
+programming.</p>
+
+
+<h2 class="Heading">1.2
+Encryption</h2>
+<p>We will start by defining encryption and
+decryption.</p>
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figg_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figg_HTML.gif"/>
+Definition 1-6
+
+<p><strong>Encryption</strong> is a method of encoding values so that
+only authorized persons can view the original content. <strong>Decryption</strong>
+ is a method of decoding encrypted values.</p>
+
+<p>Note that in this section we will mostly talk about numbers, but
+characters and letters can also be encrypted/decrypted using the same
+methods, by using the ASCII<sup><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></sup> values for the
+characters.</p>
+<p>Before we talk about encryption, we first have to recall what
+<em>functions</em> are, since encoding/decoding values is achieved by
+using functions.</p>
+
+<h3 class="Heading">1.2.1
+Functions</h3>
+<p>
+Figure <a href="#510363_1_En_1_Chapter.xhtml#Fig5">1-5</a> shows a visual
+representation of a function . An input goes in the
+function and an output is produced.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Fig5_HTML.jpg" style="width:15em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Fig5_HTML.jpg"/>
+</p>
+
+<p>Figure 1-5</p>
+<p>A function</p>
+
+
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figh_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figh_HTML.gif"/>
+Definition 1-7
+
+<p><strong>Functions</strong> are mathematical entities that assign
+unique outputs to given inputs.</p>
+
+<p>For example, you might have a function that accepts as input a person
+and then returns the person’s age or name as the output. Another example
+is the function <code>f(x) = x + 1</code>. There are many inputs this function can accept: 1, 2, and
+3.14. For example, when we input 2 it gives us an output of 3, since
+<code>f(2) = 2 + 1 = 3</code>.</p>
+<p>
+One simple way to think of functions is in the form of tables. For a
+function <code>f(x)</code>
+accepting a single argument <em>x</em>, we have a two-column table where
+the first column is the input and the second column is the output . For a function <code>f(x, y)</code> that’s
+accepting two arguments <em>x</em> and <em>y,</em> we have a
+three-column table where the first and second columns represent the
+input, and the third column is the output. Thus, to display the function
+discussed above in the form of a table, it would look like this:
+
+</p>
+
+<table style="border-collapse: collapse;border-top: 0.5pt solid ; border-bottom: 0.5pt solid ; border-left: 0.5pt solid ; border-right: 0.5pt solid ; ">
+<thead>
+<tr class="header">
+<th style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"><p><strong>x</strong></p></th>
+<th style="text-align: left; border-bottom: 0.5pt solid;"><p><em><strong>f</strong></em><strong>(</strong><em><strong>x</strong></em><strong>)</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"><p>1</p></td>
+<td style="text-align: left; border-bottom: 0.5pt solid;"><p>2</p></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"><p>2</p></td>
+<td style="text-align: left; border-bottom: 0.5pt solid;"><p>3</p></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; border-right: 0.5pt solid;"><p>…</p></td>
+<td style="text-align: left;"><p>…</p></td>
+</tr>
+</tbody>
+</table>
+
+
+
+<h3 class="Heading">1.2.2
+Symmetric-Key Algorithm</h3>
+<p>
+We can assume  that there exist
+functions <em>E</em>(<em>x</em>) and <em>D</em>(<em>x</em>) for
+encryption and decryption, respectively. We want these functions to have
+the following properties:
+
+</p>
+
+<ul>
+<li><p><em>E</em>(<em>x</em>) ≠ <em>x</em>, meaning that the encrypted
+value should not be the same as the original value.</p></li>
+<li><p><em>E</em>(<em>x</em>) ≠ <em>D</em>(<em>x</em>), meaning that the
+encryption and decryption functions produce different values.</p></li>
+<li><p><em>D</em>(<em>E</em>(<em>x</em>)) = <em>x</em>, meaning that the
+decryption of an encrypted value should return the original
+value.</p></li>
+</ul>
+
+<p>For example, let’s assume there’s some kind of an encryption scheme,
+say E(“Boro”) = 426f726f. We can “safely” communicate the value 426f726f
+without actually exposing our original value, and only those who know
+the decryption scheme D(x) will be able to see that D(426f726f) =
+“Boro”.</p>
+<p>Another example of an encryption scheme is for <em>E</em>(<em>x</em>)
+to shift every character in <em>x</em> forward, and for
+<em>D</em>(<em>x</em>) to shift every character in <em>x</em> backward.
+This scheme is known as the <em>Caesar cipher</em>. To encrypt the text
+“abc” we have E(“abc”) = “bcd”, and to decrypt it, we have D(“bcd”) =
+“abc”.</p>
+<p>
+However, this scheme makes a <em>symmetric algorithm</em>, as shown in
+Figure <a href="#510363_1_En_1_Chapter.xhtml#Fig6">1-6</a>, meaning that we
+have to share the functions <code>E</code> and <code>D</code> with the parties
+involved. That makes it open to attacks.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Fig6_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Fig6_HTML.jpg"/>
+</p>
+
+<p>Figure 1-6</p>
+<p>Symmetric-key
+algorithm
+</p>
+
+
+
+
+<h3 class="Heading">1.2.3
+Asymmetric-Key Algorithm</h3>
+<p>To solve the problems that arise with
+symmetric-key algorithms, we will use what is called an <em>asymmetric algorithm</em>
+ or <em>public-key
+cryptography</em>  (Figure <a href="#510363_1_En_1_Chapter.xhtml#Fig7">1-7</a>). In this
+scheme, we have two kinds of keys: public and private. We share the
+public key with the world and keep the private one to ourselves.</p>
+<p>This algorithm scheme has a neat property in which only the private
+key can decode a message, and only the public key can encode a
+message.</p>
+<p>
+We have two functions that should have the same properties as those for
+the symmetric-key
+algorithm:
+
+</p>
+
+<ul>
+<li><p><em>E</em>(<em>x</em>, <em>p</em>) encrypts a message <em>x</em>
+given a public key <em>p</em></p></li>
+<li><p><em>D</em>(<em>x</em>′, s) decrypts an encrypted message
+<em>x</em>′ given a private (secret) key <em>s</em></p></li>
+</ul>
+
+<p>
+
+</p>
+
+<p>
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Fig7_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Fig7_HTML.jpg"/>
+</p>
+
+<p>Figure 1-7</p>
+<p>Asymmetric-key
+algorithm</p>
+
+
+<p>In our example, we will rely on the modulo operation. Recall, from
+high school, that <em>a</em> mod <em>b</em> represents the remainder
+when <em>a</em> is divided by <em>b</em>. For example, 4 mod 2 = 0
+because there is no remainder when dividing 4 by 2, however, 5 mod 2 =
+1.</p>
+<p>
+Here’s one example of a basic encryption algorithm based on addition and modulo
+operations:
+
+</p>
+
+<ol>
+<li>
+
+<p>Pick one random number, for example 100. This will represent a
+common, publicly available key.</p>
+
+
+ 
+</li>
+<li>
+
+<p>Pick another random number in the range (1, 100), for example, 97.
+This will represent the private key <em>s</em>.</p>
+
+
+ 
+</li>
+<li>
+
+<p>The public key <em>p</em> is obtained by subtracting the common key
+from the private one: 100 − 97 = 3.</p>
+
+
+ 
+</li>
+<li>
+
+<p>To encrypt data, add it to the public key and the take modulo 100.
+<em>E</em>(<em>x</em>, <em>p</em>) = (<em>x</em> + <em>p</em>) mod
+100.</p>
+
+
+ 
+</li>
+<li>
+
+<p>To decrypt data, we use the same logic but with our private key, so
+<em>D</em>(<em>x</em>′, <em>s</em>) = (<em>x</em>′ + <em>s</em>) mod
+100.</p>
+
+
+ 
+</li>
+</ol>
+
+<p>For example, suppose we want to encrypt 5. Then <em>E</em>(5, 3) = (5
++ 3) mod 100 = 8. To decrypt 8, we have <em>D</em>(8, 97) = (8 + 97) mod
+100 = 105 mod 100 = 5.</p>
+<p>This example uses a very simple generation pair: (<em>x</em> +
+<em>y</em>) mod <em>c</em>. But, in practice, the pair-generation
+algorithm is much more complex and harder for attackers to break. After
+all, the complexity of the algorithm’s computation is what makes it hard
+to break.</p>
+<p>
+We can use a similar algorithm for digital signatures:
+
+</p>
+
+<ul>
+<li><p><em>S</em>(<em>x</em>, <em>s</em>) signs a message <em>x</em>
+given a private key <em>s</em> (encryption).</p></li>
+<li><p><em>V</em>(<em>x</em>′, <em>sig</em>, <em>p</em>) verifies a
+signed message <em>x</em>′, given signature sig and public key
+<em>p</em> (decryption).</p></li>
+</ul>
+
+<p>As we said earlier, each record will also include a special number
+(or a hash). This hash will be what is produced by
+<em>S</em>(<em>x</em>, <em>s</em>) (encryption), and it can be verified
+by using the verify function to confirm a record’s ownership
+(decryption).</p>
+<p>The wallet will contain a pair of public and private keys. These keys
+will be used to receive or send money. With the private key, it is
+possible to write new blocks (or transactions) to the blockchain,
+effectively spending money. With the public key, others can use it to
+send money to the wallet and verify signatures.</p>
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figi_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figi_HTML.gif"/>
+Exercise 1-1
+
+<p>Come up with a table of functions such that:</p>
+<p>
+
+</p>
+
+<ol>
+<li>
+
+<p>The input is a number and the output is a number.</p>
+
+
+ 
+</li>
+<li>
+
+<p>The input is a number and the output is the name of an employee in a
+company given that number.</p>
+
+
+ 
+</li>
+</ol>
+
+<p><img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figj_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figj_HTML.gif"/><strong>Exercise
+1-2</strong></p>
+<p>Check the three properties for a symmetric-key algorithm to ensure
+that the Caesar cipher is compatible with them.</p>
+<p><img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figk_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figk_HTML.gif"/><strong>Exercise
+1-3</strong></p>
+<p>Come up with an encryption scheme, based on mathematical
+substitution.</p>
+<p><img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figl_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figl_HTML.gif"/><strong>Exercise
+1-4</strong></p>
+<p>Use the asymmetric-key algorithm we defined to sign a message and
+verify it.</p>
+<p><strong>Hint</strong>: This is similar to the encryption/decryption
+example that we showed.</p>
+
+
+
+
+<h2 class="Heading">1.3 Hashing</h2>
+<p><img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figm_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figm_HTML.gif"/></p>
+
+
+Definition 1-8
+
+<p><strong>Hashing</strong>
+ is a one-way function in that it encodes text without a way to
+retrieve the original value.</p>
+
+<p>Hashing is simpler than the previously described encryption schemes.
+One example of a hashing function is to return the length of characters
+- <em>H</em>(“abc”) = 3, but also <em>H</em>(“bcd”) = 3. This means that
+we don’t have a way to retrieve the original value other than by using
+the return value 3.</p>
+<p>As we mentioned earlier, the reason to use such a technique is that
+it has some interesting properties, such as providing us with proof of
+work.</p>
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Fign_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Fign_HTML.gif"/>
+Definition 1-9
+
+<p><strong>Mining</strong> 
+is the process of validating transactions. For this effort, successful
+miners obtain money as a reward.</p>
+
+<p>Hashcash is one
+kind of a proof of work system.<sup><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></sup> We will use it to
+implement mining. We will see how this algorithm works in detail in the
+later chapters, when we implement it.</p>
+<p>Hashing functions have another
+useful property that allows us to connect two or more distinct blocks by
+having the information about the current block’s hash (<code>current-hash</code>) and the
+previous block’s hash (<code>previous-hash</code>) in
+each block. For example, <code>block-1</code> may have a
+hash such as 123456 and <code>block-2</code> may have a
+hash such as 345678. Now, <code>block-2</code>’s <code>previous-hash</code> will be
+<code>block-1</code>’s <code>current-hash</code>, that
+is, 123456. Here, we linked these two blocks, effectively creating a
+linked list of blocks containing ledgers with transactions. This linking
+is depicted in Figure <a href="#510363_1_En_1_Chapter.xhtml#Fig4">1-4</a>.</p>
+<p>The hash of the block is based on the block’s data itself, so to
+verify a hash, we can just hash the block’s data and compare it to <code>current-hash</code>.</p>
+<p>Two or more blocks (or transactions) that are connected form a
+blockchain. The validity of the blockchain will depend on the validity
+of each transaction.</p>
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figo_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figo_HTML.gif"/>
+Exercise 1-5
+
+<p>Come up with your own hashing function.</p>
+
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figp_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figp_HTML.gif"/>
+Exercise 1-6
+
+<p>How can the linked list depicted in Figure <a href="#510363_1_En_1_Chapter.xhtml#Fig4">1-4</a> be traversed?
+What are the implications of this property?</p>
+
+
+
+<h2 class="Heading">1.4 Smart
+Contracts</h2>
+
+
+<img src="images/510363_1_En_1_Chapter/510363_1_En_1_Figq_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_1_Chapter/510363_1_En_1_Figq_HTML.gif"/>
+Definition 1-10
+
+<p>A <strong>smart
+contract</strong>  is a self-executing contract in which the
+conditions of an agreement between a buyer and a seller are directly
+expressed by lines of code.</p>
+
+<p>
+A blockchain is programmable if the transaction conditions themselves
+can be programmed by users. For example, users (not necessarily
+programmers) can write a script to add requirements that must be
+satisfied before sending money. It could look something like this:
+
+</p>
+<pre>1   if (user has more than 10 money)
+2      then approve transaction
+3      else reject transaction</pre>
+<p>Smart contracts are implemented as a computation that takes place on
+the blockchain. We will implement a very basic functionality of smart
+contracts in the later chapters.</p>
+
+
+<h2 class="Heading">1.5 Bitcoin</h2>
+<p>Bitcoin was the
+world’s first implementation of a blockchain. In November 2008, a paper
+authored by Satoshi Nakamoto, entitled “Bitcoin: A Peer-to-Peer
+Electronic Cash System,” was published on a cryptography mailing list.
+Bitcoin’s whitepaper is nine pages, however, it is a mostly theoretical
+explanation of the design, and as such may be a bit overwhelming to
+newcomers.</p>
+<p>The Bitcoin software is open-source code and was released in January
+2009 on SourceForge. The design of a Bitcoin includes a decentralized
+network (peer-to-peer network), block (mining), blockchain,
+transactions, and wallets, each of which we will look at in detail in
+this book.</p>
+<p>Although there are many blockchain models and each differs in
+implementation details, the blockchain we will be building upon in this
+book will look pretty similar to Bitcoin, with some parts
+simplified.</p>
+
+
+<h2 class="Heading">1.6 Example
+Workflows</h2>
+<p>We will list a few important workflows that our
+system will use, among others.</p>
+<p><em>Mining a block</em> creates a new block, using Hashcash to
+calculate the <code>current-hash</code> of the
+block. It also contains <code>previous-hash</code>, which
+is a link to the previous block in the blockchain.</p>
+<p><em>Checking a wallet balance</em> for person A will first filter all
+blocks in the blockchain (sender = A or receiver = A) and then sum them
+to calculate the balance. The more our blockchain grows, the longer this
+operation will take. For that purpose, we will use the unspent
+transaction outputs (UTXO) model. This model is a list of transactions
+containing information about the owner and the amount of money. Thus,
+every transaction will consume elements from this list.</p>
+<p><em>Adding a block to a blockchain</em> consists of sending money
+from A to B. One prerequisite is that A has enough money. We check this
+using the wallet balance workflow. We proceed by creating a transaction
+(sender = A, receiver = B) and signing it. Then we mine a block using
+this transaction and update the UTXO with the rewards.</p>
+
+
+<h2 class="Heading">1.7 Summary</h2>
+<p>The point of this chapter is to provide a vague idea of how the
+system that we will implement looks. Things will become much clearer in
+the implementation chapter (Chapter <a href="#510363_1_En_3_Chapter.xhtml">3</a>), where we have to be explicit
+about the definitions of every component.</p>
+<p>
+Here’s briefly what we learned in this chapter:
+
+</p>
+
+<ul>
+<li><p>The core component of the system is a block.</p></li>
+<li><p>A block contains (among other data) transactions.</p></li>
+<li><p>We have a ledger that is an ordered list of all valid blocks (a
+blockchain).</p></li>
+<li><p>Every peer involved with the ledger has a wallet.</p></li>
+<li><p>Every record in the ledger is signed by the owner and can be
+verified by the public (digital signatures).</p></li>
+<li><p>The ledger is in a decentralized location, that is, everybody has
+a copy of it.</p></li>
+<li><p>Trust is based on proof of work (mining).</p></li>
+</ul>
+
+
+
+
+Footnotes
+
+
+<a href="#510363_1_En_1_Chapter.xhtml#Fn1_source">1</a>
+
+ 
+
+
+
+<a href="#510363_1_En_1_Chapter.xhtml#Fn2_source">2</a>
+
+ 
+
+
+
+<a href="#510363_1_En_1_Chapter.xhtml#Fn3_source">3</a>
+
+ 
+
+
+
+
+
+<p></p>
+
+
+<!--Begin Abstract-->
+
+<h1 class="ChapterTitle" lang="en">2. Racket Programming Language</h1>
+
+
+<!--End Abstract-->
+
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figa_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figa_HTML.jpg"/>
+</p>
+
+<p><em>Structure, by D. Bozhinovski</em></p>
+<p>Now that we have vaguely explained what a blockchain is and how it is
+useful, the next obvious step is to implement these calculations in a
+computer, so that they are automatically performed. In this chapter, we
+introduce a tool that will allow us to implement these calculations
+exactly.</p>
+
+<h2 class="Heading">2.1 Introduction
+to Lisp</h2>
+<p>Lisp, originating from 1958, stands for <em>LIST Processing</em> and
+is a family of programming languages. Unlike standard programming
+languages, it has a fully parenthesized prefix notation. For example,
+instead of writing <code>1 + 2</code>, one would write <code>(+ 1 2)</code>.</p>
+<p>There are many Lisp implementations in the Lisp family. One such
+implementation is Racket, and we will use it in this book since this
+implementation is particularly easy for entry-level programmers. The
+language is used in a variety of contexts such as research, computer
+science education, and general-purpose programming. It has also been
+used for commercial projects. One notable example is the Hacker
+News<sup><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></sup> website, which runs on Arc, a
+programming language developed in Racket.</p>
+<p>Lisp implementations are quite
+known for their minimalism. Due to this minimalism, building a
+blockchain (or anything, for that matter) in Lisp will imply that you
+can do the same in most other programming languages with ease. Lisps
+favor function composition—chaining two functions together—for example,
+given <em>f</em>(<em>x</em>) and <em>g</em>(<em>x</em>), one composition
+is <em>f</em>(<em>g</em>(<em>x</em>)). Further in the book, we will see
+the interesting properties that composition offers and how easily we can
+maintain and extend our code.</p>
+
+<h3 class="Heading">2.1.1 Data
+Structures and Recursion</h3>
+<p>
+There are three important notions in a Lisp:
+
+</p>
+
+<ul>
+<li><p><em>Primitives</em> or axioms (starting points
+or building blocks). As an example, the numbers 1, 2, and so on, are
+something we do not have to implement ourselves since they are already
+included in the programming language. Another example is operations on
+numbers, such as <code>+</code> and <code>*</code>.</p></li>
+<li><p><em>Composition</em>  or
+a way to compose primitives to do complex calculations. For example, we
+can combine <code>+</code>
+and <code>*</code> as
+follows: <code>1 + (2 * 3)</code> or in prefix (Lisp) notation: <code>(+ 1 (* 2 3))</code>.</p></li>
+<li><p><em>Abstraction</em>  or
+capturing the composition of primitives. For example, if we find
+ourselves doing a calculation over and over again, it would be good to
+capture (abstract, or wrap) it in a function that can be easily
+reused.</p></li>
+</ul>
+
+<p>We will rely on these concepts repeatedly throughout the book, as
+they allow us to build complex structures.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figb_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figb_HTML.gif"/>
+Definition 2-1
+
+<p>A <strong>data structure</strong> is a collection of values, the
+relationships among them, and the functions or operations that can be
+applied to these values.</p>
+
+<p>An example of a data
+structure 
+is numbers together with the plus and multiplication functions.</p>
+<p>From the motivation in the previous chapter we can see the need of
+forming such a data structure, where, for example, a block is a
+structure that contains a hash, an owner, and transaction amount.</p>
+<p>There are many data structures. An ordered list is one example,
+representing the numbers (1, 2, 3) in that order. Further, there are
+operations on lists, such as counting the number of elements, merging
+two lists, and so on.</p>
+<p>We used the numbers 1, 2, and 3 in the previous example of a
+list—these elements are <em>primitives</em> . A
+list, together with its operations, represents an <em>abstraction</em> .
+Chaining several list operations together represents a <em>composition</em>
+.</p>
+<p>Now that we can transform some data structure (by applying operations
+on it), it would be good to be able to repeatedly transform a data
+structure according to some specific rules. For example, if we have a
+blockchain data structure we may want to come up with a way to transform
+it such that, for example, a new block is inserted in it. This might
+require applying the same operation several times.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figc_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figc_HTML.gif"/>
+Definition 2-2
+
+<p>In mathematics and computer science, functions exhibit <strong>recursive</strong>
+ behavior when they can be defined by two properties:</p>
+
+<p>
+
+</p>
+
+<ol>
+<li>
+
+<p>A simple base case (or cases)—a terminating case that returns a value
+without using recursion</p>
+
+
+ 
+</li>
+<li>
+
+<p>A rule (or rules) that reduces toward the base case</p>
+
+
+ 
+</li>
+</ol>
+
+<p>
+The most common example of a recursive function is
+the factorial function, defined as follows:
+
+
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Chapter_TeX_Equa.png" style="width:17.22em" alt="$$ fact(n)=\left\{\begin{array}{l}1,\mathrm{if}\ n=0\\ {}n\cdot fact\left(n-1\right),\mathrm{otherwise}\end{array}\right. $$"/>
+</p>
+
+
+
+</p>
+<p>For example, using substitution we can see that <em>fact</em>(3)
+evaluates to 3 ⋅ <em>fact</em>(2), which is 3 ⋅ 2 ⋅ <em>fact</em>(1),
+and finally 3 ⋅ 2 ⋅ 1 ⋅ <em>fact</em>(0), which is just 6.</p>
+<p>The recursion we just discussed applies the same operation multiple
+times, and gives the motivation for the next definition.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figd_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figd_HTML.gif"/>
+Definition 2-3
+
+<p>A <strong>tree</strong> 
+is a hierarchical, recursive data structure that can have two possible
+values:</p>
+
+<p>
+
+</p>
+
+<ol>
+<li>
+
+<p>An empty value</p>
+
+
+ 
+</li>
+<li>
+
+<p>A single value, coupled with another two subtrees</p>
+
+
+ 
+</li>
+</ol>
+
+<p>
+A family tree is one example of a tree. Another example of a tree is a
+binary tree, whereby the left subtree’s value is less than the current
+value and the right subtree’s value is greater than the current value:
+
+</p>
+<pre>1     2
+2    / \
+3   1   3</pre>
+<p>Trees are important in Lisps, as they are used to represent a
+program’s structure. We will discuss this more in the next section.</p>
+
+
+<h3 class="Heading">2.1.2 Languages
+and Syntax</h3>
+<p>In this section, we take a quick look at the foundations of a Lisp,
+which will provide a high overview of the ideas behind Lisps.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fige_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fige_HTML.gif"/>
+Definition 2-4
+
+<p>A <strong>language</strong>
+  consists
+of:</p>
+
+<p>
+
+</p>
+
+<ol>
+<li>
+
+<p>Symbols, which can be combined into sentences</p>
+
+
+ 
+</li>
+<li>
+
+<p>Grammar, which is a set of rules that tells us which sentences are
+well-formed</p>
+
+
+ 
+</li>
+</ol>
+
+<p>This definition of a language is also reflected in programming
+languages, which have a special grammar called the syntax. For example,
+the C programming language has a special syntax—you have to follow
+specific rules when writing program statements.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figf_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figf_HTML.gif"/>
+Definition 2-5
+
+<p>An <strong>abstract
+syntax tree</strong>   is a tree
+representation of the abstract syntactic structure of source code
+written in a programming language.</p>
+
+<p>
+When you write a program in a programming language, there’s an
+intermediate step that parses the program’s source code and derives an
+abstract syntax tree.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fig1_HTML.jpg" style="width:25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fig1_HTML.jpg"/>
+</p>
+
+<p>Figure 2-1</p>
+<p>Example 1: Abstract
+syntax tree</p>
+
+
+<p>
+For example, the image in Figure <a href="#510363_1_En_2_Chapter.xhtml#Fig1">2-1</a> represents an
+abstract syntax
+tree for the following pseudocode:
+
+</p>
+<pre>1   while (a &gt; b) {
+2       a = a - 1;
+3       b = b * 2;
+4   }</pre>
+<p>
+As another example, the image in Figure <a href="#510363_1_En_2_Chapter.xhtml#Fig2">2-2</a> represents the
+following pseudocode:
+
+</p>
+<pre>1   if (a == b &amp;&amp; b == c) {
+2       a = a - 1;
+3       b = b * 2;
+4   } else a = a * b * 2;</pre>
+<p>
+It is not important to understand what these codes do, rather understand
+how such programs are represented internally in programming languages.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fig2_HTML.jpg" style="width:32.48em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fig2_HTML.jpg"/>
+</p>
+
+<p>Figure 2-2</p>
+<p>Example 2: Abstract
+syntax tree</p>
+
+
+<p>Lisps do not have the restriction of a special syntax like C has, for
+example. The code that we will write will be the actual abstract syntax
+tree. This is why Lisps rely on prefix notation. We see how Lisps are
+based on a minimalistic design, as we do not get the overhead of many
+other languages that have special syntax and sometimes functionalities
+that overlap.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figg_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figg_HTML.gif"/>
+Definition 2-6
+
+<p>The syntactic elements in Lisp are symbolic
+<strong>expressions</strong>  or S-expressions. An
+S-expression can be one of:</p>
+
+<p>
+
+</p>
+
+<ol>
+<li>
+
+<p>A symbol (a string of characters)</p>
+
+
+ 
+</li>
+<li>
+
+<p>A well-formed list (balanced parentheses) of S-expressions</p>
+
+
+ 
+</li>
+</ol>
+
+<p>For example, <code>hello</code> is a valid
+S-expression, and so is <code>(hello there)</code>. But
+<code>(hello(</code> is not
+a valid S-expression, because the parentheses are not balanced.
+Whitespace is important in constructing S-expressions. Note that <code>h ello</code> is different
+from <code>hello</code>.</p>
+<p>An S-expression
+is well-formed if and only if the abstract syntax tree is balanced.</p>
+<p>Syntax has a
+special meaning in Lisps compared to other languages. With macros as
+part of the core language, it’s possible to extend this syntax.<sup><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></sup> S-expressions form the syntax
+of a Lisp.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figh_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figh_HTML.gif"/>
+Exercise 2-1
+
+<p>We treated numbers with the plus function as a data structure. Think
+of another data structure.</p>
+
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figi_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figi_HTML.gif"/>
+Exercise 2-2
+
+<p>Evaluate <code>sum(3)</code>, <code>sum(5)</code>, and <code>sum(1)</code> given the
+following definition:</p>
+<p><img src="images/510363_1_En_2_Chapter/510363_1_En_2_Chapter_TeX_IEq1.png" style="width:17.29em" alt="$$ sum(n)=\left\{\begin{array}{l}0,\mathrm{if}\ n=0\\ {}n+ sum\left(n-1\right),\mathrm{otherwise}\end{array}\right. $$"/></p>
+<p>What about <code>sum(−1)</code>?</p>
+
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figj_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figj_HTML.gif"/>
+Exercise 2-3
+
+<p>Which of the following S-expressions is valid?</p>
+<p><code>1.  hello</code></p>
+<p><code>2.  123</code></p>
+<p><code>3.  (hello 123)</code></p>
+<p><code>4.  (hello (123)</code></p>
+<p><code>5.  (+ 1 (* 2 3))</code></p>
+<p><code>6.  (+ (* 3 2) (/ 6 2))</code></p>
+<p><strong>Hint</strong>: Drawing an abstract syntax tree for each of
+the expressions might make it more obvious why one is or isn’t
+valid.</p>
+
+
+
+
+<h2 class="Heading">2.2 Configuration
+and Installation</h2>
+<p>
+Racket can be downloaded and installed via <a href="https://download.racket-lang.org/"><code>https://download.racket-lang.org</code></a>.
+There are binaries available for Windows, Linux, and Mac. This book was
+written using Racket version 7, but it may work as well with other
+versions. After downloading and installing the complete package, we can
+run DrRacket. If you get to the screen shown in Figure <a href="#510363_1_En_2_Chapter.xhtml#Fig3">2-3</a>,
+congratulations! It means that the installation was successful.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fig3_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fig3_HTML.jpg"/>
+</p>
+
+<p>Figure 2-3</p>
+<p>DrRacket</p>
+
+
+<p>The upper text area part of the screen is the definitions area, where we usually
+write the definitions. Alternatively, the lower part is the interactions
+area, where we interact with the definitions.</p>
+<p>The Help Desk, found under <code>Help &gt; Help Desk</code>
+on the top menu, contains useful information such as a quick
+introduction, reference manuals, and examples.</p>
+<p>
+There are two main approaches to working with Racket:
+
+</p>
+
+<ul>
+<li><p>Using the graphical user interface (GUI), which is the
+recommended way and what we use throughout this book</p></li>
+<li><p>Using the command-line utilities (<code>racket</code> is the
+interpreter/compiler and <code>raco</code> is the package
+manager), which is for more advanced users</p></li>
+</ul>
+
+
+
+<h2 class="Heading">2.3 Introduction
+to Racket</h2>
+<p>The first thing that Lisp newcomers notice is that there are too many
+parentheses in Lisp programs. This is true, but it is a direct
+consequence of the fact that we are writing our abstract syntax tree in
+a language that has no special syntax.</p>
+<p>As we go through this book, we will see the power of expressiveness
+we get as a result. For example, one advantage is that there is no need
+for a special order of operations. In high school, we had to remember
+that <code>*</code> and
+<code>/</code> had to be
+evaluated before <code>+</code> and <code>-.</code> This is not the
+case with Lisps, as the order of evaluation is obvious by the way we’ve
+written our program.</p>
+<p>Let’s consider the expression <code>(+ 1 (* 2 3))</code>. As we
+mentioned, whitespace is an
+important part of S-expressions, so <code>(+1 (* 2 3))</code> is
+different from <code>(+ 1 (* 2 3))</code>. To convert this to a more familiar notation in our mind,
+we could swap the operators so that they are in <em>infix</em> notation
+instead of <em>prefix</em>: <code>(+ 1 (* 2 3))</code> is the
+same as <code>(1 + (2 * 3))</code>. We now see that the value of this expression is 7.</p>
+<p>
+Next, let’s write this expression followed by the return key (Enter) in
+the interactions area (the bottom text area) of the DrRacket editor:
+
+</p>
+<pre>1   &gt; (+ 1 (* 2 3))
+2   7</pre>
+<p>
+The <code>&gt;</code> sign
+indicates that the command that follows it must be input into the
+interactions area.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fig4_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fig4_HTML.jpg"/>
+</p>
+
+<p>Figure 2-4</p>
+<p>DrRacket first calculation</p>
+
+
+<p>We get 7 as a result, as depicted in Figure <a href="#510363_1_En_2_Chapter.xhtml#Fig4">2-4</a>. We’ve done our
+first calculation
+in Racket.</p>
+<p>After finishing an evaluation, DrRacket again waits for a new
+command. This is because in the interactions area, we are in REPL mode,
+which stands for Read-Evaluate-Print-Loop. That is, the interactions
+area will read what we write, try to evaluate it (come up with a
+result), print the result, and loop back to reading again.</p>
+<p>
+Lisp evaluation is very similar to substitution in mathematics. For
+example, one way <code>(+ 1 (* 2 3))</code> can be evaluated is as follows:
+
+</p>
+
+<ol>
+<li>
+
+<p><code>(+ 1 (* 2 3))</code></p>
+
+
+ 
+</li>
+<li>
+
+<p><code>(+ 1 6)</code></p>
+
+
+ 
+</li>
+<li>
+
+<p><code>7</code></p>
+
+
+ 
+</li>
+</ol>
+
+<p>That is, in each step, we reduce the expression until no further
+reductions are possible. We immediately notice how powerful substitution
+as a concept is.</p>
+
+<h3 class="Heading">2.3.1 Primitive
+Types</h3>
+<p>In the evaluation above , we got a number as a
+result—the value 7 has a type of number. While types of values are
+implicit in Racket, we still have a way to check what the type of a
+value is, as we will see later with the help of predicates.</p>
+<p>
+Racket has some primitive (built-in) types, such as:
+
+</p>
+
+<ul>
+<li><p>Symbols, such as <code>hello, world</code></p></li>
+<li><p>Lists, such as <code>(1, 2, 3)</code></p></li>
+<li><p>Functions, such as <code>f(x) = x + 1</code></p></li>
+<li><p>Numbers, such as <code>1, 2, 3.14</code></p></li>
+<li><p>Booleans, such as <code>#t</code> (for True) and
+<code>#f</code> (for
+False)</p></li>
+<li><p>Characters or single letters: <code>#\A, #\B, #\C</code></p></li>
+<li><p>Strings or lists of characters: <code>"Hello", "World"</code></p></li>
+<li><p>Bytes: Per ASCII code, we can represent characters in terms of a
+number (e.g. <code>72</code>
+is <code>H</code>)</p></li>
+<li><p>Bytes, as a list of byte: <code>#"Hello", #"World"</code></p></li>
+</ul>
+
+<p>
+
+</p>
+<pre>1   &gt; 123
+2   123
+3   &gt; #t
+4   #t
+5   &gt; #f
+6   #f
+7   &gt; #\A
+8   #\A
+9   &gt; "Hello  World"
+10   "Hello World"
+11   &gt; (bytes 72 101 108 108 111)
+12   #"Hello"</pre>
+<p>
+Each evaluation has a specific type attached to the produced value :
+
+</p>
+
+<ol>
+<li>
+
+<p>The first evaluation (<code>123</code>) has a type of
+number.</p>
+
+
+ 
+</li>
+<li>
+
+<p>The second (<code>#t</code>) and third (<code>#f</code>) evaluations have
+a type of boolean.</p>
+
+
+ 
+</li>
+<li>
+
+<p>The fourth evaluation (<code>#\A</code>) has a type of
+character.</p>
+
+
+ 
+</li>
+<li>
+
+<p>The fifth evaluation (<code>"Hello World"</code>) has a
+type of string.</p>
+
+
+ 
+</li>
+<li>
+
+<p>The sixth evaluation ((<code>bytes 72 101 108 108 111</code>)) has a type of bytes and is using the ASCII table for
+letters.</p>
+
+
+ 
+</li>
+</ol>
+
+<p>We cover symbols, lists, and functions in the following sections .</p>
+
+
+<h3 class="Heading">2.3.2 Lists,
+Evaluation, and Quotes</h3>
+<p>
+In order to produce the ordered list (<code>1, 2, 3)</code>, we can ask
+DrRacket to evaluate <code>(list 1 2 3)</code> in the
+interactions area:
+
+</p>
+<pre>1   &gt; (list 1 2 3)
+2   '(1 2 3)</pre>
+<p><code>list</code>   is a built-in
+function, just like <code>+</code>, which we already
+used. <code>list</code>
+accepts any number of arguments, and as a result, returns a list
+generated from them. The returned expression <code>'(1 2 3)</code> is just a
+fancy notation, which is equivalent to the expression <code>(quote (1 2 3))</code>,
+where we tell Racket to return the actual list <code>(1 2 3)</code> instead of
+evaluating it.</p>
+<p>We notice how parentheses are used to denote a function call, or
+evaluation. In general, the code <code>(f a_1 a_2 ... a_n)</code>
+makes a function call to <code>f</code>, passing <code>n</code> arguments in that
+order. For example, for the function <code>f(x) = x + 1</code>, one
+example evaluation is <code>f(1)</code> and we write
+<code>(f 1)</code>, where as
+a return value we get 2.</p>
+<p>Note that <code>(list 1 2 3)</code> returned <code>'(1 2 3)</code> as a result. Let’s try to understand what happened here. If
+<code>(list 1 2 3)</code>
+had returned <code>(1 2 3)</code>, this wouldn’t have made much sense since (as we discussed)
+this notation would try to call the (nonexistent) function 1 with
+arguments 2 and 3. Instead, it returned a <em>quoted</em> list: ‘<code>(1 2 3)</code>.</p>
+<p>
+To understand how this affects evaluation, let’s
+consider an example where you say either of these statements to someone:
+
+</p>
+
+<ul>
+<li><p>Say your name</p></li>
+<li><p>Say “your name”</p></li>
+</ul>
+
+<p>In the first example, you expect the person to tell you their name.
+In the second example, you expect them to say the words “your name,”
+rather than their actual name.</p>
+<p>
+Similar to this example, there is a built-in syntax called <code>quote</code> , and we
+can use it on any set of symbols:
+
+</p>
+<pre>1   &gt; (quote hello)
+2   'hello</pre>
+<p>This allows for the creation of new symbols and is especially
+important for the creation of macros. There is a special list, called
+the <em>empty list,</em> and is denoted as <code>(list)</code>, or <code>(quote ())</code>, or simply
+<code>'()</code>. We will
+later see why this list is special when we start using recursion.</p>
+<p>
+For additional information on <code>list</code> (or any other
+function), you can click the word using the mouse and press the F1
+button. This will open Racket’s manuals screen, which will allow you to
+pick a function that you want information about. Usually, it’s the first
+match on this list. Clicking it should show something similar to Figure
+<a href="#510363_1_En_2_Chapter.xhtml#Fig5">2-5</a>.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fig5_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fig5_HTML.jpg"/>
+</p>
+
+<p>Figure 2-5</p>
+<p>Racket manual for <code>list</code>  </p>
+
+
+<p>In Racket, parentheses, brackets, and braces have the same effect.
+Thus, <code>(list 1 2 3)</code> is the same as <code>[list 1 2 3]</code> and
+<code>{list 1 2 3}</code>.
+This visual distinction may be useful to group evaluations when there
+are a lot of parentheses.</p>
+<p>Recall that S-expressions can be
+either a symbol or a list. Since we discussed evaluation, lists, and
+symbols in this section, at this point in the book we have covered what
+makes the core of a Lisp.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figk_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figk_HTML.gif"/>
+Exercise 2-4
+
+<p>Create a list in Racket that contains a mixture of different types
+(numbers, strings). The list should have at least two elements.</p>
+
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figl_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figl_HTML.gif"/>
+Exercise 2-5
+
+<p>Note that <code>list</code> is a function
+and <code>quote</code> is a
+syntax. Read the manual for both using the F1 key.</p>
+
+
+
+<h3 class="Heading">2.3.3 Dotted
+Pairs</h3>
+<p>
+Another built-in function is <code>cons</code>, which stands
+for <em>construct</em>
+ . This
+function accepts
+only two arguments, and as a result, it returns a (quoted) pair:
+
+</p>
+<pre>1   &gt; (cons 1 2)
+2   '(1 . 2)</pre>
+<p>
+Think of <code>'(1 . 2)</code> as a sequence of two numbers: 1 and 2.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fig6_HTML.jpg" style="width:14.98em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fig6_HTML.jpg"/>
+</p>
+
+<p>Figure 2-6</p>
+<p>The (<code>cons 'some-value 'nil</code>) pair</p>
+
+
+<p>
+There are two other built-in functions, called <code>car</code> and <code>cdr</code>, which are used
+to retrieve the first and the second element of a pair, respectively:
+
+</p>
+<pre>1   &gt; (car (cons 1 2))
+2   1
+3   &gt; (cdr (cons 1 2))
+4   2
+5   &gt; (car '(1 . 2))
+6   1
+7   &gt; (cdr '(1 . 2))
+8   2</pre>
+<p>Note how we used function composition here, namely, we “composed”
+<code>car</code> and <code>cons</code> in the first
+example, and <code>cdr</code> and <code>cons</code> in the second
+example.</p>
+<p>
+Pairs are so important that we can encode any data structure with them.
+In fact, lists are a special kind of pair, where <code>(list 1 2 3)</code> is equal
+to <code>(cons 1 (cons 2 (cons 3 '())))</code>. See Figure <a href="#510363_1_En_2_Chapter.xhtml#Fig7">2-7</a>.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fig7_HTML.jpg" style="width:25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fig7_HTML.jpg"/>
+</p>
+
+<p>Figure 2-7</p>
+<p>An example of a list</p>
+
+
+<p>The motivation for using a list is that it will allow us, for example, to link
+several blocks together to make a blockchain.</p>
+<p>Racket also supports sets. In a list/pair there can be repeated
+elements, but in a set all elements are unique. Additionally, there are
+operations that we can use on sets, such as union (merges two sets),
+subtraction (removes the elements in set 1 that are found in set 2), and
+so on.</p>
+<p>
+For example, consider the following code where the built-in functions
+<code>list-&gt;set</code>,
+<code>set-union</code>, and
+<code>set-subtract</code>
+are used:
+
+</p>
+<pre>1   &gt; (list-&gt;set '(1 2 3 4 4))
+2   (set 1 3 2 4)
+3   &gt; '(1 2 3 4 4)
+4   '(1 2 3 4 4)
+5   &gt; (set-union (list-&gt;set '(1 2 3)) (list-&gt;set '(3 4 5)))
+6   (set 1 5 3 2 4)
+7   &gt; (set-subtract (list-&gt;set '(1 2 3)) (list-&gt;set '(3 4 5)))
+8   (set 1 2)</pre>
+<p>We notice how in Lisp, depending only on a few primitive notions
+(function calls, pairs, and quote), we can capture abstraction. We will
+talk more about this in Section 2.3.13.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figm_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figm_HTML.gif"/>
+Exercise 2-6
+
+<p>Represent the same list you created in Exercise 2-4 using <code>cons</code>.</p>
+
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fign_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fign_HTML.gif"/>
+Exercise 2-7
+
+<p>Use a combination of <code>car</code> and <code>cdr</code> for the list in
+Exercise 2-6 to get the second element in the list.</p>
+
+
+
+<h3 class="Heading">2.3.4 Adding
+Definitions</h3>
+<p>
+So far we’ve worked only with the interactions area in DrRacket. Let’s
+try to do something useful with the definitions area.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fig8_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fig8_HTML.jpg"/>
+</p>
+
+<p>Figure 2-8</p>
+<p>Adding
+definitions in DrRacket</p>
+
+
+<p>
+We can notice a couple of things in the screenshot in Figure <a href="#510363_1_En_2_Chapter.xhtml#Fig8">2-8</a>:
+
+</p>
+
+<ul>
+<li><p>In the definitions area, we added some code. We notice that we
+used another built-in syntax named <code>define</code> to attach a
+value (<code>123</code>) to
+a symbol/variable (<code>a-number</code>).</p></li>
+<li><p>In the interactions area, we interacted with something that was
+already defined in the definitions area. In this case, the interaction
+was to just display the definition’s value by referring to its
+symbol.</p></li>
+</ul>
+
+<p>In this book, every Racket program will start with <code>#lang racket</code>. This
+means that we will be dealing with Racket’s ordinary syntax. There are
+different values this can accept; for example, we can work with a
+language specialized in drawing graphics, but that is out of context for
+this book.</p>
+<p>Everything that we write in the definitions area we can also write in
+the interactions area and vice versa. To have the definitions available
+in the interactions area, we need to run the program by choosing <code>Racket &gt; Run</code> from
+the top menu. Note that when we run a program, the interactions area
+gets cleared.</p>
+<p>
+If our definitions have references to other definitions, we can hover
+over the symbol’s name using the mouse and DrRacket will draw a line
+pointing to the definition of that reference (Figure <a href="#510363_1_En_2_Chapter.xhtml#Fig9">2-9</a>). For big and
+complex programs, this will be useful for uncovering details of a
+function.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fig9_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fig9_HTML.jpg"/>
+</p>
+
+<p>Figure 2-9</p>
+<p>Following references in DrRacket</p>
+
+
+<p>Definitions can be saved to a file for later usage by choosing <code>File &gt; Save Definitions</code> from the top menu.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figo_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figo_HTML.gif"/>
+Exercise 2-8
+
+<p>Store the list from Exercise 2-7 in the definitions area and then use
+<code>car</code> and <code>cdr</code> on that list in
+the interactions area.</p>
+
+
+
+<h3 class="Heading">2.3.5 Procedures
+and Functions</h3>
+<p>In Lisp, a procedure  is essentially a
+mathematical function. When called, it returns some data. However,
+unlike mathematical functions, some Lisp expressions and procedures have
+side effects.</p>
+<p>For example, consider two functions: <code>add-1</code> increases a
+number by one and <code>get-current-weather</code>
+gets the current weather from an external service. The first function
+will always return the same value at any point in time, whereas the
+second “function” can return different values at different points in
+time.</p>
+<p>Thus Lisp procedures are not always functions in the “pure” sense of
+mathematics, but in practice, they are frequently referred to as
+“functions” anyway (even those that may have side effects), to emphasize
+that a computed result is always returned.</p>
+<p>Given the reasoning in the previous paragraph, from this point, we
+will refrain from using the word “function” and stick with
+“procedure.”</p>
+<p>There is special built-in syntax called <code>lambda</code> , which
+accepts two arguments and produces a procedure as a result. The first
+argument is a list of arguments that the procedure will accept, and the
+second argument is an expression (body) that acts on the arguments from
+the list.</p>
+<p>For example, <code>(lambda (x) (+ x 1))</code>
+returns a procedure that accepts a single argument <code>x</code>, such that when
+this procedure is called with an argument, it increases this argument’s
+value by one: <code>(+ x 1)</code>.</p>
+<p>
+Evaluating this expression gives us:
+
+</p>
+<pre>1   &gt; (lambda (x) (+ x 1))
+2   #</pre>
+<p>
+In order to call the procedure, we can try to pass an argument:
+
+</p>
+<pre>1   &gt; ((lambda (x) (+ x 1)) 1)
+2   2</pre>
+<p>
+Of course, writing and evaluating procedures this way is hard. Instead,
+we can define the procedure in the definitions area and then interact
+with it in the interactions area:
+
+</p>
+<pre>1   (define add-one (lambda (x) (+ x 1)))</pre>
+<p>
+Interaction:
+
+</p>
+<pre>1   &gt; (add-one 1)
+2   2
+3   &gt; (add-one 2)
+4   3
+5   &gt; (add-one (add-one 1))
+6   3</pre>
+<p>
+To make things a little bit easier, Racket has special syntax for
+defining procedures, so these two
+are equivalent:
+
+</p>
+<pre>(define add-one (lambda (x) (+ x 1)))  (define (add-one x) (+ x 1))</pre>
+<p>
+Procedures can
+also take more than one argument:
+
+</p>
+<pre>(define add (lambda (x y) (+ x y)))  (define (add x y) (+ x y))</pre>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figp_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figp_HTML.gif"/>
+Exercise 2-9
+
+<p>In Exercise 2-7 you retrieved the second element from a list with
+<code>(car (cdr l))</code>.
+Define a procedure that accepts a list and returns the second element
+from that list.</p>
+
+
+
+<h3 class="Heading">2.3.6 Conditional
+Procedures</h3>
+<p>
+There are useful built-in procedures  such as checking
+whether a value is a number, whether one number is greater than another,
+and so on.
+
+</p>
+<pre>1   &gt; (number? 1)
+2   #t
+3   &gt; (number? "hello")
+4   #f
+5   &gt; (character? #\A)
+6   #t
+7   &gt; (string? "hello")
+8   #t
+9   &gt; (byte? 72)
+10   #t
+11   &gt; (bytes? #"Hello")
+12   #t
+13   &gt; (procedure? add-one)
+14   #t
+15   &gt; (symbol? (quote hey))
+16   #t
+17   &gt; (symbol? 1)
+18   #f
+19   &gt; (&gt; 1 2)
+20   #f
+21   &gt; (= 1 2)
+22   #f
+23   &gt; (= 1 1)
+24   #t</pre>
+<p>
+<code>if</code> is a
+built-in syntax that allows the evaluation of expressions based on the
+<em>truthiness</em> of some predicate. It accepts three arguments:
+
+</p>
+
+<ul>
+<li><p>Conditional to check</p></li>
+<li><p>Expression to evaluate if the conditional is true</p></li>
+<li><p>Expression to evaluate if the conditional is false</p></li>
+</ul>
+
+<p>
+Here’s example usage:
+
+</p>
+<pre>1   &gt; (if (= 1 1) "It is true" "It is not true")
+2   "It is true"
+3   &gt; (if (= 1 2) "It is true" "It is not true")
+4   "It is not true"</pre>
+<p>
+The more general syntax for <code>if</code> is <code>cond</code>:
+
+</p>
+<pre>1   (cond (test-1 action-1)
+2         (test-2 action-2)
+3         ...
+4         (test-n action-n))</pre>
+<p>Optionally, the last test can be an <code>else</code> to use the
+specific action  if none of the
+conditions match.</p>
+<p>
+As an example, here is one way to use <code>cond</code> in a definition:
+
+</p>
+<pre>1   (define (is-large x)
+2     (cond ((&gt; x 10) #t)
+3           (else #f)))</pre>
+<p>
+Interacting with it:
+
+</p>
+<pre>1   &gt; (is-large 5)
+2   #f
+3   &gt; (is-large 10)
+4   #f
+5   &gt; (is-large 11)
+6   #t</pre>
+<p>
+As we’ve seen, <code>=</code> is an equality
+predicate that checks whether two numbers are equal. However, it only
+works on numbers, and it will raise an error if we use it on anything
+else :
+
+</p>
+<pre>1   &gt; (= 1 2)
+2   #f
+3   &gt; (= 3.14 3.14)
+4   #t
+5   &gt; (= '() '())
+6   =: contract violation</pre>
+<p>
+There are three other important equality predicates:
+
+</p>
+
+<ul>
+<li><p><code>eq?</code>
+checks whether two arguments refer to the same object in
+memory.</p></li>
+<li><p><code>eqv?</code> is
+the same as <code>eq?</code>, except that it
+can also be used for primitive types (e.g. numbers, strings).</p></li>
+<li><p><code>equal?</code>
+is the same as <code>eqv?</code>, except that it
+can also be used to check if the arguments have the same recursive
+structure (e.g. lists).</p></li>
+</ul>
+
+<p>Note that there’s only one empty list <code>'()</code> in memory,<sup><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></sup> so all three predicates will
+return the same value when checking against empty lists.</p>
+<p>
+To show where <code>eq?</code> fails, we will
+use a built-in procedure called <code>integer-&gt;char</code> that
+converts a number to a character , per ASCII.
+
+</p>
+<pre>1   &gt; (integer-&gt;char 65)
+2   #\A
+3   &gt; (eq? '() '())
+4   #t
+5   &gt; (eq? (integer-&gt;char 65) (integer-&gt;char 65))
+6   #f
+7   &gt; (eq? '(1) '(1))
+8   #f</pre>
+<p>As expected, this will return true for the empty list but cannot
+compare objects that aren’t referring to the same memory location or
+lists that actually have elements.</p>
+<p>
+Note how <code>eqv?</code>
+differs in this case:
+
+</p>
+<pre>1   &gt; (eqv? '() '())
+2   #t
+3   &gt; (eqv? (integer-&gt;char 65) (integer-&gt;char 65))
+4   #t
+5   &gt; (eqv? '(1) '(1))
+6   #f</pre>
+<p>
+Finally, <code>equal?</code>
+will compare structures recursively, supporting lists :
+
+</p>
+<pre>1   &gt; (equal? '() '())
+2   #t
+3   &gt; (equal? (integer-&gt;char 65) (integer-&gt;char 65))
+4   #t
+5   &gt; (equal? '(1) '(1))
+6   #t</pre>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figq_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figq_HTML.gif"/>
+Exercise 2-10
+
+<p>We already defined <code>is-large</code> using the
+<code>cond</code> syntax.
+Represent it using the <code>if</code> syntax.</p>
+
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figr_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figr_HTML.gif"/>
+Exercise 2-11
+
+<p>Represent the following logic using <code>cond</code>: return <code>'foo</code> if the value is
+a string or a number, and <code>'bar</code> otherwise.</p>
+
+
+
+<h3 class="Heading">2.3.7 Recursive
+Procedures</h3>
+<p>Procedures, just like data structures  (e.g. trees), can be
+recursive. We already saw an example with the factorial procedure, in
+that it called itself to make a computation or a loop.</p>
+<p>
+For example, here’s how we could define a factorial in Racket:
+
+</p>
+<pre>1   (define (fact n)
+2     (if (= n 0)
+3         1
+4         (* n (fact (- n 1)))))</pre>
+<p>
+Calling it will produce the following:
+
+</p>
+<pre>1   &gt; (fact 3)
+2   6
+3   &gt; (fact 0)
+4   1</pre>
+<p>
+For a more advanced example, we will define a procedure that calculates
+the length (number of elements) of a list:
+
+</p>
+<pre>1   (define (list-length x)
+2     (cond ((eq? x '()) 0)
+3           (else (+ 1 (list-length (cdr x))))))</pre>
+<p>
+We defined a procedure called <code>list-length</code> that
+accepts a single argument <code>x</code> and the body of the
+procedure has the condition :
+
+</p>
+
+<ol>
+<li>
+
+<p>For the empty list, just return <code>0</code> since the length of
+an empty list is <code>0</code>.</p>
+
+
+ 
+</li>
+<li>
+
+<p>Otherwise, return the value of one plus (<code>list-length (cdr x))</code>.</p>
+
+
+ 
+</li>
+</ol>
+
+<p>
+Testing it with a few values:
+
+</p>
+<pre>1   &gt; (list-length '(1 2 3))
+2   3
+3   &gt; (list-length '())
+4   0
+5   &gt; (list-length '(1))
+6   1</pre>
+<p>
+Recall that lists are represented in terms of pairs:
+
+</p>
+<pre>1   &gt; (car '(1 2 3))
+2   1
+3   &gt; (cdr '(1 2 3))
+4   '(2 3)
+5   &gt; (car (cdr '(1 2 3)))
+6   2
+7   &gt; (cdr (cdr '(1 2 3)))
+8   '(3)</pre>
+<p>
+In other words, <code>cdr</code> of a list will
+return that same list without the first element . Here is how Racket
+evaluates <code>(list-length '(1 2 3))</code>:
+
+</p>
+<pre>1   (list-length '(1 2 3))
+2   = (+ 1 (list-length '(2 3)))
+3   = (+ 1 (+ 1 (list-length '(3))))
+4   = (+ 1 (+ 1 (+ 1 (list-length '()))))
+5   = (+ 1 (+ 1 (+ 1 0)))
+6   = (+ 1 (+ 1 1))
+7   = (+ 1 2)
+8   = 3</pre>
+<p>We just saw an example of a recursive behavior, since the recursive
+cases were reduced to the base case to get a result. With this example,
+we can see the power of recursion and how it allows us to process values
+in a repeating manner.</p>
+<p>
+There is another way that we can write <code>list-length</code>:
+
+</p>
+<pre>1   &gt; (define (list-length-iter x n)
+2       (cond ((eq? x '()) n)
+3             (else (list-length-iter (cdr x) (+ n 1)))))
+4   &gt; (list-length-iter '(1 2  3) 0)
+5   3</pre>
+<p>
+Here’s how it evaluates:
+
+</p>
+<pre>1   (list-length-iter '(1 2 3) 0)
+2   = (list-length-iter '(2 3) 1)
+3   = (list-length-iter '(3) 2)
+4   = (list-length-iter  '() 3)
+5   = 3</pre>
+<p>Both procedures  are recursive, in that
+they generate the same result. However, the nature of the evaluation is
+very different.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figs_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figs_HTML.gif"/>
+Definition 2-7
+
+<p>Recursive procedures can generate an <strong>iterative</strong> or a
+<strong>recursive</strong> process:</p>
+<p>
+
+</p>
+
+<ol>
+<li>
+
+<p>A recursive process is one where the current state of calculation is
+not captured by the arguments, and so it relies on “deferred”
+evaluations</p>
+
+
+ 
+</li>
+<li>
+
+<p>An iterative process is where the current state of calculation is
+captured completely by its arguments</p>
+
+
+ 
+</li>
+</ol>
+
+
+<p>In the previous examples, <code>list-length</code> generates
+a recursive process since it needs to go down to the base case and then
+build its way back up to do the calculations that were “deferred.” In
+contrast, <code>list-length-iter</code>
+generates   an iterative process,
+since the results are captured in the arguments.</p>
+<p>This distinction is important because the very different nature of
+evaluation implies a few things. For example, iterative processes
+evaluate faster than recursive ones.</p>
+<p>In contrast, some algorithms cannot be written using iterative
+processes, as we will see later with left and right folds.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figt_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figt_HTML.gif"/>
+Exercise 2-12
+
+<p>The way we implemented <code>fact</code> represents a
+recursive procedure that generates a recursive process. Rework it so
+that it is still a recursive procedure and generates an iterative
+process.</p>
+
+
+
+<h3 class="Heading">2.3.8 Procedures
+That Return Procedures</h3>
+<p>
+We can construct procedures that return
+other procedures as a result. For example:
+
+</p>
+<pre>1   &gt; (define (f x) (lambda (y) (+ x y)))
+2   &gt; f
+3   #
+4   &gt; (f 1)
+5   #
+6   &gt; ((f 1) 2)
+7   3</pre>
+<p>Note the new syntax on line 3. It states that the return value of the
+expression on the previous line is a procedure named <code>f</code>. However, on line
+4, when we execute <code>(f 1)</code>, we get an unnamed procedure. That is because lambdas are
+anonymous functions without a name.</p>
+<p>
+This concept is so powerful that we can implement our own <code>cons</code>, <code>car</code>, and <code>cdr</code>:
+
+</p>
+<pre>1   (define (my-cons x y) (lambda (z) (if (= z 1) x y)))
+2   (define (my-car z) (z 1))
+3   (define (my-cdr z) (z 2))</pre>
+<p>
+Evaluating:
+
+</p>
+<pre>1   &gt; (my-cons 1 2)
+2   #
+3   &gt; (my-car (my-cons 1 2))
+4   1
+5   &gt; (my-cdr (my-cons 1 2))
+6   2</pre>
+<p>Note how we define <code>my-cons</code> to return
+another procedure that accepts an argument <code>z</code>, and then based on
+that argument’s value, we return either the first or the second
+element.</p>
+<p>Using the substitution method, <code>(my-cons 1 2)</code>
+evaluates to <code>(lambda (z) (if (= z1 2))</code>. So, this lambda (procedure) “captures” data in
+a sense. Then, when we call <code>my-car</code> or <code>my-cdr</code> on this procedure, we just pass
+1 or 2 to get the first or the second value, respectively.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figu_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figu_HTML.gif"/>
+Exercise 2-13
+
+<p>Implement a procedure so that when it’s evaluated, it returns a
+procedure that returns a constant number.</p>
+<p><strong>Hint</strong>: <code>(lambda () 1)</code> is a
+procedure that accepts no arguments and returns a constant number.</p>
+
+
+
+<h3 class="Heading">2.3.9 General
+Higher-Order Procedures</h3>
+<p>With the example above, we’ve seen how Racket can return procedures
+as return values (output). However, it can also accept procedures as
+arguments (input).</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figv_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figv_HTML.gif"/>
+Definition 2-8
+
+<p>A <strong>higher-order
+procedure</strong>   takes one or more
+procedures as arguments or returns a procedure as a result.</p>
+
+<p>There are three common built-in higher-order procedures: <code>map</code>, <code>filter</code> and <code>fold</code>.</p>
+<p>
+For the purpose of this example, we will rely on these definitions:
+
+</p>
+<pre>1   (define my-test-list '(1 2 3))
+2   (define (add-one x) (+ x 1))
+3   (define (gt-1 x) (&gt; x 1))</pre>
+<p>
+<code>map</code> takes as
+input a procedure with a single argument and a list, and it returns a
+list where all members of the list have this procedure applied to them:
+
+</p>
+<pre>1   &gt; (map (lambda (x) (+ x 1)) my-test-list)
+2   '(2 3 4)
+3   &gt; (map  add-one  my-test-list)
+4   '(2 3 4)</pre>
+<p>
+If we use substitution on (<code>map add-one my-test-list</code>), we get <code>(list (add-one 1) (add-one 2) (add-one 3))</code>. However, it is best to implement these
+procedures ourselves to understand how they work. <code>map</code> takes a
+transformation procedure <code>f</code>, together with a
+list <code>l</code>. We have
+two cases to cover:
+
+</p>
+
+<ul>
+<li><p>For the empty list, we just return the empty list.</p></li>
+<li><p>Otherwise, we extract the first element, apply the transformation
+procedure, and reconstruct the list by recursively mapping the remainder
+of the elements.</p></li>
+</ul>
+
+<p>
+
+</p>
+<pre>1   (define (my-map f l)
+2     (cond ((eq? l '()) '())
+3           (else (cons (f (car l)) (my-map f (cdr l))))))</pre>
+<p>
+Another higher-order procedure, <code>filter</code>, takes as
+input a predicate with a single argument and a list, and it only returns
+those members in the list whose predicate evaluates to true :
+
+</p>
+<pre>1   &gt; (filter gt-1 my-test-list)
+2   '(2 3)</pre>
+<p>
+To reimplement <code>filter</code>, note that it
+takes a predicate <code>p</code>, together with a
+list <code>l</code>. There
+are three cases:
+
+</p>
+
+<ul>
+<li><p>For the empty list, just as before, we just return the empty
+list.</p></li>
+<li><p>Otherwise, if a predicate matches the current element, we include
+it in the generation of the new list, recursively filtering the
+remainder of the elements.</p></li>
+<li><p>Otherwise, we recursively filter the remainder of the elements,
+skipping the addition of the current one to the list.</p></li>
+</ul>
+
+<p>
+
+</p>
+<pre>1   (define (my-filter p l)
+2     (cond ((eq? l '()) '())
+3           ((p (car l)) (cons (car l) (my-filter p (cdr l))))
+4           (else (my-filter p (cdr l)))))</pre>
+<p>
+Finally, <code>fold</code>
+takes as input a combining procedure that accepts two arguments (the
+current value and accumulator), an initial value, and a list. <code>fold</code> then returns a
+value combined with this procedure. There are two types of folds, a
+right and a left one, which combine from the right and the left respectively :
+
+</p>
+<pre>1   &gt; (foldr cons '() '(1 2 3))
+2   '(1 2 3)
+3   &gt; (foldl cons '() '(1 2 3))
+4   '(3 2 1)</pre>
+<p>
+<code>foldr</code> takes a
+combining operator (procedure) <code>op</code>, together with an
+initial value <code>i</code>
+and list <code>l</code>. The
+two cases we need to cover are as follows:
+
+</p>
+
+<ul>
+<li><p>For the empty list, we return the initial value.</p></li>
+<li><p>Otherwise, we use the combining operator to the current element,
+applied to the folded remainder of the list.</p></li>
+</ul>
+
+<p>
+
+</p>
+<pre>1   (define (my-foldr op i l)
+2     (cond ((eq? '() l) i)
+3           (else (op (car l)
+4                     (my-foldr op i (cdr l))))))</pre>
+<p>
+<code>foldl</code> is a bit
+different. We start by defining a procedure that has two cases:
+
+</p>
+
+<ul>
+<li><p>For the empty list, we return the initial value.</p></li>
+<li><p>Otherwise, we call the fold again, changing the initial value to
+be combined with the current element and the remainder of the
+list.</p></li>
+</ul>
+
+<p>
+
+</p>
+<pre>1   (define (my-foldl op i l)
+2     (cond ((eq? '() l) i)
+3           (else (my-foldl op (op (car l) i) (cdr l)))))</pre>
+<p>
+This procedure  works in a similar way
+to <code>foldr</code>,
+except that the result is captured in the procedure’s argument. For
+example, here’s how it unfolds for <code>(my-foldl + 0 '(1 2 3))</code>:
+
+</p>
+<pre>1   (my-foldl + 0 '(1 2 3))
+2   = (my-foldl + 1 '(2 3))
+3   = (my-foldl + 3 '(3))
+4   = (my-foldl + 6 '())
+5   = 6</pre>
+<p>Note that the right fold exhibits a recursive process (think <code>my-length</code>), while the
+left one exhibits an iterative process (think <code>my-length-iter</code>).</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figw_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figw_HTML.gif"/>
+Exercise 2-14
+
+<p>Implement a procedure so that it calls a procedure that’s passed in
+the arguments.</p>
+<p><strong>Hint</strong>: <code>(... (lambda () 1))</code>
+should return <code>1</code>.</p>
+
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figx_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figx_HTML.gif"/>
+Exercise 2-15
+
+<p>Use DrRacket’s feature to follow definitions on <code>my-map</code>, <code>my-filter</code>, <code>my-foldr</code>, and <code>my-foldl</code> to get a
+better understanding of how they work.</p>
+
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figy_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figy_HTML.gif"/>
+Exercise 2-16
+
+<p>Pick some operators and predicates and use <code>my-map</code>, <code>my-filter</code>, <code>my-foldr</code>, and <code>my-foldl</code> with them on
+lists to see what they evaluate to.</p>
+
+
+
+<h3 class="Heading">2.3.10
+Packages</h3>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figz_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figz_HTML.gif"/>
+Definition 2-9
+
+<p>A <strong>package</strong>
+  in Racket
+resembles a set of definitions someone has written for others to
+use.</p>
+
+<p>For example, if we want to use hashing procedures, we would pick a
+package that implements these and use them. This allows us to put our
+focus on the system design instead of defining everything from
+scratch.</p>
+<p>Packages can be browsed at <a href="https://pkgs.racket-lang.org/"><code>https://pkgs.racket-lang.org</code></a>.
+They can be installed from the DrRacket GUI. When we try to use a
+package, we will be provided with an option to install it, given it is
+available in the packages repository. Alternatively, packages can be
+installed using <code>raco pkg install &lt;package_name&gt;</code> from the command line. We will
+take advantage of packages later.</p>
+<p>
+To export objects (variables, procedures, etc.) from a package, we use
+the <code>provide</code>
+syntax. As an example, let’s create a few procedures and then save their
+definitions in a file called <code>utils.rkt</code> by choosing
+<code>File &gt; Save Definitions</code> from the top menu.
+
+</p>
+<pre>1   (define (sum-list l) (foldl + 0 l))
+2   (define (add-one x) (+ x 1))
+3
+4   (provide sum-list)</pre>
+<p>
+We will create another file called <code>test.rkt</code> in the same
+folder as <code>utils.rkt</code>. We will
+use the <code>require</code>
+syntax:
+
+</p>
+<pre>1   (require "utils.rkt")
+2
+3   (define (add-two x) (+ x 2))</pre>
+<p>
+We can now interact with <code>test.rkt</code>:
+
+</p>
+<pre>1   &gt; (sum-list '(1 2 3))
+2   6
+3   &gt; (add-two 1)
+4   3
+5   &gt; (add-one 1)
+6   add-one: undefined;</pre>
+<p>Note that <code>add-one</code> was undefined
+because only the procedures we provide in the special syntax <code>(provide ...)</code> will be
+available for use by those that require the package .</p>
+
+
+<h3 class="Heading">2.3.11 Scope</h3>
+<p>
+As a start, let’s consider the following definitions:
+
+</p>
+<pre>1   (define my-number 123)
+2   (define (add-to-my-number x) (+ my-number x))</pre>
+<p>We created a variable called <code>my-number</code> and
+assigned the number <code>123</code> to it. We also
+created a procedure called <code>add-to-my-number</code>,
+which adds a number (that’s passed to it as an argument) to <code>my-number</code>.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figaa_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figaa_HTML.gif"/>
+Definition 2-10
+
+<p><strong>Scope</strong>
+  refers to
+the visibility of some specific definitions, or to which parts of the
+program can use these definitions.</p>
+
+<p><code>my-number</code> is
+defined at the same “level” as <code>add-to-my-number</code>, so
+it is in the scope of <code>add-to-my-number</code>. But
+the <code>x</code> in <code>add-to-my-number</code> is
+only accessible in the body of the procedure definition and not
+accessible to anything outside it.</p>
+<p>
+Using the <code>let</code>
+syntax, we can introduce variables that are visible only in a certain
+section:
+
+</p>
+<pre>1   (let ([var-1 value-1]
+2         [var-2 value-2])
+3   ... our code ...)</pre>
+<p>
+This creates variables <code>var-1</code> and <code>var-2</code>, which are
+visible only in the <code>our code</code> part.
+
+</p>
+<pre>1   &gt; (let ((x 1) (y 2)) (+ x y))
+2   3
+3   &gt; x
+4   . . x: undefined;
+5   &gt; y
+6   . . y: undefined;</pre>
+<p>
+The <code>letrec</code>
+syntax    which is very similar
+to <code>let</code>, where
+in addition the variables will be visible in the variable scope:
+
+</p>
+<pre>1   &gt; (letrec ((x 1) (y (+ x 1))) y)
+2   2</pre>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figab_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figab_HTML.gif"/>
+Definition 2-11
+
+<p><strong>Variable “shadowing</strong> <strong>”</strong>
+occurs when a variable defined in scope has the same name as a variable
+defined in an outer scope.</p>
+
+<p>
+For example, compare the result of these two evaluations:
+
+</p>
+<pre>1   &gt; (let ((x 1)) x)
+2   1
+3   &gt; (let ((x 1)) (let ((x 2)) x))
+4   2</pre>
+<p>In the second example, we have a <code>let</code> within a <code>let</code>. The inner <code>let</code> is defining an
+<code>x</code> and so is the
+outer <code>let</code>.
+However, the <code>x</code>
+within the inner <code>let</code> will be used in
+the inner <code>let</code>’s
+body.</p>
+<p>
+Finally, let’s consider another example:
+
+</p>
+<pre>1   (define a-number 3)
+2   (define (test-1 x) (+ a-number x))
+3   (define (test-2 a-number) (+ a-number a-number))</pre>
+<p>
+Interacting:
+
+</p>
+<pre>1   &gt; (test-1 4)
+2   7
+3   &gt; (test-2 4)
+4   8</pre>
+<p><code>test-1</code> is
+using <code>a-number</code>
+from the global scope. <code>test-2</code> is using
+variable shadowing for <code>my-number</code>, so it is
+the same as saying <code>(define (test-2 x) (+ x x))</code>.</p>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figac_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figac_HTML.gif"/>
+Exercise 2-17
+
+<p>Use DrRacket’s feature to follow definitions on <code>test-1</code> and <code>test-2</code>.</p>
+
+
+
+<h3 class="Heading">2.3.12
+Mutation</h3>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figad_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figad_HTML.gif"/>
+Definition 2-12
+
+<p><strong>Mutation</strong>
+  allows a
+variable to be redefined with a different value.</p>
+
+<p>
+Mutation can be achieved using the <code>set!</code> syntax. Consider
+the following definition:
+
+</p>
+<pre>1   (define x 123)
+2   x
+3   (define x 1234)
+4   x</pre>
+<p>
+This definition will produce an error that says <code>module: identifier already defined in: x</code>. However, the next definition:
+
+</p>
+<pre>1   (define x 123)
+2   x
+3   (set! x 1234)
+4   x</pre>
+<p>Will happily print <code>123</code> followed by <code>1234</code>.</p>
+<p>
+Even though mutation looks powerful, good Lisp practice says to avoid
+mutation when possible. The reason for that is that mutation causes side
+effects, and side effects make reasoning about programs harder. To
+demonstrate this issue, consider this definition:
+
+</p>
+<pre>1   (define some-number 123)
+2
+3   (define (add-one)
+4     (+ 1 some-number))
+5
+6   (define (add-one-mutation)
+7     (begin
+8       (set! some-number (+ 1 some-number))
+9       some-number))</pre>
+<p><code>begin</code> allows
+us to sequence multiple expressions, executing them in order .</p>
+<p>
+Now let’s interact with it:
+
+</p>
+<pre>1   &gt; (add-one)
+2   124
+3   &gt; (add-one)
+4   124</pre>
+<p>
+So far, so good. No side effects, since <code>add-one</code> returns the
+same value every time it’s called. However:
+
+</p>
+<pre>1   &gt; (add-one-mutation)
+2   124
+3   &gt; (add-one-mutation)
+4   125
+5   &gt; (add-one)
+6   126</pre>
+<p>This is what makes it hard to reason about programs—when some of the
+values are modified, some procedures might return different values for
+the same inputs. Thus, care must be taken when using mutation. However,
+we will use mutation in the peer- to-peer implementation later, which
+will make things slightly simpler .</p>
+
+
+<h3 class="Heading">2.3.13
+Structures</h3>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figae_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figae_HTML.gif"/>
+Definition 2-13
+
+<p>A <strong>structure</strong>
+  is a
+composite data type that defines a grouped list of variables to be
+placed under one name.</p>
+
+<p>In Racket, the special syntax <code>struct</code> allows us to
+capture data structures and come up with a new kind of abstraction. In a
+sense, we already know how we can capture abstractions with <code>car</code>, <code>cons</code>, and <code>cdr</code>. However, <code>struct</code> is much more
+convenient since it automatically provides procedures to construct a
+data type and retrieve its values.</p>
+<p>
+Consider the following example code:
+
+</p>
+<pre>1   (struct document (author title content))
+2   (define a-document
+3     (document
+4      "Boro Sitnikovski"
+5      "Introducing Blockchain with Lisp"
+6      "Hello  World"))</pre>
+<p>
+From the expression on line 1, we automatically get the following
+procedures:
+
+</p>
+
+<ul>
+<li><p><code>document-author, document-title, document-content</code> extracts values from
+objects.</p></li>
+<li><p><code>document</code>
+constructs an object of such type.</p></li>
+<li><p><code>document?</code> checks
+whether a given object is of such type.</p></li>
+</ul>
+
+<p>Then, using <code>document</code> on line 3,
+we can construct an object that is using this data structure.</p>
+<p>
+Next  , we can use the
+automatically generated procedures to extract values from objects that
+are using this data structure:
+
+</p>
+<pre>1   &gt; (document-author a-document)
+2   "Boro Sitnikovski"
+3   &gt; (document-title a-document)
+4   "Introducing Blockchain with Lisp"
+5   &gt; (document-content a-document)
+6   "Hello World"
+7   &gt; (document? a-document)
+8   #t
+9   &gt; (document? "test")
+10   #f</pre>
+<p>
+There is also a way to declare mutable structures as follows:
+
+</p>
+<pre>1   (struct document (author title content) #:mutable)</pre>
+<p>The <code>#:mutable</code> keyword
+will automatically generate <code>set-&lt;field&gt;!</code>
+procedures for every property in the structure.</p>
+<p>
+Now we can interact as follows:
+
+</p>
+<pre>1   &gt; (document-author a-document)
+2   "Boro Sitnikovski"
+3   &gt; (set-document-author! a-document "Boro")
+4   &gt; (document-author  a-document)
+5   "Boro"</pre>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figaf_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figaf_HTML.gif"/>
+Exercise 2-18
+
+<p>Create a person structure that contains a first name, last name, and
+age.</p>
+
+
+
+<h3 class="Heading">2.3.14
+Threads</h3>
+
+
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Figag_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Figag_HTML.gif"/>Definition
+2-14
+
+<p>A <strong>thread</strong>
+  is a
+sequence of instructions that can execute in parallel.</p>
+
+<p>Racket has a built-in procedure <code>thread</code> that accepts a
+procedure that will run in parallel without blocking the next
+instruction in order.</p>
+<p>
+We will show an example of demonstrating threads. We will implement a
+procedure called <code>detailed-fact</code> that
+will be similar to <code>fact</code>, but also print
+whatever it is currently processing.
+
+</p>
+<pre>1   (define (detailed-fact n)
+2     (begin
+3       (display "Calculating factorial of ")
+4       (displayln n)
+5       (if (= n 0)
+6           1
+7           (* n (detailed-fact (- n 1))))))</pre>
+<p>
+<code>display</code> is a
+procedure that prints some text, and <code>displayln</code> is the
+same, but it also prints a newline.
+
+</p>
+<pre>1   &gt; (begin (detailed-fact 1) (detailed-fact 2))
+2   Calculating factorial of 1
+3   Calculating factorial of 0
+4   Calculating factorial of 2
+5   Calculating factorial of 1
+6   Calculating factorial of 0</pre>
+<p>
+This code represents a sequential execution and the results  make sense. However,
+we now turn to parallel execution to see what will happen:
+
+</p>
+<pre>1   &gt; (begin (thread (lambda () (detailed-fact 1))) (thread (lambda ()
+2     (detailed-fact 2))))
+3   Calculating factorial of 2
+4   Calculating factorial of 1
+5   Calculating factorial of 0
+6   Calculating factorial of 1
+7   Calculating factorial of 0</pre>
+<p>Note how we used <code>(thread (lambda () ...))</code> instead of just <code>(thread ...)</code>. As we
+said, <code>thread</code>
+expects a procedure, but at the end of the evaluation, there would be
+the output of factorial of some number (for example 3), so <code>(thread 3)</code> does not
+make sense.</p>
+<p>In this parallel execution, the output is not ordered as it was in
+the previous case. This means that the <code>lambda</code>s within <code>thread</code> are being
+executed in parallel, so the order of execution cannot be
+guaranteed.</p>
+<p>We will use threads for parallel processing in the peer-to-peer
+implementation later , where we will have
+one thread per peer so that when we are serving one peer we don’t block
+the serving of other peers.</p>
+
+
+
+<h2 class="Heading">2.4 Creating an
+Executable</h2>
+<p>The idea behind producing an executable is so that
+you can run it on other computers without requiring a DrRacket
+installation, and also without having to share the original code. In the
+later chapters, we will create an executable so that the blockchain can
+be used and shared by others.</p>
+<p>
+To create an example executable, we start with the following code:
+
+</p>
+<pre>1   #lang racket
+2   (print "Hello")
+3   (read-bytes-line)</pre>
+<p>This code will just print the text <code>Hello</code>. The <code>print</code> procedure
+prints some text (similar to <code>display</code>), and <code>read-bytes-line</code> waits
+for user input. If we did not use <code>read-bytes-line</code>, it
+would just print and exit right away, before we could read the text.</p>
+<p>
+Next, we choose <code>Racket &gt; Create Executable</code>. Select <code>Distribution</code> and
+choose <code>Create</code>.
+After doing that, the executable should be created in the target folder.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_2_Chapter/510363_1_En_2_Fig10_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_2_Chapter/510363_1_En_2_Fig10_HTML.jpg"/>
+</p>
+
+<p>Figure 2-10</p>
+<p>Running an executable</p>
+
+
+<p>Running the executable should show something similar to Figure <a href="#510363_1_En_2_Chapter.xhtml#Fig10">2-10</a>. Pressing the
+Return key will exit the program.</p>
+
+
+<h2 class="Heading">2.5 Summary</h2>
+<p>
+The point of this chapter is to get a basic understanding of the Racket
+programming language. Here’s what we learned in this chapter:
+
+</p>
+
+<ul>
+<li><p>Lisp is a family of programming languages and Racket belongs to
+the Lisp family.</p></li>
+<li><p>Lisps have no special syntax compared to standard programming
+languages and syntax is defined differently in Lisp, through
+S-expressions.</p></li>
+<li><p>Lisp evaluation is very similar to substitution in
+mathematics.</p></li>
+<li><p>There are several primitive types: symbols, booleans, characters,
+strings, and lists.</p></li>
+<li><p>Lists are special kinds of pairs.</p></li>
+<li><p>Procedures are a way to capture abstraction. They can accept and
+return any kind of type, including procedures themselves. They can also
+be recursive.</p></li>
+<li><p>Packages allow us to reuse code, written either by ourselves or
+by someone else.</p></li>
+<li><p>Produced executables can be shared with friends so that everyone
+can use them.</p></li>
+</ul>
+
+
+
+
+Footnotes
+
+
+<a href="#510363_1_En_2_Chapter.xhtml#Fn1_source">1</a>
+
+ 
+
+
+
+<a href="#510363_1_En_2_Chapter.xhtml#Fn2_source">2</a>
+
+ 
+
+
+
+<a href="#510363_1_En_2_Chapter.xhtml#Fn3_source">3</a>
+
+ 
+
+
+
+
+
+<p></p>
+
+
+<!--Begin Abstract-->
+
+<h1 class="ChapterTitle" lang="en">3. Blockchain Implementation</h1>
+
+
+<!--End Abstract-->
+
+
+<p>
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figa_HTML.jpg" style="width:35.62em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figa_HTML.jpg"/>
+</p>
+
+<p><em>Gateway to abstractions, by D. Bozhinovski</em></p>
+<p>Now that we have equipped ourselves with the ability to write
+computer programs, we will implement the components (data structures and
+operations) of the blockchain. Throughout this chapter, we will be using
+some new procedures. For some of them, we will give a brief explanation.
+For others, if you are curious, you can get additional details from
+Racket’s manuals.</p>
+<p>Every section in this chapter is hands-on, meaning that you will have
+to implement it as we go through. Exercises are provided to make sure
+you understand how the procedures we build will be used. Before we
+start, recall that at the top of every file you have to prepend <code>#lang racket</code>, as we
+mentioned in the previous chapter.</p>
+<p>As before, code snippets that start with a <code>&gt;</code> are to be
+evaluated in the REPL. Don’t save their definitions in the actual target
+file.</p>
+<p>We start by defining serialization. We will rely on it heavily in the
+next chapter, when peers will send information to each other. Think of
+it as a neat way to transform data structures to some object that’s easy
+to transfer between peers.</p>
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figb_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figb_HTML.gif"/>Definition
+3-1
+
+<p><strong>Serialization</strong>
+ is the process of converting an object into a stream of bytes to
+store the object or transmit it to memory, a database, or a file. <strong>Deserialization</strong>
+ is the opposite process—converting a stream of bytes into an
+object.</p>
+
+
+<h2 class="Heading">3.1 The
+wallet.rkt File</h2>
+<p>In this section,
+we will implement wallets. They will be used by transactions later to
+determine the source and the destination of sending/receiving money.</p>
+<p>
+As we discussed earlier, a wallet is a structure that contains a public
+and a private key. Wallets have this form:
+
+</p>
+<pre>1   (struct wallet
+2     (private-key public-key)
+3     #:prefab)</pre>
+<p>The <code>#:</code>
+operator represents an <strong>optional keyword argument</strong>—it’s
+basically an argument whose value can be set by referring to this
+argument’s name. In contrast, for ordinary arguments, we have to rely on
+their order to set their values. For example, in <code>(lambda (x y z) ...)</code>,
+we have to pass values for <code>x</code> and <code>y</code> before we can pass
+a value for <code>z</code>.</p>
+<p>The <code>#:prefab</code>
+part is new. A prefab (“previously fabricated”) structure type is a
+built-in type that is known to the Racket printer. We can print/display
+the structure and all of its contents. In addition, we can
+serialize/deserialize these kinds of structures.</p>
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figc_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figc_HTML.gif"/>Definition
+3-2
+
+<p><strong>RSA</strong>
+ is an asymmetric-key algorithm used to encrypt and decrypt
+messages, similar in nature to the one described in Section 1.2.2.</p>
+
+<p>
+We will make a procedure that creates a wallet by generating random
+public and private keys, and it will rely on the RSA algorithm.
+
+</p>
+<pre>1   (define (make-wallet)
+2     (letrec ([rsa-impl (get-pk 'rsa libcrypto-factory)]
+3              [privkey (generate-private-key rsa-impl '((nbits 512)))]
+4              [pubkey (pk-key-&gt;public-only-key privkey)])
+5       (wallet (bytes-&gt;hex-string
+6                (pk-key-&gt;datum privkey 'PrivateKeyInfo))
+7               (bytes-&gt;hex-string
+8                (pk-key-&gt;datum pubkey 'SubjectPublicKeyInfo)))))</pre>
+<p>
+All of the procedures we’re using come from the <code>crypto</code> package:
+
+</p>
+
+<ul>
+<li><p><code>get-pk</code>
+returns the RSA implementation algorithm.</p></li>
+<li><p><code>generate-private-key</code>
+generates a private key given algorithm (in this case, RSA).</p></li>
+<li><p><code>pk-key-&gt;public-only-key</code>
+returns a public key given public/private key.</p></li>
+<li><p><code>pk-key-&gt;datum</code>
+returns a public/private key so that it is easily serializable by the
+next procedure in this list.</p></li>
+<li><p><code>bytes-&gt;hex-string</code>
+converts a hex string (think numbers for example) to bytes, e.g. <code>"0102030304" -&gt; "Hello"</code>.</p></li>
+</ul>
+
+<p>
+We need to require the necessary packages:
+
+</p>
+<pre>1   (require crypto)
+2   (require crypto/all)</pre>
+<p>
+And we export everything so that this procedure can be used as a
+package.
+
+</p>
+<pre>1   (provide (struct-out wallet) make-wallet)</pre>
+<p>The <code>struct-out</code>
+syntax  is
+exporting the <code>struct</code> together with
+the procedures it generates.</p>
+<p>
+Here’s an example of a generated wallet:
+
+</p>
+<pre>1   &gt; (make-wallet)
+2   '#s(wallet
+3       "3082015502010030..."
+4       "305c300d06092a86...")</pre>
+<p>We now have a way to create wallets for our blockchain.</p>
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figd_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figd_HTML.gif"/>Exercise
+3-1
+
+<p>Create a wallet using <code>make-wallet</code> and store
+it in a variable using <code>define</code>.</p>
+
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Fige_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Fige_HTML.gif"/>Exercise
+3-2
+
+<p>Extract the private and the public key of the previously created
+wallet. The code should look something like <code>(wallet-?? (make-wallet))</code>.</p>
+
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figf_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figf_HTML.gif"/>Exercise
+3-3
+
+<p>Get yourself briefly introduced to the procedures used in the <code>crypto</code> package by
+reading the manuals.</p>
+<p><strong>Hint</strong>: If your local documentation does not contain
+information about the <code>crypto</code> package, refer
+to <a href="https://docs.racket-lang.org/"><code>https://docs.racket-lang.org</code></a>.</p>
+
+
+
+<h2 class="Heading">3.2 The block.rkt
+File</h2>
+<p>Recall that a blockchain is simply a list of blocks, as depicted in
+Figure <a href="#510363_1_En_1_Chapter.xhtml#Fig4">1-4</a> (Chapter <a href="#510363_1_En_1_Chapter.xhtml">1</a>). Thus, a block is the building
+block of a blockchain, and in this section, we will provide an
+implementation of blocks.</p>
+
+<h3 class="Heading">3.2.1
+Construction</h3>
+<p>
+A block should contain the current hash,
+the previous hash, the data, and the timestamp that it was generated:
+
+</p>
+<pre>1   &gt; (struct block
+2   (current-hash previous-hash data timestamp)
+3   #:prefab)</pre>
+<p>Using a hashing algorithm will allow us to confirm that the block is
+valid.</p>
+<p>
+In general, blocks can contain any data, not just transactions, but we
+are limiting them to transactions for now. We will also add a <code>nonce</code> field for the
+Hashcash algorithm. We will see the purpose of this field in a moment:
+
+</p>
+<pre>1   (struct block
+2     (current-hash previous-hash transaction timestamp nonce)
+3     #:prefab)</pre>
+<p>
+Our block also contains a transaction that is roughly of the following
+form:
+
+</p>
+<pre>1   &gt; (struct transaction
+2     (signature from to value)
+3     #:prefab)</pre>
+<p>We will implement transactions in details later.</p>
+<p>
+Here’s one way to generate a block:
+
+</p>
+<pre>1   &gt; (block "123456" "234" (transaction "BoroS" "Boro" "You" 123) 1 1)
+2   '#s(block "123456" "234" #s(transaction "BoroS" "Boro" "You" 123)
+3   1 1)</pre>
+<p>For example, this block makes a transaction from <code>"Boro"</code> to <code>"You"</code> with the value
+of <code>123</code>, and
+with a timestamp and a <code>nonce</code> of <code>1</code>.</p>
+
+
+<h3 class="Heading">3.2.2 Hashing and
+Verification</h3>
+<p>Next, we will implement a procedure that calculates a block’s hash.
+We will use the SHA hashing algorithm.</p>
+<p><img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figg_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figg_HTML.gif"/></p>
+
+
+Definition 3-3
+
+<p><strong>SHA</strong>
+ is a hashing algorithm that takes an input and produces a hash
+value.</p>
+
+<p>
+Here’s how the procedure looks:
+
+</p>
+<pre>1   (define (calculate-block-hash previous-hash timestamp transaction nonce)
+2     (bytes-&gt;hex-string (sha256 (bytes-append
+3              (string-&gt;bytes/utf-8 previous-hash)
+4              (string-&gt;bytes/utf-8 (number-&gt;string timestamp))
+5              (string-&gt;bytes/utf-8 (~a (serialize transaction)))
+6              (string-&gt;bytes/utf-8 (number-&gt;string nonce))))))</pre>
+<p>
+There are a few things to note here:
+
+</p>
+
+<ul>
+<li><p>We expect every field in the structure to be of type <code>string</code>. This will
+make things much easier later, e.g., when we want to store the
+blockchain in a data file.</p></li>
+<li><p>If you check the manuals for <code>sha256</code>, you will
+notice it accepts bytes. That means we have to convert every field to
+bytes using <code>string-&gt;bytes/utf-8</code>
+and then append all these bytes together before hashing them.</p></li>
+<li><p><code>number-&gt;string</code>
+converts a number to a string, so for example <code>3 -&gt; "3"</code> and
+∼<code>a</code> does the
+same thing but it can also convert objects to string.</p></li>
+<li><p>We use <code>serialize</code> on a
+transaction. This procedure accepts an object and returns an
+S-expression containing the same contents. Not all objects can be
+serialized; however, in this case, we use <code>#:prefab</code> which
+additionally makes structures serializable.</p></li>
+<li><p>Finally, we store the hash as a hex string. Think of hex as a way
+to store a string from readable characters to numbers, e.g. <code>"Hello" -&gt; "0102030304"</code>.</p></li>
+</ul>
+
+<p>
+As an example, this is how we calculate the hash of our earlier example
+block:
+
+</p>
+<pre>1   &gt;  (calculate-block-hash  "234"  1  (transaction  "BoroS"  "Boro"  "You"
+2   "a book") 1)
+3   "5e2889a76a464ea19a493a74d2da991a78626fc1fa9070340c2284ad92f4dd17"</pre>
+<p>
+Now that we have a way to calculate a block’s hash, we also need a way
+to verify it. To do that, we just hash the block’s contents again and
+compare this hash to the one stored in the block:
+
+</p>
+<pre>1   (define (valid-block? bl)
+2     (equal? (block-current-hash bl)
+3             (calculate-block-hash (block-previous-hash bl)
+4                                   (block-timestamp bl)
+5                                   (block-transaction bl)
+6                                   (block-nonce bl))))</pre>
+
+
+<h3 class="Heading">3.2.3 Hashcash
+Algorithm</h3>
+<p>
+At this point, we have everything we need to implement the Hashcash algorithm .
+
+</p>
+<pre>1   (define difficulty 2)
+2   (define target (bytes-&gt;hex-string (make-bytes difficulty 32)))</pre>
+<p>We set the <code>difficulty</code> to <code>2</code>, and thus the <code>target</code> will contain a
+<code>difficulty</code>
+number of bytes using the built-in procedure called <code>make-bytes</code>.</p>
+<p>
+A block will be considered mined if the hash matches the target, given
+the difficulty:
+
+</p>
+<pre>1   (define (mined-block? block-hash)
+2     (equal? (subbytes (hex-string-&gt;bytes block-hash) 1 difficulty)
+3             (subbytes (hex-string-&gt;bytes target) 1 difficulty)))</pre>
+<p>
+A couple of things to note here:
+
+</p>
+
+<ul>
+<li><p><code>hex-string-&gt;bytes</code>
+is just a way to convert a hex string, e.g. <code>"0102030304" -&gt; #"\1\2\3\3\4"</code>.</p></li>
+<li><p><code>subbytes</code>
+takes a list of bytes, a start, and an end point and returns that
+sublist.</p></li>
+<li><p>Thus, given a random hash, we consider it to be valid if its
+first two (in this case, per <code>difficulty</code>) bytes
+match the <code>target</code>.</p></li>
+</ul>
+
+<p>
+The actual Hashcash procedure is as follows:
+
+</p>
+<pre>1   (define (make-and-mine-block
+2             previous-hash timestamp transaction nonce)
+3     (let ([current-hash (calculate-block-hash
+4                   previous-hash timestamp transaction nonce)])
+5       (if (mined-block? current-hash)
+6           (block current-hash previous-hash transaction timestamp nonce)
+7           (make-and-mine-block
+8            previous-hash timestamp transaction (+ nonce 1)))))</pre>
+<p>This procedure keeps increasing the <code>nonce</code> until a block
+is valid , at which point it is
+returned. That is, we continuously change the <code>nonce</code> until <code>sha256</code> produces a
+hash that matches the target. This defines the foundations of mining
+(proof of work).</p>
+<p>
+For example, here’s how we can mine the earlier block we gave as an
+example:
+
+</p>
+<pre>1   &gt; (define mined-block (make-and-mine-block "234" 1 (transaction "BoroS"
+2     "Boro" "You" "a book") 1))
+3   &gt; (block-nonce mined-block)
+4   337
+5   &gt; (block-previous-hash mined-block)
+6   "234"
+7   &gt; (block-current-hash mined-block)
+8   "e920d627196658b64e349c1d3d6f2de1ab308d98d1c48130ee36df47ef25ee9a"</pre>
+<p>Note that <code>nonce</code> had to go up to
+<code>337</code> for the
+mining conditionals to be fulfilled. This is the amount of “work” that
+was required. In some cases, it will be smaller, and in others, it will
+be larger.</p>
+<p>
+Lastly, we need a small helper procedure:
+
+</p>
+<pre>1   (define (mine-block transaction previous-hash)
+2     (make-and-mine-block
+3      previous-hash (current-milliseconds) transaction 1))</pre>
+<p><code>current-milliseconds</code>
+returns the current time in milliseconds since midnight UTC, January 1,
+1970.</p>
+<p>
+We provide these structures and procedures:
+
+</p>
+<pre>1   (provide (struct-out block) mine-block valid-block? mined-block?)</pre>
+<p>
+And make sure we require all the necessary packages :
+
+</p>
+<pre>1   (require (only-in file/sha1 hex-string-&gt;bytes))
+2   (require (only-in sha sha256))
+3   (require (only-in sha bytes-&gt;hex-string))
+4   (require racket/serialize)</pre>
+<p>The <code>only-in</code>
+syntax imports only specific objects from a package that we specify,
+instead of importing everything.</p>
+<p>At this point, besides being able to create and sign wallets, we now
+also have the necessary procedures to create and mine a block.</p>
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figh_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figh_HTML.gif"/>Exercise
+3-4
+
+<p>Create a block (with a transaction) using <code>block</code> (and
+transaction) and store it in a variable using <code>define</code>. Then,
+calculate its hash using <code>calculate-block-hash</code>.</p>
+
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figi_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figi_HTML.gif"/>Exercise
+3-5
+
+<p>Use <code>make-and-mine-block</code>
+on a block you generated. What’s the <code>nonce count</code>, i.e.,
+how much “work” (processing) did it take to mine that block?</p>
+
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figj_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figj_HTML.gif"/>Exercise
+3-6
+
+<p>Use <code>valid-block?</code> on the
+block in the previous exercise. Now use <code>valid-block?</code> on that
+block where its <code>nonce</code> is <code>1</code>.</p>
+<p><strong>Hint</strong>: To generate a “new” block out of an existing
+one called <code>bl</code>,
+you can use:</p>
+<p><code>1   (block (block-current-hash bl)</code></p>
+<p><code>2          (block-previous-hash bl)</code></p>
+<p><code>3          (block-transaction bl)</code></p>
+<p><code>4          (block-timestamp bl)</code></p>
+<p><code>5          (block-nonce bl))</code></p>
+
+
+
+
+<h2 class="Heading">3.3 The utils.rkt
+File</h2>
+<p>This file will contain common procedures that will be used by other
+components.</p>
+<p>
+A procedure that we will use often is <code>true-for-all?</code>. It
+returns true if a predicate satisfies all members of the list, and false
+otherwise:
+
+</p>
+<pre>1   (define (true-for-all? pred list)
+2     (cond
+3       [(empty? list) #t]
+4       [(pred (car list)) (true-for-all? pred (cdr list))]
+5       [else #f]))</pre>
+<p>
+Here’s an example how we can use it:
+
+</p>
+<pre>1   &gt; (true-for-all? (lambda (x) (&gt; x 3)) '(1 2 3))
+2   #f
+3   &gt; (true-for-all? (lambda (x) (&gt; x 3)) '(4 5 6))
+4   #t</pre>
+<p>
+Next, we’ll have a need for a procedure to export a <code>struct</code> into a file:
+
+</p>
+<pre>1   (define (struct-&gt;file object file)
+2     (let ([out (open-output-file file #:exists 'replace)])
+3       (write (serialize object) out)
+4       (close-output-port out)))</pre>
+<p><code>open-output-file</code>
+returns an object in memory, which we can then write to using <code>write</code>. When we do
+that, it will write to the opened file. <code>close-output-port</code>
+closes this object in memory. This procedure will serialize a <code>struct</code> and then will
+write the serialized contents to a file.</p>
+<p>
+The following procedure is the opposite of <code>struct-&gt;file</code>:
+given a file, it will return a <code>struct</code> by opening the
+file, reading its contents, and deserializing its contents.
+
+</p>
+<pre>1   (define (file-&gt;struct file)
+2     (letrec ([in (open-input-file file)]
+3              [result (read in)])
+4       (close-input-port in)
+5       (deserialize result)))</pre>
+<p>
+A few notes here:
+
+</p>
+
+<ul>
+<li><p><code>read</code>
+will read and return data from <code>in</code> (the opposite of
+<code>write</code>).</p></li>
+<li><p><code>open-input-file</code> is
+similar to <code>open-output-file</code>,
+except that it is used to read from a file using <code>read</code>.</p></li>
+<li><p><code>deserialize</code> is the
+opposite of <code>serialize</code>.</p></li>
+</ul>
+
+<p>
+We provide these procedures:
+
+</p>
+<pre>1   (provide true-for-all? struct-&gt;file file-&gt;struct)</pre>
+<p>
+And make sure we require all the necessary packages:
+
+</p>
+<pre>1   (require racket/serialize)</pre>
+<p>Now we have a way to write our blockchain data into the filesystem
+(and read it from the filesystem). This way, our blockchain data can
+persist.</p>
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figk_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figk_HTML.gif"/>Exercise
+3-7
+
+<p>Use <code>struct-&gt;file</code> on
+some block to store it in a file. Then, use <code>file-&gt;struct</code> on
+that same file. Did you get the same block? Next, use a text editor to
+open the file you created. What do the file contents look like?</p>
+
+
+
+<h2 class="Heading">3.4
+Transactions</h2>
+<p>In this section, we will implement the procedures for signing and
+verifying transactions, as depicted in Figure 1-2 (Chapter <a href="#510363_1_En_1_Chapter.xhtml">1</a>).</p>
+
+<h3 class="Heading">3.4.1 The
+transaction-io.rkt File</h3>
+<p>The <code>transaction</code>   structure will consist
+of a <code>transaction-io</code>
+structure 
+(transaction input/output). The transaction input will represent the
+blockchain address from which the money was sent, and the transaction
+output will represent the blockchain address to which the money was
+sent.</p>
+<p>
+This structure contains a hash so that we’re able to verify its
+validity. It also has a value, an owner, and a timestamp.
+
+</p>
+<pre>1   (struct transaction-io
+2     (transaction-hash value owner timestamp)
+3     #:prefab)</pre>
+<p>
+Similarly to a block, we will use the same code for creating a hash and
+also rely on serialization:
+
+</p>
+<pre>1   (define (calculate-transaction-io-hash value owner timestamp)
+2     (bytes-&gt;hex-string  (sha256  (bytes-append
+3              (string-&gt;bytes/utf-8 (number-&gt;string value))
+4              (string-&gt;bytes/utf-8 (~a (serialize owner)))
+5              (string-&gt;bytes/utf-8  (number-&gt;string  timestamp))))))</pre>
+<p>
+<code>make-transaction-io</code>
+is a helper procedure that will initialize <code>timestamp</code> as well:
+
+</p>
+<pre>1   (define (make-transaction-io value owner)
+2     (let ([timestamp (current-milliseconds)])
+3       (transaction-io
+4        (calculate-transaction-io-hash value owner timestamp)
+5        value
+6        owner
+7        timestamp)))</pre>
+<p>
+A <code>transaction-io</code>
+structure  is
+valid if its hash is equal to the hash of the value, owner, and the
+timestamp :
+
+</p>
+<pre>1   (define (valid-transaction-io? t-in)
+2     (equal? (transaction-io-transaction-hash t-in)
+3             (calculate-transaction-io-hash
+4              (transaction-io-value t-in)
+5              (transaction-io-owner t-in)
+6              (transaction-io-timestamp  t-in))))</pre>
+<p>
+Here’s an example usage:
+
+</p>
+<pre>1   &gt; (make-transaction-io 123 "Some person")
+2   '#s(transaction-io "df652a3c15feba2eb9071cfdd810130c971f7fe7494a4710ee62
+3   2fca11f0d83e" 123 "Some person" 1573765357289)
+4   &gt; (valid-transaction-io? (transaction-io "df652a3c15feba2eb9071cfdd81013
+5   0c971f7fe7494a4710ee622fca11f0d83e" 123 "Some person" 1573765357289))
+6   #t
+7   &gt; (valid-transaction-io? (transaction-io "badhash" 123 "Some person"
+8   1573765357289))
+9   #f</pre>
+<p>
+Finally, we import the necessary packages and export the procedures:
+
+</p>
+<pre>1   (require (only-in sha sha256))
+2   (require (only-in sha bytes-&gt;hex-string))
+3   (require racket/serialize)
+4
+5   (provide (struct-out transaction-io)
+6             make-transaction-io valid-transaction-io?)</pre>
+<p>Now that we have a way to store transaction inputs/outputs, we can
+proceed with the actual transaction
+implementation
+.</p>
+
+
+<h3 class="Heading">3.4.2 The
+transaction.rkt File</h3>
+<p>This file will contain procedures for signing
+and verifying transactions. It will also use transaction inputs and
+outputs and store them in a single transaction.</p>
+<p>
+Here’s everything that we will need to <code>require</code>:
+
+</p>
+<pre>1   (require "transaction-io.rkt")
+2   (require "utils.rkt")
+3   (require (only-in file/sha1 hex-string-&gt;bytes))
+4   (require "wallet.rkt")
+5   (require crypto)
+6   (require crypto/all)
+7   (require racket/serialize)</pre>
+<p>
+A transaction contains a signature, sender, receiver, value, and a list
+of inputs and outputs (<code>transaction-io</code>
+objects).
+
+</p>
+<pre>1   (struct transaction
+2     (signature from to value inputs outputs)
+3     #:prefab)</pre>
+<p><img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figl_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figl_HTML.gif"/></p>
+
+
+Definition 3-4
+
+<p>In Racket, a <strong>crypto factory</strong>
+  consists
+of specific implementations of crypto-graphic algorithms.</p>
+
+<p>
+In addition to the code, we need to use all crypto factories. They will
+allow us to use some procedures, for example <code>hex&lt;-&gt;pk-key</code>:
+
+</p>
+<pre>1   (use-all-factories!)</pre>
+<p>
+We will need a procedure that makes an empty, unsigned, and unprocessed
+(no input outputs) transaction. This procedure will be used later when
+we send money or create the first (genesis) transaction.
+
+</p>
+<pre>1   (define (make-transaction from to value inputs)
+2     (transaction
+3      ""
+4      from
+5      to
+6      value
+7      inputs
+8      '()))</pre>
+
+<h4 class="Heading">3.4.2.1 Digital
+Signatures</h4>
+<p>Next, we need a procedure  to sign a transaction.
+It is similar to the procedures we wrote earlier where we used hashing,
+in that we get all bytes from the structure and append them. The
+difference, in this case, is that we will be using digital signatures
+for signing and verifying data.</p>
+<p>
+To create a digital signature, we use a hashing procedure (in this case,
+it is using the SHA algorithm). The private key is then used to encrypt
+the produced hash. The encrypted hash will represent the digital
+signature.
+
+</p>
+<pre>1   (define (sign-transaction from to value)
+2     (let ([privkey (wallet-private-key from)]
+3           [pubkey (wallet-public-key from)])
+4       (bytes-&gt;hex-string
+5        (digest/sign
+6         (datum-&gt;pk-key (hex-string-&gt;bytes privkey) 'PrivateKeyInfo)
+7         'sha1
+8         (bytes-append
+9          (string-&gt;bytes/utf-8 (~a (serialize from)))
+10          (string-&gt;bytes/utf-8 (~a (serialize to)))
+11          (string-&gt;bytes/utf-8 (number-&gt;string value)))))))</pre>
+<p><code>digest/sign</code>
+is the procedure that does the hashing and encryption. It accepts a
+private key, an algorithm,<sup><a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></sup> and bytes, and it
+returns encrypted data.</p>
+
+
+<h4 class="Heading">3.4.2.2
+Processing Transactions</h4>
+<p>
+Next, we implement a procedure for processing
+transactions
+ which will:
+
+</p>
+
+<ul>
+<li><p>Sum all the inputs within <code>inputs-sum</code>.</p></li>
+<li><p>Calculate the <code>leftover</code>, which is
+the difference between <code>inputs-sum</code> and the
+current transaction’s <code>value</code>.</p></li>
+<li><p>Generate new outputs based on the transaction’s <code>value</code> and <code>leftover</code>.</p></li>
+<li><p>Combine the old outputs (<code>outputs</code>) and new
+outputs (<code>new-outputs</code>) to the
+newly generated transaction (inputs remain unchanged and will be used by
+the UTXO implementation later).</p></li>
+<li><p>Use <code>foldr + 0 l</code> to calculate the sum of a list of numbers, <code>l</code>.</p></li>
+</ul>
+
+<p>
+In other words, based on some transaction inputs, the procedure will
+create transaction outputs that contain the transaction’s <code>value</code> and <code>leftover</code> money:
+
+</p>
+<pre>1   (define (process-transaction t)
+2     (letrec
+3         ([inputs (transaction-inputs t)]
+4          [outputs (transaction-outputs t)]
+5          [value (transaction-value t)]
+6          [inputs-sum
+7           (foldr + 0 (map (lambda (i) (transaction-io-value i)) inputs))]
+8          [leftover (- inputs-sum value)]
+9          [new-outputs
+10           (list
+11            (make-transaction-io value (transaction-to t))
+12            (make-transaction-io leftover (transaction-from t)))])
+13       (transaction
+14        (sign-transaction (transaction-from t)
+15                          (transaction-to t)
+16                          (transaction-value t))
+17        (transaction-from t)
+18        (transaction-to t)
+19        value
+20        inputs
+21        (append new-outputs outputs))))</pre>
+<p>
+We will also need a procedure that checks a transaction signature :
+
+</p>
+<pre>1   (define (valid-transaction-signature? t)
+2     (let ([pubkey (wallet-public-key (transaction-from t))])
+3       (digest/verify
+4        (datum-&gt;pk-key (hex-string-&gt;bytes pubkey) 'SubjectPublicKeyInfo)
+5        'sha1
+6        (bytes-append
+7         (string-&gt;bytes/utf-8 (~a (serialize (transaction-from t))))
+8         (string-&gt;bytes/utf-8 (~a (serialize (transaction-to t))))
+9         (string-&gt;bytes/utf-8 (number-&gt;string (transaction-value t))))
+10         (hex-string-&gt;bytes (transaction-signature t)))))</pre>
+<p><code>digest/verify</code> is the
+opposite of <code>digest/sign</code>, in that
+instead of signing, it determines if a signature is valid.</p>
+<p>
+Lastly, we will need a procedure that determines transaction validity
+under the following conditions:
+
+</p>
+
+<ul>
+<li><p>Its signature is valid: <code>valid-transaction-signature?</code></p></li>
+<li><p>All outputs are valid: <code>valid-transaction-io?</code></p></li>
+<li><p>The sum of the inputs is greater than or equal to the sum of the
+outputs: <code>&gt;= sum-inputs sum-outputs</code>. This resolves the problem of
+double-spending.</p></li>
+</ul>
+
+<p>
+
+</p>
+<pre>1   (define (valid-transaction? t)
+2     (let ([sum-inputs
+3            (foldr + 0 (map (lambda (t) (transaction-io-value t))
+4                            (transaction-inputs t)))]
+5           [sum-outputs
+6            (foldr + 0 (map (lambda (t) (transaction-io-value t))
+7                            (transaction-outputs t)))])
+8       (and
+9        (valid-transaction-signature? t)
+10        (true-for-all? valid-transaction-io? (transaction-outputs t))
+11        (&gt;= sum-inputs sum-outputs))))</pre>
+<p>The <code>(and ...)</code> syntax
+  will
+return <code>#t</code> if
+all values passed to it are <code>#t</code>, and it will
+return <code>#f</code>
+otherwise. In contrast, <code>(or ...)</code> will return
+<code>#t</code> if at least
+one value passed to it is <code>#t</code>, and <code>#f</code> otherwise.</p>
+<p>
+Finally, we export the following:
+
+</p>
+<pre>1   (provide (all-from-out "transaction-io.rkt")
+2            (struct-out transaction)
+3            make-transaction process-transaction valid-transaction?)</pre>
+<p>The <code>all-from-out</code> syntax
+specifies all objects that we import (and that are exported) from the
+target. In this case, besides the file exporting the <code>transaction</code> structure
+with a couple of procedures, it also exports everything from <code>transaction-io.rkt</code>.</p>
+<p>In addition to wallets and blocks, our implementation also supports
+the creation and processing of transactions.</p>
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figm_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figm_HTML.gif"/>Exercise
+3-8
+
+<p>Create a transaction, process it, and verify it using the procedures
+above.</p>
+<p><strong>Hint</strong>: Use <code>make-transaction</code>,
+<code>process-transaction,</code>
+and <code>valid-transaction?</code>,
+respectively.</p>
+
+
+
+
+
+<h2 class="Heading">3.5 The
+blockchain.rkt File</h2>
+<p>
+We will now implement the final component—the blockchain. We’ll need to
+<code>require</code> a bunch
+of stuff:
+
+</p>
+<pre>1   (require "block.rkt")
+2   (require "transaction.rkt")
+3   (require "utils.rkt")
+4   (require "wallet.rkt")</pre>
+<p>
+Recall that UTXO is just a list of <code>transaction-io</code>
+objects, where it represents unspent transaction outputs. In a way, it
+resembles the initial balance of wallets. Thus, the structure will
+contain a list of blocks and UTXO:
+
+</p>
+<pre>1   (struct blockchain
+2     (blocks utxo)
+3     #:prefab)</pre>
+
+<h3 class="Heading">3.5.1
+Initialization</h3>
+<p>
+We will need a procedure for the initialization of the
+blockchain. It should accept the genesis transaction, genesis hash, and
+UTXO:
+
+</p>
+<pre>1   (define (init-blockchain t seed-hash utxo)
+2     (blockchain (cons (mine-block (process-transaction t) seed-hash) '())
+3                 utxo))</pre>
+<p>
+One way to initialize a blockchain is as follows:
+
+</p>
+<pre>1   &gt; (define coin-base (make-wallet))
+2   &gt; (define wallet-a (make-wallet))
+3   &gt; (define genesis-t (make-transaction coin-base wallet-a 100  '()))
+4   &gt; (define utxo (list
+5   &gt;              (make-transaction-io 100 wallet-a)))
+6   &gt; (define blockchain (init-blockchain genesis-t "1337cafe"  utxo))</pre>
+
+
+<h3 class="Heading">3.5.2
+Rewards</h3>
+<p>
+In the original Bitcoin implementation, the block reward starts at 50
+coins for the first block and halves on every 210000 blocks. This means
+that every block up until block 210000 will reward 50 coins, while block
+210001 will reward 25. In other words, the reward is calculated using
+the following formula, where <em>b</em> is the number of blocks.
+
+
+
+<p>
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Chapter_TeX_Equa.png" style="width:3.52em" alt="$$ \frac{2^{\left\lfloor \frac{b}{210000}\right\rfloor }}{50} $$"/>
+</p>
+
+
+
+</p>
+<p>
+We follow the same algorithm. We start with 50 coins initially and halve
+them on every 210000 blocks.
+
+</p>
+<pre>1   (define (mining-reward-factor blocks)
+2     (/ 50 (expt 2 (floor (/ (length blocks) 210000)))))</pre>
+
+
+<h3 class="Heading">3.5.3 Adding a
+Transaction</h3>
+<p>
+The next procedure will add a transaction to the
+blockchain. It should:
+
+</p>
+
+<ol>
+<li>
+
+<p>Mine a block.</p>
+
+
+ 
+</li>
+<li>
+
+<p>Create a new UTXO based on the processed transaction outputs, inputs,
+and the current UTXO.</p>
+
+
+ 
+</li>
+<li>
+
+<p>Generate a new list of blocks by adding the newly mined block.</p>
+
+
+ 
+</li>
+<li>
+
+<p>Calculate the rewards based on the current UTXO.</p>
+
+
+ 
+</li>
+</ol>
+
+<p>
+Additionally, UTXO will be treated as a set so that we can easily remove
+specific inputs and append new transactions using set operations.
+
+</p>
+<pre>1   (define (add-transaction-to-blockchain b t)
+2     (letrec ([hashed-blockchain
+3               (mine-block t
+4                (block-current-hash (car (blockchain-blocks b))))]
+5              [processed-inputs (transaction-inputs t)]
+6              [processed-outputs (transaction-outputs t)]
+7              [utxo (set-union processed-outputs
+8                               (set-subtract (blockchain-utxo b)
+9                                             processed-inputs))]
+10              [new-blocks (cons hashed-blockchain (blockchain-blocks b))]
+11              [utxo-rewarded (cons
+12                              (make-transaction-io
+13                               (mining-reward-factor new-blocks)
+14                               (transaction-from t))
+15                              utxo)])
+16        (blockchain
+17         new-blocks
+18         utxo-rewarded)))</pre>
+<p>There is another thing about <code>add-transaction-to-blockchain</code>:
+given a blockchain and a transaction, it returns a new, updated blockchain.
+This newly returned blockchain will be the latest that should be used,
+since the previous one will not contain this new transaction. This way,
+we avoid mutating the previous blockchain.</p>
+<p>
+Next, we will create a procedure that will determine the balance of a
+wallet—the sum of all unspent transactions for the matching owner:
+
+</p>
+<pre>1   (define (balance-wallet-blockchain  b  w)
+2     (letrec ([utxo (blockchain-utxo b)]
+3              [my-ts (filter
+4                      (lambda (t) (equal? w (transaction-io-owner t)))
+5                      utxo)])
+6       (foldr + 0 (map (lambda (t) (transaction-io-value t)) my-ts))))</pre>
+<p>
+We will also need a procedure that will send money from one wallet to
+another by initiating a transaction and then adding it to the blockchain
+for processing. <code>my-ts</code> will contain
+the current receiver’s transaction inputs. Finally, we add the
+transaction to the blockchain only if it is valid.
+
+</p>
+<pre>1   (define (send-money-blockchain b from to value)
+2     (letrec ([my-ts
+3               (filter (lambda (t) (equal? from (transaction-io-owner t)))
+4                       (blockchain-utxo b))]
+5               [t (make-transaction from to value my-ts)])
+6       (if (transaction? t)
+7           (let ([processed-transaction (process-transaction t)])
+8             (if (and
+9                  (&gt;= (balance-wallet-blockchain b from) value)
+10                  (valid-transaction? processed-transaction))
+11                 (add-transaction-to-blockchain b processed-transaction)
+12                 b))
+13           (add-transaction-to-blockchain b '()))))</pre>
+
+
+<h3 class="Heading">3.5.4
+Verification</h3>
+<p>
+We will now introduce a procedure
+that determines blockchain validity under the following conditions:
+
+</p>
+
+<ul>
+<li><p>All blocks are valid using <code>valid-block?</code>.</p></li>
+<li><p>Previous hashes are matching using the <code>equal?</code> check by
+comparing the previous hash of all blocks (except the last) to the
+current hash of all blocks (except the first).</p></li>
+<li><p>All transactions are valid using <code>valid-transaction?</code>.</p></li>
+<li><p>All blocks are mined using <code>mined-block?</code>.</p></li>
+</ul>
+
+<p>
+
+</p>
+<pre>1   (define (valid-blockchain? b)
+2     (let ([blocks (blockchain-blocks b)])
+3       (and
+4        (true-for-all? valid-block? blocks)
+5        (equal? (drop-right (map block-previous-hash blocks) 1)
+6                (cdr (map block-current-hash blocks)))
+7        (true-for-all?
+8         valid-transaction? (map
+9                            (lambda (block) (block-transaction block))
+10                            blocks))
+11         (true-for-all?
+12         mined-block? (map block-current-hash blocks)))))</pre>
+<p>
+Finally, we export everything:
+
+</p>
+<pre>1   (provide (all-from-out "block.rkt")
+2            (all-from-out "transaction.rkt")
+3            (all-from-out "wallet.rkt")
+4            (struct-out blockchain)
+5            init-blockchain send-money-blockchain
+6            balance-wallet-blockchain valid-blockchain?)</pre>
+<p>We now have all the necessary components: managing wallets, blocks,
+transactions, and finally the blockchain.</p>
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Fign_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Fign_HTML.gif"/>Exercise
+3-9
+
+<p>Create two sets and use <code>set-subtract</code>, <code>set-union</code>, and <code>set-intersect</code> on
+them. Observe the results.</p>
+
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figo_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figo_HTML.gif"/>Exercise
+3-10
+
+<p>Initialize a blockchain with <code>init-blockchain</code> and
+add a transaction to it using <code>add-transaction-to-blockchain</code>.</p>
+
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figp_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figp_HTML.gif"/>Exercise
+3-11
+
+<p>Use <code>valid-blockchain?</code> on
+the blockchain in the previous exercise (do this before adding the new
+transaction, and again after adding the new transaction).</p>
+
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figq_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figq_HTML.gif"/>Exercise
+3-12
+
+<p>Make a transfer in a blockchain using <code>send-money-blockchain</code>.</p>
+
+
+
+
+<h2 class="Heading">3.6 Integrating
+Components</h2>
+<p>In this section, we will combine all the various parts into a single
+point and show how they can be easily used.</p>
+
+<h3 class="Heading">3.6.1 The
+main-helper.rkt File</h3>
+<p>
+This file will
+import everything from <code>blockchain.rkt</code> and
+<code>utils.rkt</code> and
+will provide some printing procedures.
+
+</p>
+<pre>1   (require "blockchain.rkt")
+2   (require "utils.rkt")</pre>
+<p>
+The next procedure will convert a transaction object to a printable
+string. It will use <code>substring</code> to only
+print a subset of the hash (since it may be too big), and it will also
+use <code>format</code>,
+which is a string-formatting procedure that replaces every ∼<code>a</code> in a string with
+the passed argument in order.
+
+</p>
+<pre>1   (define (format-transaction t)
+2     (format "...~a... sends ...~a... an amount of ~a."
+3             (substring (wallet-public-key (transaction-from t)) 64 80)
+4             (substring  (wallet-public-key  (transaction-to  t)) 64  80)
+5             (transaction-value t)))</pre>
+<p>
+The next procedure will print the details of a block. <code>printf</code> is similar to
+<code>print</code>, except
+that it can be used like <code>format</code>:
+
+</p>
+<pre>1   (define (print-block bl)
+2     (printf "Block information\n=================
+3   Hash:\t~a\nHash_p:\t~a\nStamp:\t~a\nNonce:\t~a\nData:\t~a\n"
+4         (block-current-hash bl)
+5         (block-previous-hash bl)
+6         (block-timestamp bl)
+7         (block-nonce bl)
+8         (format-transaction (block-transaction bl))))</pre>
+<p>
+Besides using recursion explicitly, there is a built-in <code>for</code> syntax that also
+allows repetitive computations. To print a blockchain, we will use the
+<code>for</code> syntax to
+go through all blocks, print them to the standard output, and then use
+<code>newline</code> to add
+a newline character to make the separation of every block obvious:
+
+</p>
+<pre>1   (define (print-blockchain b)
+2     (for ([block (blockchain-blocks b)])
+3       (print-block block)
+4       (newline)))</pre>
+<p>
+We print wallets similarly:
+
+</p>
+<pre>1   (define (print-wallets b wallet-a wallet-b)
+2     (printf "\nWallet A balance: ~a\nWallet B balance: ~a\n\n"
+3             (balance-wallet-blockchain b wallet-a)
+4             (balance-wallet-blockchain b wallet-b)))</pre>
+<p>
+And export the procedures:
+
+</p>
+<pre>1   (provide (all-from-out "blockchain.rkt")
+2            (all-from-out "utils.rkt")
+3            format-transaction print-block print-blockchain print-wallets)</pre>
+
+
+<img src="images/510363_1_En_3_Chapter/510363_1_En_3_Figr_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_3_Chapter/510363_1_En_3_Figr_HTML.gif"/>Exercise
+3-13
+
+<p>Create a transaction and use <code>format-transaction</code> to
+see what it outputs. Repeat the same for a block (<code>print-block</code>),
+blockchain (<code>print-blockchain</code>),
+and wallets (<code>print-wallets</code>).</p>
+
+
+
+<h3 class="Heading">3.6.2 The
+main.rkt File</h3>
+<p>
+This is where we
+will put all the components together and use them. We start by checking
+if the <code>blockchain.data</code>
+file  exists by
+using <code>file-exists?</code>. This
+file will contain contents from a previous blockchain if it exists. If
+it doesn’t, we will just create a fresh blockchain.
+
+</p>
+<pre>1   (require "main-helper.rkt")
+2
+3   (when (file-exists? "blockchain.data")
+4     (begin
+4       (printf "Found 'blockchain.data', reading...\n")
+6       (print-blockchain (file-&gt;struct "blockchain.data"))
+7       (exit)))</pre>
+<p>We used <code>when</code>, which is
+similar to <code>if</code>,
+except that the <code>else</code> branch is
+omitted.</p>
+<p>
+Next, we initialize wallets:
+
+</p>
+<pre>1   (define coin-base (make-wallet))
+2   (define wallet-a (make-wallet))
+3   (define wallet-b (make-wallet))</pre>
+<p>
+We initialize transactions by creating the genesis transaction:
+
+</p>
+<pre>1   (printf "Making genesis transaction...\n")
+2   (define genesis-t (make-transaction coin-base wallet-a 100 '()))</pre>
+<p>
+We initialize the unspent transactions—the genesis transaction:
+
+</p>
+<pre>1   (define utxo (list
+2                 (make-transaction-io 100 wallet-a)))</pre>
+<p>
+Finally, we initiate the blockchain by mining the genesis transaction:
+
+</p>
+<pre>1   (printf "Mining genesis block...\n")
+2   (define blockchain (init-blockchain genesis-t "1337cafe" utxo))
+3   (print-wallets blockchain wallet-a wallet-b)</pre>
+<p>
+Making a second transaction:
+
+</p>
+<pre>1   (printf "Mining second transaction...\n")
+2   (set! blockchain (send-money-blockchain blockchain wallet-a wallet-b 2))
+3   (print-wallets blockchain wallet-a wallet-b)</pre>
+<p>
+Making a third transaction:
+
+</p>
+<pre>1   (printf "Mining third transaction...\n")
+2   (set! blockchain (send-money-blockchain blockchain wallet-b wallet-a 1))
+3   (print-wallets blockchain wallet-a wallet-b)</pre>
+<p>
+Attempting to make a fourth transaction:
+
+</p>
+<pre>1   (printf "Attempting to mine fourth (not-valid) transaction...\n")
+2   (set! blockchain (send-money-blockchain blockchain wallet-b wallet-a 3))
+3   (print-wallets blockchain wallet-a wallet-b)</pre>
+<p>
+Checking blockchain validity:
+
+</p>
+<pre>1   (printf "Blockchain is valid: ~a\n\n" (valid-blockchain? blockchain))</pre>
+<p>
+Printing every block from the blockchain:
+
+</p>
+<pre>1   (for ([block (blockchain-blocks blockchain)])
+2     (print-block block)
+3     (newline))</pre>
+<p>
+And exporting the blockchain to <code>blockchain.data</code>,
+which can be reused later.
+
+</p>
+<pre>1   (struct-&gt;file blockchain "blockchain.data")
+2   (printf "Exported blockchain to 'blockchain.data'...\n")</pre>
+<p>
+Once we create <code>main.rkt</code>, we run it
+from the <code>Racket &gt; Run</code> menu. It should show the following output:
+
+</p>
+<pre>1   Making genesis transaction...
+2   Mining genesis block...
+3
+4   Wallet A balance: 100
+5   Wallet B balance: 0
+6
+7   Mining second transaction...
+8
+9   Wallet A balance: 130
+10   Wallet B balance: 20
+11
+12   Mining third transaction...
+13
+14   Wallet A balance: 140
+15   Wallet B balance: 60
+16
+17   Attempting to mine fourth (not-valid) transaction...
+18
+19   Wallet A balance: 140
+20   Wallet B balance: 60
+21
+22   Blockchain is valid: #t
+23
+24   Block information
+25   =================
+26   Hash:   e720bb198279a76057280bdf8eb667fe1883d0ae263c5d5d1be08697a2f534d1
+27   Hash_p: 38200563c1f807be2a5d10ec42dd53acae1f6f804b4c93016b87c974817f065d
+28   Stamp:  1529923610574
+29   Nonce:  216
+30   Data:   ...bb6... sends ...896... an amount of 10.
+31
+32   Block information
+33   =================
+34   Hash:   38200563c1f807be2a5d10ec42dd53acae1f6f804b4c93016b87c974817f065d
+35   Hash_p: 6a20fbe4038bb3b83090e7f767bb24af5164218bba5c751a1858262df2a2a847
+36   Stamp:  1529923610405
+37   Nonce:  752
+38   Data:   ...896... sends ...bb6... an amount of 20.
+39
+40   Block  information
+41   =================
+42   Hash:   6a20fbe4038bb3b83090e7f767bb24af5164218bba5c751a1858262df2a2a847
+43   Hash_p: 7365656467656e65736973
+44   Stamp:  1529923610332
+45   Nonce:  220
+46   Data:   ...58d... sends ...896... an amount of 100.
+47
+48   Exported blockchain to 'blockchain.data'...</pre>
+
+
+
+<h2 class="Heading">3.7 Summary</h2>
+<p>We built every component one by one, gradually. Some components are
+<em>orthogonal</em>—they are independent of one another. For example,
+the <code>wallet</code>
+implementation does not call any procedures from <code>block</code>, and a <code>block</code> can be used
+independently of a <code>wallet</code>. When we
+combine all of the components, we get a blockchain system.</p>
+<p>This design allows us to easily extend our system. In the next
+chapter, we will extend the system with peer-to-peer and smart contracts
+functionalities without having to change the basic components.</p>
+
+
+
+Footnotes
+
+
+<a href="#510363_1_En_3_Chapter.xhtml#Fn1_source">1</a>
+
+ 
+
+
+
+
+
+<p></p>
+
+
+<!--Begin Abstract-->
+
+<h1 class="ChapterTitle" lang="en">4. Extending the Blockchain</h1>
+
+
+<!--End Abstract-->
+
+
+<p>
+<img src="images/510363_1_En_4_Chapter/510363_1_En_4_Figa_HTML.jpg" style="width:22.47em" alt="../images/510363_1_En_4_Chapter/510363_1_En_4_Figa_HTML.jpg"/>
+</p>
+
+<p><em>Extensions, by D. Bozhinovski</em></p>
+<p>In the previous chapter, we implemented blockchain’s basic
+components. In this chapter, we will extend the blockchain with smart
+contracts and peer-to-peer support.</p>
+
+<h2 class="Heading">4.1 Smart
+Contracts Implementation</h2>
+<p>Bitcoin’s blockchain is programmable, which means that the
+transaction conditions themselves can be programmed by users. For
+example, users can write <em>scripts</em> (short pieces of code) to add
+requirements that must be satisfied before making a transaction.</p>
+<p>In Section 2.4, we created an executable that we can send to our
+friends, but they cannot change the executable because they don’t have
+the original code. And even if they did have the original code, not all
+users have programming skills.</p>
+<p>The point of smart contracts is to allow non-programmers to adjust
+the behavior of the transactional process without having to change the
+original code.</p>
+
+<h3 class="Heading">4.1.1 The
+smart-contracts.rkt File</h3>
+<p>
+The idea is to implement a small language, which users can consume. Our
+implementation will depend on transactions:
+
+</p>
+<pre>1   (require "transaction.rkt")</pre>
+<p>
+We have to extend the original <code>valid-transaction?</code> so
+that it will also consider contracts when calculating validity:
+
+</p>
+<pre>1   (define (valid-transaction-contract? t c)
+2     (and (eval-contract t c)
+3          (valid-transaction? t)))</pre>
+<p>
+We will now implement a procedure that will accept a transaction, a
+contract, a scripting language (which is really just an S-expression),
+and return some value. The returned value can be true, false, a number,
+or a string.
+
+</p>
+<pre>1   (define (eval-contract t c)
+2     (match c
+3       [(? number? x) x]
+4       [(? string? x) x]
+5       [`() #t]
+6       [`true #t]
+7       [`false #f]
+8       [`(if ,co ,tr ,fa) (if co tr fa)]
+9       [`(+ ,l ,r) (+ l r)]
+10       [else #f]))</pre>
+<p>We used new syntax here, called <code>match</code>. It is similar
+to <code>cond</code>, except
+that it can directly compare the structure of an object. For example,
+<code>? &lt;expr&gt; &lt;pat&gt;</code> matches when <code>&lt;expr&gt;</code> is true
+and stores the value in <code>&lt;pat&gt;</code>. In the
+previous code, if we pass a number, it will return that same number.
+Additionally, if we pass the value <code>true</code> (i.e., <code>c</code> matches <code>true</code>), then it will
+return <code>#t</code>.
+Another example is if <code>c</code> matches a structure
+of the form <code>(if X Y Z)</code> (quoted<sup><a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a></sup>), then it will return the
+evaluation of <code>(if X Y Z)</code>.</p>
+<p>
+Here are a few example uses:
+
+</p>
+<pre>1   &gt; (define test-transaction (transaction "BoroS" "Boro" "You" "a book"
+2     '() '()))
+3   &gt; (eval-contract test-transaction 123)
+4   123
+5   &gt; (eval-contract test-transaction "Hi")
+6   "Hi"
+7   &gt; (eval-contract test-transaction '())
+8   #t
+9   &gt; (eval-contract test-transaction 'true)
+10   #t
+11   &gt; (eval-contract test-transaction 'false)
+12   #f
+13   &gt; (eval-contract test-transaction '(if #t "Hi" "Hey"))
+14   "Hi"
+15   &gt; (eval-contract test-transaction '(if #f "Hi" "Hey"))
+16   "Hey"
+17   &gt; (eval-contract test-transaction '(+ 1 2))
+18   3</pre>
+<p>
+However, we still haven’t used any of the transaction’s values in our
+language. Let’s extend it with a few more commands:
+
+</p>
+<pre>1   ...
+2        [`from (transaction-from t)]
+3        [`to (transaction-to t)]
+4        [`value (transaction-value t)]
+5   ...</pre>
+<p>
+Now we can do something like this:
+
+</p>
+<pre>1   &gt; (eval-contract test-transaction 'from)
+2   "Boro"
+3   &gt; (eval-contract test-transaction 'to)
+4   "You"
+5   &gt; (eval-contract test-transaction 'value)
+6   "a book"</pre>
+<p>
+We will implement a few more operators so that the scripting language
+becomes more expressive:
+
+</p>
+<pre>1   ...
+2        [`(* ,l ,r) (* l r)]
+3        [`(- ,l ,r) (- l r)]
+4        [`(= ,l ,r) (equal? l r)]
+5        [`(&gt; ,l ,r) (&gt; l r)]
+6        [`(&lt; ,l ,r) (&lt; l r)]
+7        [`(and ,l ,r) (and l r)]
+8        [`(or ,l ,r) (or l r)]
+9   ...</pre>
+<p>
+However, there is a problem in the language implementation. Consider the
+evaluations of <code>(+ 1 2)</code> and <code>(+ (+ 1 2) 3)</code>:
+
+</p>
+<pre>1   &gt; (eval-contract test-transaction '(+ 1 2))
+2   3
+3   &gt; (eval-contract test-transaction '(+ (+ 1 2) 3))
+4   . . +: contract violation</pre>
+<p>The problem happens in the matching clause <code>[`(+ ,l ,r) (+ l r)]</code>.
+When we match against <code>'(+ (+ 1 2) 3))</code>, we
+end up with <code>(+ '(+ 1 2) 3)</code>, and Racket cannot sum a quoted list with a number. The
+solution to this problem is to <em>recursively</em> evaluate every
+subexpression. So the match turns from <code>[`(+ ,l ,r) (+ l r)]</code>
+to <code>[`(+ ,l ,r) (+ (eval-contract t l) (eval-contract t r))]</code>.</p>
+<p>
+In this case, the evaluation will happen as follows:
+
+</p>
+<pre>1   (eval-contract t '(+ (+ 1 2) 3))
+2   = (eval-contract t (list '+ (eval-contract t '(+ 1 2))
+3                               (eval-contract t 3)))
+4   = (eval-contract t (list '+ (+ 1 2) 3))
+5   = (eval-contract t (list '+ 3 3))
+6   = (eval-contract t '(+ 3 3))
+7   = (eval-contract t 6)
+8   = 6</pre>
+<p>It is important to remember the distinction between a quoted list and
+a non-quoted one; the latter will attempt evaluation. In this case, we
+juggled the quotations to produce the desired results.</p>
+<p>
+We will have to rewrite all of the operators:
+
+</p>
+<pre>1   ...
+2        [`(+ ,l ,r) (+ (eval-contract t l) (eval-contract t r))]
+3        [`(* ,l ,r) (* (eval-contract t l) (eval-contract t r))]
+4        [`(- ,l ,r) (- (eval-contract t l) (eval-contract t r))]
+5        [`(= ,l ,r) (= (eval-contract t l) (eval-contract t r))]
+6        [`(&gt; ,l ,r) (&gt; (eval-contract t l) (eval-contract t r))]
+7        [`(&lt; ,l ,r) (&lt; (eval-contract t l) (eval-contract t r))]
+8        [`(and ,l ,r) (and (eval-contract t l) (eval-contract t r))]
+9        [`(or ,l ,r) (or (eval-contract t l) (eval-contract t r))]
+10   ...</pre>
+<p>
+The <code>if</code>
+implementation in the language has the same problem. So we will also
+change it:
+
+</p>
+<pre>1   ...
+2        [`(if ,co ,tr ,fa) (if (eval-contract t co)
+3                           (eval-contract t tr)
+4                           (eval-contract t fa))]
+5   ...</pre>
+<p>
+Thus, the final procedure becomes:
+
+</p>
+<pre>1   (define (eval-contract t c)
+2     (match c
+3       [(? number? x) x]
+4       [(? string? x) x]
+5       [`() #t]
+6       [`true #t]
+7       [`false #f]
+8       [`(if ,co ,tr ,fa) (if (eval-contract t co)
+9                              (eval-contract t tr)
+10                              (eval-contract t fa))]
+11       [`(+ ,l ,r) (+ (eval-contract t l) (eval-contract t r))]
+12       [`from (transaction-from t)]
+13       [`to (transaction-to t)]
+14       [`value (transaction-value t)]
+15       [`(+ ,l ,r) (+ (eval-contract t l) (eval-contract t r))]
+16       [`(* ,l ,r) (* (eval-contract t l) (eval-contract t r))]
+17       [`(- ,l ,r) (- (eval-contract t l) (eval-contract t r))]
+18       [`(= ,l ,r) (= (eval-contract t l) (eval-contract t r))]
+19       [`(&gt; ,l ,r) (&gt; (eval-contract t l) (eval-contract t r))]
+20       [`(&lt; ,l ,r) (&lt; (eval-contract t l) (eval-contract t r))]
+21       [`(and ,l ,r) (and (eval-contract t l) (eval-contract t r))]
+22       [`(or ,l ,r) (or (eval-contract t l) (eval-contract t r))]
+23       [else #f]))</pre>
+<p>
+Users can now supply scripting code, such as <code>(if (= (+ 1 2) 3) from to)</code>:
+
+</p>
+<pre>1   &gt; (eval-contract test-transaction '(if (= (+ 1 2) 3) from to))
+2   "Boro"
+3   &gt; (eval-contract test-transaction '(if (= (+ 1 2) 4) from to))
+4   "You"</pre>
+<p>
+Finally, we provide the output, which is just the transaction validity
+check:
+
+</p>
+<pre>1   (provide valid-transaction-contract?)</pre>
+
+
+<h3 class="Heading">4.1.2 Updating
+Existing Code</h3>
+<p>Now that we have implemented the logic for smart contracts, the next thing
+we need to address is the front-end—how users can use its functionality.
+For that matter, we will update the implementation to support contracts
+by reading from a file. If a file named <code>contract.script</code>
+exists, we will read and parse it (with <code>read</code>) and then run
+the code.</p>
+<p>
+We will rewrite the money sending procedure in <code>blockchain.rkt</code> to
+accept contracts. It’s the same procedure except that we use <code>valid-transaction-contract?</code>
+instead of <code>valid-transaction?</code>.
+
+</p>
+<pre>1   (define (send-money-blockchain b from to value c)
+2     (letrec ([my-ts
+3               (filter (lambda (t) (equal? from (transaction-io-owner t)))
+4                       (blockchain-utxo b))]
+5               [t (make-transaction from to value my-ts)])
+6       (if (transaction? t)
+7           (let ([processed-transaction (process-transaction t)])
+8             (if (and
+9                  (&gt;= (balance-wallet-blockchain b from) value)
+10                  (valid-transaction-contract? processed-transaction c))
+11                  (add-transaction-to-blockchain b processed-transaction)
+12                  b))
+13           (add-transaction-to-blockchain b '()))))</pre>
+<p>
+Next, we will update <code>utils.rkt</code> to add this
+helper procedure for reading contracts:
+
+</p>
+<pre>1   (define (file-&gt;contract file)
+2     (with-handlers ([exn:fail? (lambda (exn) '())])
+3       (read (open-input-file file))))</pre>
+<p>Here, we used <code>with-handlers</code>, which
+accepts a procedure that handles the case when something may fail—in
+this case, <code>read</code>
+or <code>open-input-file</code>.</p>
+<p>Finally, make sure to add <code>file-&gt;contract</code> to
+the list of <code>provide</code>s in <code>utils.rkt</code>.
+Additionally, in <code>main.rkt</code> update every
+use of <code>send-money-blockchain</code>
+to additionally send <code>(file-&gt;contract "contract.script")</code> as an argument so that the contract processed
+is the one read from <code>contract.script</code>.</p>
+<p>We will also need to update <code>blockchain.rkt</code> and
+<code>main.rkt</code>
+because they now rely on a procedure implemented in the smart contracts
+package. We will add <code>(require "smart-contracts.rkt")</code> to them.</p>
+
+
+<img src="images/510363_1_En_4_Chapter/510363_1_En_4_Figb_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_4_Chapter/510363_1_En_4_Figb_HTML.gif"/>Exercise
+4-1
+
+<p>Come up with a few valid expressions and evaluate them using <code>eval-contract</code>.</p>
+
+
+
+<img src="images/510363_1_En_4_Chapter/510363_1_En_4_Figc_HTML.gif" style="width:1.38em" alt="../images/510363_1_En_4_Chapter/510363_1_En_4_Figc_HTML.gif"/>Exercise
+4-2
+
+<p>Repeat the previous exercise, but use the <code>contract.script</code>
+file.</p>
+<p><strong>Hint</strong>: This exercise might require you to create an
+executable.</p>
+
+
+
+
+<h2 class="Heading">4.2 Peer-to-Peer
+Implementation</h2>
+<p>In Section 3.6.2, we used DrRacket to execute the blockchain
+implementation. That’s okay for testing purposes. However, if we wanted
+to share that implementation with other users and ask them to execute
+it, it will be kind of inconvenient because there’s no way to share data
+between different users.</p>
+<p>In this section, we will implement peer-to-peer support so that users
+who are interested in our implementation can join the
+system/community.</p>
+<p>
+Before we dive into the implementation, Figure <a href="#510363_1_En_4_Chapter.xhtml#Fig1">4-1</a> shows a high
+overview of the architecture that we will build.
+
+</p>
+
+<p>
+<img src="images/510363_1_En_4_Chapter/510363_1_En_4_Fig1_HTML.jpg" style="width:27.5em" alt="../images/510363_1_En_4_Chapter/510363_1_En_4_Fig1_HTML.jpg"/>
+</p>
+
+<p>Figure 4-1</p>
+<p>Peer-to-peer architecture</p>
+
+
+<p>
+Every peer node (user connected to the system) list will consist of the
+following:
+
+</p>
+
+<ul>
+<li><p><em>Peer context
+data</em> <em>:</em> Information such as relations with other
+peers, list of connected peers, and so on.</p></li>
+<li><p><em>Generic handler:</em> Transforms the peer context
+data.</p></li>
+</ul>
+
+<p>
+Further, there will be two ways to establish communication with other
+peers:
+
+</p>
+
+<ul>
+<li><p>A peer will accept new connections from other peers.</p></li>
+<li><p>A peer will try to connect/make new connections to other
+peers.</p></li>
+</ul>
+
+<p>Whenever a connection is established, peers will communicate with
+each other through the generic handler, parsing and evaluating commands
+such as syncing/updating the blockchain, updating the list of peers, and
+so on.</p>
+<p>Consider this example scenario: Assume there are three peers—Peer 1,
+Peer 2, and Peer 3. Peer 1 and Peer 2 are online, and Peer 3 is offline
+at the moment. Peer 1 has the following list of valid peers: (Peer 1,
+Peer 2, Peer 3). Peer 2’s list of peers is empty. According to the
+diagram, Peer 1 will accept new connections and try to connect to peers.
+So, Peer 1 will try to connect to Peer 2. This connection will be
+successful, and the next step is for Peer 1 to send some data to Peer 2
+(e.g., the list of valid peers).</p>
+<p>Peer 2’s list of peers was empty, but now it will be merged with Peer
+1, so it will become (Peer 1, Peer 2, Peer 3). Peer 1 and Peer 2 are
+connected to each other, and they will keep trying to connect to Peer 3.
+Once Peer 3 becomes available, the same algorithm will be executed and
+Peer 3 will join the network.</p>
+<p>With this approach, the goal is to build a system similar to the
+high-level description shown in Figures <a href="#510363_1_En_4_Chapter.xhtml#Fig1">1-1</a> and <a href="#510363_1_En_1_Chapter.xhtml#Fig3">1-3</a> (Chapter <a href="#510363_1_En_1_Chapter.xhtml">1</a>).</p>
+<p>Building communication systems of this type is naturally complex. It
+is suggested you consult the Racket manuals (by pressing the F1 key) for
+every procedure that you will be using.</p>
+
+<h3 class="Heading">4.2.1 The
+peer-to-peer.rkt File</h3>
+<p>
+To start, we will add dependencies for the block implementation and rely
+on serialization to send data to other peers:
+
+</p>
+<pre>1   (require "blockchain.rkt")
+2   (require "block.rkt")
+3   (require racket/serialize)</pre>
+
+<h4 class="Heading">4.2.1.1 Peer
+Context Structure</h4>
+<p>
+We will implement structures that hold information about the peers so
+that we have a reference to send data to the correct destinations. The
+<code>peer-info</code>
+structure   contains an IP address
+and a port of a peer. Think of an IP address and a port similar to a
+street address and a number, respectively.
+
+</p>
+<pre>1   (struct peer-info
+2     (ip port)
+3     #:prefab)</pre>
+<p>
+The <code>peer-info-io</code>
+structure 
+additionally contains IO ports (think communication channels) for
+sending and receiving data between peers:
+
+</p>
+<pre>1   (struct peer-info-io
+2     (peer-info input-port output-port)
+3     #:prefab)</pre>
+<p>The reason we separate <code>peer-info</code> and <code>peer-info-io</code> is that
+later in <code>main-p2p.rkt</code>, we
+won’t have the context of input/output ports (before a connection to a
+peer is established), so it gives us a nice way to reuse the
+structure.</p>
+<p>
+Finally, <code>peer-context-data</code>
+  contains
+all the information needed for a single peer, that is:
+
+</p>
+
+<ul>
+<li><p>List of valid peers</p></li>
+<li><p>List of connected peers</p></li>
+<li><p>A reference to the blockchain</p></li>
+</ul>
+
+<p>
+
+</p>
+<pre>1   (struct peer-context-data
+2     (name
+3      port
+4      [valid-peers #:mutable]
+5      [connected-peers #:mutable]
+6      [blockchain #:mutable])
+7     #:prefab)</pre>
+<p>The list<sup><a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a></sup> of valid peers will be updated
+depending on the information retrieved from the connected peers. The
+list of connected peers will be a (not necessarily strict) subset of
+<code>valid-peers</code>.
+The blockchain will be updated with the data combined from all peers. We
+make them mutable because it provides an easy way to update the data.</p>
+
+
+<h4 class="Heading">4.2.1.2 Generic
+Handler</h4>
+<p>The generic
+handler 
+will be a <code>handler</code> procedure
+that will be used both by the server (the “accepting new connections”
+part of the diagram) and the client (the “connecting to new peers” part
+of the diagram). It will be a procedure that accepts commands (commands
+similar in nature to the smart contracts’ <code>eval-contract</code>
+implementation) and then does something depending on the command.</p>
+<p>
+Here’s a list of commands that peers will send to each other:
+
+</p>
+
+<table style="border-collapse: collapse;border-top: 0.5pt solid ; border-bottom: 0.5pt solid ; border-left: 0.5pt solid ; border-right: 0.5pt solid ; ">
+<thead>
+<tr class="header">
+<th style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"><p><strong>Request</strong></p></th>
+<th style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"><p><strong>Response</strong></p></th>
+<th style="text-align: left; border-bottom: 0.5pt solid;"><p><strong>Notes</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"><p><code>get-valid-peers</code></p></td>
+<td style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"><p><code>valid-peers:X</code></p></td>
+<td style="text-align: left; border-bottom: 0.5pt solid;"><p>A peer may
+request a list of valid peers. The response will be X – valid peers.
+Note that this response should automatically trigger the <code>valid-peers</code>
+command.</p></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"><p><code>get-latest-blockchain</code></p></td>
+<td style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"><p><code>latest-blockchain:X</code></p></td>
+<td style="text-align: left; border-bottom: 0.5pt solid;"><p>A peer may
+request the latest blockchain from another peer. The response will be X
+- the latest version of the blockchain. This should trigger the <code>latest-blockchain</code>
+command.</p></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"><p><code>latest-blockchain:X</code></p></td>
+<td style="text-align: left; border-right: 0.5pt solid; border-bottom: 0.5pt solid;"> </td>
+<td style="text-align: left; border-bottom: 0.5pt solid;"><p>When a peer
+gets this request, it will update the blockchain, given it is
+valid.</p></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; border-right: 0.5pt solid;"><p><code>valid-peers:X</code></p></td>
+<td style="text-align: left; border-right: 0.5pt solid;"> </td>
+<td style="text-align: left;"><p>When a peer gets this request, it will
+update the list of valid peers.</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The commands  in this table will
+allow the peers to sync data with each other. We will now provide the
+handler implementation. It accepts a <code>peer-context</code> and
+input/output ports. Given these, it will read the input (command) and
+send the appropriate output (evaluated command) back to the peer:
+
+</p>
+<pre>1   (define (handler peer-context in out)
+2     (flush-output out)
+3     (define line (read-line in))
+4     (when (string? line) ; it can be eof
+5       (cond [(string-prefix? line "get-valid-peers")
+6              (fprintf out "valid-peers:~a\n"
+7                       (serialize
+8                        (set-&gt;list
+9                         (peer-context-data-valid-peers peer-context))))
+10              (handler peer-context in out)]
+11             [(string-prefix? line "get-latest-blockchain")
+12              (fprintf out "latest-blockchain:")
+13              (write
+14               (serialize (peer-context-data-blockchain peer-context)) out)
+15              (handler peer-context in out)]
+16             [(string-prefix? line "latest-blockchain:")
+17              (begin (maybe-update-blockchain peer-context line)
+18                     (handler peer-context in out))]
+19             [(string-prefix? line "valid-peers:")
+20              (begin (maybe-update-valid-peers peer-context line)
+21                     (handler peer-context in out))]
+22             [(string-prefix? line "exit")
+23              (fprintf out "bye\n")]
+24             [else (handler peer-context in out)])))</pre>
+<p>
+We used some new procedures  here:
+
+</p>
+
+<ul>
+<li><p>An output buffer (output communication channel with a peer) is
+usually filled with bytes. We need to flush (empty) this buffer every
+time we want to send a message, to avoid resending the previous
+messages. We achieve this using `flush-output`.</p></li>
+<li><p><code>read-line</code> is similar
+to <code>read</code> except
+that it will stop reading once a newline is reached.</p></li>
+<li><p><code>string-prefix?</code> checks
+to see if a string starts with some other string.</p></li>
+<li><p><code>fprintf</code>
+is similar to <code>printf</code> except that we
+can also supply the first argument to specify where this message should
+be sent.</p></li>
+<li><p><code>set-&gt;list</code> converts
+a set to a list.</p></li>
+</ul>
+
+<p>There’s a little trick involved in the <code>latest-blockchain</code>
+case—we used <code>write</code> instead of
+<code>(fprintf out "latest-blockchain:</code>∼<code>a\n")</code>. The reason for
+that is that <code>print</code> (and thus <code>printf</code> and <code>fprintf</code>) cannot be
+relied on for output that needs to be formatted in a specific way. For
+example , <code>print</code> prints strings
+with quotation marks (to make the printed data more legible to the
+user), and this will be messed up when we try to deserialize the data we
+received, so we want to send the data in its “raw” format.</p>
+<p>
+The next step is to implement procedures for updating the blockchain and
+the list of valid peers, under the conditions that the blockchain is
+valid and it has higher effort than ours.
+
+</p>
+<pre>1   (define (maybe-update-blockchain peer-context line)
+2     (let ([latest-blockchain
+3            (trim-helper line #rx"(latest-blockchain:|[\r\n]+)")]
+4           [current-blockchain
+5            (peer-context-data-blockchain peer-context)])
+6       (when (and (valid-blockchain? latest-blockchain)
+7                   (&gt; (get-blockchain-effort latest-blockchain)
+8                      (get-blockchain-effort current-blockchain)))
+9         (printf "Blockchain updated for peer ~a\n"
+10                 (peer-context-data-name peer-context))
+11         (set-peer-context-data-blockchain! peer-context
+12                                            latest-blockchain))))</pre>
+<p>We used <code>#rx"..."</code> for the
+first time—this specifies a regular expression. Think of it as a way to
+define a search pattern in some string.</p>
+<p>
+For example, <code>#rx"(latest-blockchain:|[\r\n]+)"</code>
+matches the following strings:
+
+</p>
+
+<ul>
+<li><p><code>latest-blockchain:a\n</code></p></li>
+<li><p><code>latest-blockchain:b\n</code></p></li>
+<li><p>In general, <code>latest-blockchain:...\n</code></p></li>
+</ul>
+
+<p>
+The previous procedure  will update the
+blockchain only when it is valid and the effort is higher than the
+current one. We define the effort as the sum of all blocks’ <code>nonce</code>s:
+
+</p>
+<pre>1   (define (get-blockchain-effort b)
+2     (foldl + 0 (map block-nonce (blockchain-blocks b))))</pre>
+<p>
+To update the list of valid peers is to merge the current list of valid
+peers with the newly received list, thus mutating the <code>peer-context</code>
+structure :
+
+</p>
+<pre>1   (define (maybe-update-valid-peers peer-context line)
+2     (let ([valid-peers (list-&gt;set
+3                         (trim-helper line #rx"(valid-peers:|[\r\n]+)"))]
+4           [current-valid-peers (peer-context-data-valid-peers
+5                                 peer-context)])
+6       (set-peer-context-data-valid-peers!
+7        peer-context
+8        (set-union current-valid-peers valid-peers))))</pre>
+<p>
+We also used this procedure, which is just a helper one that will remove
+a command (prefix) from a string, allowing us to focus on the input. For
+example, when we receive <code>valid-peers:X</code>, it
+will remove <code>valid-peers:</code>,
+allowing us to retrieve <code>X</code> easily.
+
+</p>
+<pre>1   (define (trim-helper line x)
+2     (deserialize
+3      (read
+4       (open-input-string
+5        (string-replace line x "")))))</pre>
+<p>This concludes the <code>handler</code>
+implementation. Now there is a procedure that can be used by peers to
+accept commands and update the list of peers and the blockchain. In the
+next section, we will implement the communication between the peers—they
+should communicate with each other using these commands that we implemented .</p>
+
+
+<h4 class="Heading">4.2.1.3 Server
+Implementation</h4>
+<p>
+When a peer connects to another peer (a server), here’s what should
+happen:
+
+</p>
+
+<ol>
+<li>
+
+<p>The server should wait for the incoming peer to send some
+command.</p>
+
+
+ 
+</li>
+<li>
+
+<p>The server should use the <code>handler</code> procedure to
+handle the necessary data.</p>
+
+
+ 
+</li>
+<li>
+
+<p>The server should send the transformed data back to the incoming
+peer.</p>
+
+
+ 
+</li>
+</ol>
+
+<p>However, if more than one peer connects, then the procedure will
+“block,” in the sense that the second peer will have to wait for the
+first one to be served, the third will have to wait for the second, and
+so on.</p>
+<p>
+To resolve this issue, we turn to threads. <code>accept-and-handle</code> is
+the main procedure that will serve the incoming peers. The procedure
+accepts a connection (listener object) and a peer context and launches
+<code>handler</code> in a
+thread for every incoming connection:
+
+</p>
+<pre>1   (define (accept-and-handle listener peer-context)
+2     (define-values (in out) (tcp-accept listener))
+3     (thread
+4      (lambda ()
+5        (handler peer-context in out)
+6        (close-input-port in)
+7        (close-output-port out))))</pre>
+<p>We used a new procedure called <code>tcp-accept</code> that
+accepts a connection and returns the input (to read data) and the output
+ports (to send data). Using the <code>define-values</code> syntax,
+we store both of these values.</p>
+<p>
+<code>peers/serve</code> is
+the main server listener. This is straight copy-pasted from the Racket
+documentation, and the curious reader can navigate to the documentation
+and read more about the implementation details. In short, a
+<em>custodian</em> is a kind of container that ensures there are no
+bogus threads or input/output ports in the memory and takes care of this
+for us.
+
+</p>
+<pre>1   (define (peers/serve peer-context)
+2     (define main-cust (make-custodian))
+3     (parameterize ([current-custodian main-cust])
+4       (define listener
+5         (tcp-listen (peer-context-data-port peer-context) 5 #t))
+6       (define (loop)
+7         (accept-and-handle listener peer-context)
+8         (loop))
+9       (thread loop))
+10     (lambda ()
+11       (custodian-shutdown-all main-cust)))</pre>
+<p>The <code>tcp-listen</code>
+procedure  keeps
+listening to a specific port for new incoming connections.</p>
+
+
+<h4 class="Heading">4.2.1.4 Client
+Implementation</h4>
+<p>
+Next , we will
+implement <code>connect-and-handle</code>—a
+procedure that tries to connect to other peers, whereas previously we
+constructed a procedure that was supposed to serve incoming peers. This
+procedure will be similar to <code>accept-and-handle</code>,
+but kind of dual, in that it does not accept new connections. Rather, it
+tries to make a new connection:
+
+</p>
+<pre>1   (define (connect-and-handle peer-context peer)
+2     (begin
+3       (define-values (in out)
+4         (tcp-connect (peer-info-ip peer)
+5                      (peer-info-port peer)))
+6
+7       (define current-peer-io (peer-info-io peer in out))
+8
+9       (set-peer-context-data-connected-peers!
+10        peer-context
+11        (cons current-peer-io
+12              (peer-context-data-connected-peers peer-context)))
+13
+14        (thread
+15         (lambda ()
+16           (handler peer-context in out)
+17           (close-input-port in)
+18           (close-output-port out)
+19
+20           (set-peer-context-data-connected-peers!
+21            peer-context
+22            (set-remove
+23             (peer-context-data-connected-peers peer-context)
+24             current-peer-io))))))</pre>
+<p>
+This procedure is quite long so it deserves some unpacking:
+
+</p>
+
+<ol>
+<li>
+
+<p>The <code>tcp-connect</code> procedure
+tries to make a connection to a specific IP address and port (values
+that we extract from the <code>peer-info</code>
+structure).</p>
+
+
+ 
+</li>
+<li>
+
+<p>When the connection is successful, <code>tcp-connect</code> will
+return the input and output ports, which we can use to read data from
+and write data to, respectively.</p>
+
+
+ 
+</li>
+<li>
+
+<p>Next, the specific list of connected peers for the current context
+will be updated.</p>
+
+
+ 
+</li>
+<li>
+
+<p>Finally, we launch a thread, using <code>handler</code> to handle the
+communication. When the connection is finished, we do a cleanup and
+remove the peer from the list of peers.</p>
+
+
+ 
+</li>
+</ol>
+
+<p>
+The next procedure is to make sure we’re connected with all known peers.
+We use threads, again, for the same reason as in the server—we do not
+want this procedure to block the
+program from connecting to other clients while it tries to connect to
+one. This procedure is dual to <code>peers/serve</code>, and
+<code>tcp-connect</code> is
+dual to <code>tcp-accept</code>. We use
+<code>sleep</code> to wait
+for a few seconds before processing again in order to make the process
+more performant.
+
+</p>
+<pre>1   (define (peers/connect peer-context)
+2     (define main-cust (make-custodian))
+3     (parameterize ([current-custodian main-cust])
+4       (define (loop)
+5         (let ([potential-peers (get-potential-peers peer-context)])
+6           (for ([peer potential-peers])
+7             (with-handlers ([exn:fail? (lambda (x) #t)])
+8               (connect-and-handle peer-context peer))))
+9         (sleep 10)
+10         (loop))
+11       (thread loop))
+12     (lambda ()
+13       (custodian-shutdown-all main-cust)))</pre>
+<p>
+To implement <code>get-potential-peers</code>,
+we first get the list of connected and valid peers from the peer
+context. The valid peers that are not in the list of connected peers are
+potential peers we can make new connections with.
+
+</p>
+<pre>1   (define (get-potential-peers peer-context)
+2     (let ([current-connected-peers
+3            (list-&gt;set
+4             (map peer-info-io-peer-info
+5                  (peer-context-data-connected-peers peer-context)))]
+6           [valid-peers (peer-context-data-valid-peers peer-context)])
+7       (set-subtract valid-peers current-connected-peers)))</pre>
+
+
+<h4 class="Heading">4.2.1.5
+Integrating Parts Together</h4>
+<p>
+The next procedure will ping all peers (that have connected to us or
+that we have connected to) in an attempt to sync blockchain data and
+update other stuff, such as the list of valid peers:
+
+</p>
+<pre>1   (define (peers/sync-data peer-context)
+2     (define (loop)
+3       (sleep 10)
+4       (for [(p (peer-context-data-connected-peers peer-context))]
+5         (let ([in (peer-info-io-input-port p)]
+6               [out (peer-info-io-output-port p)])
+7           (fprintf out "get-latest-blockchain\nget-valid-peers\n")
+8           (flush-output out)))
+9       (printf "Peer ~a reports ~a valid and ~a connected peers.\n"
+10               (peer-context-data-name peer-context)
+11               (set-count
+12                (peer-context-data-valid-peers peer-context))
+13               (set-count
+14                (peer-context-data-connected-peers peer-context)))
+15       (loop))
+16     (define t (thread loop))
+17     (lambda ()
+18       (kill-thread t)))</pre>
+<p>
+The following procedure is the entry point, where everything is launched
+together:
+
+</p>
+<pre>1   (define (run-peer peer-context)
+2     (begin
+3       (peers/serve peer-context)
+4       (peers/connect peer-context)
+5       (peers/sync-data peer-context)))</pre>
+<p>
+Finally, we export the necessary objects:
+
+</p>
+<pre>1   (provide (struct-out peer-context-data)
+2             (struct-out peer-info)
+3             run-peer)</pre>
+
+
+
+<h3 class="Heading">4.2.2 Updating
+Existing Code</h3>
+<p>
+We need to modify <code>main-helper.rkt</code> to
+include the peer-to-peer
+implementation:
+
+</p>
+<pre>1   ; ...
+2   (require "peer-to-peer.rkt")
+3   ; ...
+4
+5   (provide (all-from-out "blockchain.rkt")
+6             (all-from-out "utils.rkt")
+7             (all-from-out "peer-to-peer.rkt")
+8             format-transaction print-block print-blockchain print-wallets)</pre>
+
+
+<h3 class="Heading">4.2.3 The
+main-p2p.rkt File</h3>
+<p>This is where
+we will put all the components together and use them. We want this
+implementation to accept some input arguments, such as the blockchain
+database file and the IP and port addresses of each peer.</p>
+<p>
+Once we create an executable, we have a way to pass input to it by using
+the <em>command-line
+arguments</em> . For example, if our executable is named <code>blockchain</code>, we can
+pass additional data to it by running <code>./blockchain &lt;param1&gt; &lt;param2&gt; &lt;...&gt;</code>. Racket provides a built-in procedure
+called <code>current-command-line-arguments</code>
+, which will read these arguments into a vector (similar to a
+list), and we then use <code>vector-&gt;list</code> to
+convert it to a list for further processing.
+
+</p>
+<pre>1   (require "main-helper.rkt")
+2
+3   (define args (vector-&gt;list  (current-command-line-arguments)))
+4
+5   (when (not (= 3 (length args)))
+6     (begin
+7       (printf "Usage: main-p2p.rkt db.data port ip1:port1,ip2:port2...")
+8       (newline)
+9       (exit)))</pre>
+<p>
+<code>string-to-peer-info</code>
+ is a helper procedure that does additional parsing for the
+peers’ information:
+
+</p>
+<pre>1   (define (string-to-peer-info s)
+2     (let ([s (string-split s ":")])
+3       (peer-info (car s) (string-&gt;number (cadr s)))))</pre>
+<p>
+We proceed by parsing the arguments:
+
+</p>
+<pre>1   (define db-filename (car args))
+2   (define port (string-&gt;number (cadr args)))
+3   (define valid-peers
+4     (map string-to-peer-info (string-split (caddr args) ",")))</pre>
+<p>
+We then proceed with checking if the database file exists using <code>file-exists?</code>. This
+file will contain contents from a previous blockchain if it exists. If
+the file doesn’t exist, we will proceed to create one.
+
+</p>
+<pre>1   (define db-blockchain
+2     (if (file-exists? db-filename)
+3         (file-&gt;struct db-filename)
+4         (initialize-new-blockchain)))</pre>
+<p>
+We provide the functionality for creating a new blockchain:
+
+</p>
+<pre>1   (define wallet-a (make-wallet))
+2
+3   (define (initialize-new-blockchain)
+4     (begin
+5       (define coin-base (make-wallet))
+6
+7       (printf "Making genesis transaction...\n")
+8       (define genesis-t (make-transaction coin-base wallet-a 100 '()))
+9
+10       (define utxo (list
+11                      (make-transaction-io 100 wallet-a)))
+12
+13       (printf "Mining genesis block...\n")
+14       (define b (init-blockchain genesis-t "1337cafe" utxo))
+15       b))</pre>
+<p>
+Next is the code for initialization of the current peer—it is named
+<code>Test peer</code>, and
+it contains data from the parsed command-line arguments (the port, valid
+peers, etc.).
+
+</p>
+<pre>1   (define peer-context
+2     (peer-context-data "Test peer"
+3                        port
+4                        (list-&gt;set valid-peers)
+5                        '()
+6                        db-blockchain))
+7   (define (get-blockchain) (peer-context-data-blockchain peer-context))
+8
+9   (run-peer peer-context)</pre>
+<p>
+We keep exporting the database to have up-to-date information whenever a
+user quits the app.
+
+</p>
+<pre>1   (define (export-loop)
+2     (begin
+3       (sleep 10)
+4       (struct-&gt;file (get-blockchain) db-filename)
+5       (printf "Exported blockchain to '~a'...\n" db-filename)
+6       (export-loop)))
+7
+8   (thread export-loop)</pre>
+<p>
+Finally, we create a procedure to keep mining empty blocks. Note that
+the peer-to-peer implementation runs in threaded mode, so there will be
+no blocking if we keep running this procedure.
+
+</p>
+<pre>1   (define (mine-loop)
+2     (let ([newer-blockchain
+3            (send-money-blockchain (get-blockchain)
+4                                   wallet-a
+5                                   wallet-a
+6                                   1
+7                                   (file-&gt;contract "contract.script"))])
+8       (set-peer-context-data-blockchain! peer-context newer-blockchain)
+9       (printf "Mined a block!")
+10       (sleep 5)
+11       (mine-loop)))
+12
+13   (mine-loop)</pre>
+<p>We can proceed by creating an executable and share it with our
+friends. If we know their IP addresses (or they know ours), we can make
+a connection and thus form a system.</p>
+
+
+
+<h2 class="Heading">4.3 Summary</h2>
+<p>Congratulations! As part of this chapter, we added two new important
+features to the blockchain implementation: smart contracts and
+peer-to-peer support. This concludes the blockchain implementation of
+this book.</p>
+
+
+
+Footnotes
+
+
+<a href="#510363_1_En_4_Chapter.xhtml#Fn1_source">1</a>
+
+ 
+
+
+
+<a href="#510363_1_En_4_Chapter.xhtml#Fn2_source">2</a>
+
+ 
+
+
+
+
+
+<p></p>
+
+
+<aside aria-labelledby="App1Heading" class="Appendix" id="App1">
+
+
+<h2 class="Heading" id="510363_1_En_BookBackmatter_OnlinePDF.xhtml#App1Heading">Conclusion</h2>
+<p>
+We’ve covered a bunch of stuff in this book. As a recap, we did the
+following:
+
+</p>
+
+<ul>
+<li><p>Section 1: We got a general high-level overview of the blockchain
+system.</p></li>
+<li><p>Section 2.3: We learned basic Lisp using the Racket (Scheme)
+dialect.</p></li>
+<li><p>Section 2.4: We created an executable with DrRacket.</p></li>
+<li><p>Section 3: We created a basic implementation of a blockchain that
+implements the structures and the operations for wallets, blocks,
+transactions, and digital signatures.</p></li>
+<li><p>Section 4.1: We implemented support for smart contracts.</p></li>
+<li><p>Section 4.2: We implemented support for peer-to-peer
+communication.</p></li>
+</ul>
+
+<p>
+Here are some ideas for further development:
+
+</p>
+
+<ul>
+<li><p>Usually, a list of IP addresses and ports is contained in some
+public servers, but to keep things simple, we ignored that and
+implemented command-line parsing that accepts a list of IP addresses and
+ports. Ideally, we would create a simple server that maintains this list
+and shares it with peers that connect to the server, so that the peers
+can get the list from a single place. Note that the implementation is
+still decentralized; this public server merely keeps a list of
+clients.</p></li>
+<li><p>Harden the security.</p></li>
+<li><p>Tweak the communication logic and the blockchain effort
+algorithms.</p></li>
+<li><p>Make the front-end more user-friendly.</p></li>
+</ul>
+
+<p>In this book, we created a simple implementation of Bitcoin, but the
+applications of blockchain are endless. There are many other ways the
+technology can be leveraged, in general, using distributed data
+management. More specifically, managing player’s data in online
+multiplayer games, or making an actual distributed database that uses a
+subset of the blockchain’s features.</p>
+<p>We leave further extensions and implementations up to your
+imagination.</p>
+
+
+</aside>
+<aside aria-labelledby="App2Heading" class="Appendix" id="App2">
+
+
+<h2 class="Heading" id="510363_1_En_BookBackmatter_OnlinePDF.xhtml#App2Heading">Further
+Readings</h2>
+<p>Abelson, H., Sussman, J. G., <em>Structure and Interpretation of
+Computer Programs</em>, 2nd ed. 1996. The MIT Press. ISBN:
+978-026-2510-875.</p>
+<p>Friedman, P. D., Felleisen, M., Bibby, Duane. <em>The Little
+Schemer</em>, Fourth ed., 1995. The MIT Press. ISBN:
+978-026-2560-993.</p>
+<p>Nakamato, S., “Bitcoin: A Peer-to-Peer Electronic Cash System,” 2008.
+<code>downloads.coindesk.com/research/whitepapers/bitcoin.pdf</code>.</p>
+<p>The Racket Community, “The Racket Guide,” 2014. <code>docs.racket-lang.org/guide/</code>.</p>
+
+
+</aside>
+<aside aria-labelledby="App3Heading" class="Appendix" id="App3">
+
+
+<h2 class="Heading" id="510363_1_En_BookBackmatter_OnlinePDF.xhtml#App3Heading">Appendix A:
+Macros</h2>
+<p>So far we’ve been writing definitions for procedures and interacted
+with them, and we also interacted with some syntax, like <code>quote</code>, <code>define</code>, and so on.
+What if we had a way to write our own syntax? For example, could we
+write syntax that, when executed, would write code itself? Macros are a
+way to do exactly that.</p>
+
+
+<img src="images/510363_1_En_BookBackmatter_Figa_HTML.gif" style="width:1.25em" alt="../images/510363_1_En_BookBackmatter_Figa_HTML.gif"/>Definition
+A-1
+
+<p>A 
+<strong>macro</strong>  is a syntactic extension to a programming
+language. This means that we can write (or introduce our own) keywords
+into the programming language.</p>
+
+<p>There is special syntax in Lisp, called <code>define-macro</code>, which
+allows us to create a macro. It accepts the name of a macro and its
+arguments (which are optional), and will return a quoted list of Lisp
+commands.</p>
+<p>When we run our definitions (or compile them), Racket will replace
+all occurrences of the macro call with the actual output that it
+produces.</p>
+<p>As an example, if we have the following macro <code>(define-macro (add-one x) (list '+ x 1))</code>, wherever we write <code>(add-one x)</code>, it will
+be replaced with the expression <code>(+ x 1)</code>.</p>
+<p>Macros are all about affecting how the evaluation model works. Racket
+has an eager evaluation model, which means that all expressions will be
+evaluated at a given time on a procedure call. For macros, on the other
+hand, since Racket will replace the code before evaluating it,
+expressions will be evaluated only when needed.</p>
+<p>
+The following example illustrates the difference between a macro and a
+procedure. Consider the following definitions:
+
+</p>
+<pre>1   (require compatibility/defmacro)
+2
+3   (define-macro (our-if-macro a b c)
+4     (list 'cond (list a b) (list 'else c)))
+5
+6   (define (our-if-procedure a b c)
+7     (cond (a b) (else c)))</pre>
+<p>
+With a few evaluations:
+
+</p>
+<pre>1   &gt; (our-if-macro (eq? '() '()) #t #f)
+2   #t
+3   &gt; (our-if-procedure (eq? '() '()) #t #f)
+4   #t
+5   &gt; (our-if-macro  (eq? '() '()) (display "True") (display "False"))
+6   True
+7   &gt; (our-if-procedure (eq? '() '()) (display "True") (display "False"))
+8   TrueFalse</pre>
+<p>
+We can notice a couple of things from this code:
+
+</p>
+
+<ul>
+<li><p>We required a library that contains the <code>define-macro</code>
+syntax
+.</p></li>
+<li><p>We implemented our own <code>if</code> both as a macro
+and as a procedure.</p></li>
+<li><p>In the interactions area, we used a procedure called <code>display</code>, which prints
+stuff to the output.</p></li>
+<li><p>We see that the macro and the procedure produce two different
+outputs.</p></li>
+</ul>
+
+<p>The macro and the procedure behave differently, as expected. However,
+in the case of <code>if</code>, it makes sense to
+implement it as a macro rather than as a procedure. Since Racket has an
+eager evaluation model, it will evaluate all arguments, but it does not
+make sense to evaluate the <code>else</code> case if we are
+sure that the first case will match.</p>
+<p>
+Let’s manually expand the macro to get a feel for how it really works.
+
+</p>
+<pre>1   (our-if-macro (eq? '() '()) #t #f)
+2   = (list 'cond (list (eq? '() '()) #t) (list 'else #f))
+3   = (list 'cond (list #t #t) (list 'else #f))
+4   = '(cond (#t #t) (else #f))</pre>
+<p>That is, the macro returns a quoted expression that’s supposed to be
+evaluated once the macro has been used.</p>
+<p>
+The way we’ve written our macro makes things much more explicit in terms
+of execution and substitution. We can also write it as follows, which is
+a bit more implicit, where the backtick is like a quote mark
+(quasiquote) and the comma is like an unquote mark (the opposite of
+quote):
+
+</p>
+<pre>1   (define-macro (our-if-macro a b c)
+2     `(cond (,a ,b) (else ,c)))</pre>
+
+<h3 class="Heading">Hygienic Macros
+</h3>
+<p>
+The way we wrote the macros earlier is not good practice in Racket.
+Consider the following example:
+
+</p>
+<pre>1   (define-macro (swap a b)
+2     `(let ((tmp ,a))
+3        (set! ,a ,b)
+4        (set! ,b tmp)))</pre>
+<p>
+This looks like a perfectly safe macro. Indeed:
+
+</p>
+<pre>1   &gt; (define x 1)
+2   &gt; (define y 2)
+3   &gt; (displayln  (list x y))
+4   (1 2)
+5   &gt; (swap x y)
+6   &gt; (displayln (list x y))
+7   (2 1)</pre>
+<p>
+However, we can break it with the following code:
+
+</p>
+<pre>1   &gt; (define x 1)
+2   &gt; (define tmp 2)
+3   &gt; (displayln (list x tmp))
+4   (1 2)
+5   &gt; (swap x tmp)
+6   &gt; (displayln (list x tmp))
+7   (1 2)</pre>
+<p>
+To see what happened, we can expand the macro by hand. The macro
+translates to:
+
+</p>
+<pre>1   &gt; `(let ((tmp ,x))
+2       (set! ,x ,tmp)
+3       (set! ,tmp tmp))
+4   '(let ((tmp 2)) (set! 2 2) (set! 2 tmp))</pre>
+<p>
+In this case, <code>tmp</code> was already
+defined (using <code>define</code>) and was
+reused in the body of the <code>let</code>. As we can see,
+it is hard to control the accidental capture of local identifiers. We
+can get around the problem by using <code>gensym</code>  , which
+returns a unique symbol every time it’s called:
+
+</p>
+<pre>1   (define-macro (swap a b)
+2     (let ((tmp (gensym)))
+3       `(let ((,tmp ,a))
+4          (set! ,a ,b)
+5          (set! ,b ,tmp))))</pre>
+<p>
+Now our macro works as intended:
+
+</p>
+<pre>1   &gt; (define x 1)
+2   &gt; (define tmp 2)
+3   &gt; (displayln (list x tmp))
+4   (1 2)
+5   &gt; (swap x tmp)
+6   &gt; (displayln (list x tmp))
+7   (1 2)</pre>
+<p>
+However, instead of <code>gensym</code>, we can use
+ <code>define-syntax-rules</code>
+ 
+, which is the preferred way in Racket.
+
+</p>
+<pre>1   (define-syntax-rule (swap a b)
+2     (let ((tmp a))
+3       (set! a b)
+4       (set! b tmp)))</pre>
+<p>This syntax will create a hygienic macro that does not have the
+issues that <code>define-macro</code> has.</p>
+<p>
+For another example, let’s create a macro that will allow us to run some
+command infinitely:
+
+</p>
+<pre>1   (define-syntax-rule (loop f)
+2     (letrec ([fix (lambda (k) (k) (fix k))])
+3       (fix (lambda () f))))</pre>
+<p>Note that, if <code>loop</code> was a procedure
+instead, then <code>(loop (displayln "test"))</code> would not have worked since it would have
+evaluated the call to <code>displayln</code> right away.
+We had to pass <code>(lambda () (displayln "test"))</code> as a trick to defer evaluation, and then
+use <code>fix</code> to keep
+evaluating this lambda over and over.</p>
+<p>
+The <code>loop</code>
+macro
+ 
+ allows us to do <code>(loop (print (eval (read) ns)))</code>—note the REPL acronym. The expression <code>eval &lt;...&gt; ns</code>
+will try to evaluate the expression <code>&lt;...&gt;</code> in the
+<code>ns</code>
+namespace/context. To get the base (initial) namespace, we can use the
+<code>make-base-namespace</code>
+procedure. In this case, the namespace will be initially empty, but it
+may be extended with variables or procedures, depending on which
+commands are executed.
+
+</p>
+<pre>1   &gt; (define ns (make-base-namespace))
+2   &gt; (loop (print (eval (read) ns)))
+3   (+ 1 1)
+4   2(define x 5)
+5   #(+ 2 x)
+6   7</pre>
+<p>
+The printing is a bit off because it is missing newlines. If we use
+<code>displayln</code> in
+place of <code>print</code>,
+it will produce much more readable output :
+
+</p>
+<pre>1   &gt; (define ns (make-base-namespace))
+2   &gt; (loop (displayln (eval (read) ns)))
+3   (+ 1 1)
+4   2
+5   (define x 5)
+6   #
+7   (+ 2 x)
+8   7</pre>
+
+
+
+</aside>
+
+
+
+Index
+
+
+
+
+
+A
+
+
+
+
+Abstraction
+
+
+
+
+Abstract syntax tree
+
+
+
+
+Asymmetric algorithm
+
+
+
+
+Asymmetric-key algorithm
+
+
+
+
+
+
+B
+
+
+
+
+Bitcoin
+
+
+
+
+Blockchain
+
+
+definitions
+
+
+encryption and decryption
+
+
+
+
+blockchain.data file
+
+
+
+
+blockchain.rkt file
+
+
+construction
+
+
+Hashcash algorithm
+
+
+hashing and verification
+
+
+initialization
+
+
+rewards
+
+
+transaction adding
+
+
+verification
+
+
+
+
+
+
+C
+
+
+
+
+Centralized place
+
+
+
+
+Command-line arguments
+
+
+
+
+Composition
+
+
+
+
+Conditional procedures
+
+
+
+
+Construct
+
+
+
+
+Crypto factory
+
+
+
+
+Current-command-line-arguments
+
+
+
+
+
+
+D
+
+
+
+
+Data structure
+
+
+
+
+Decentralized ledger
+
+
+
+
+Decryption
+
+
+
+
+define-macro syntax
+
+
+
+
+define-syntax-rules
+
+
+
+
+Deserialization
+
+
+
+
+Digital signatures
+
+
+
+
+Double-spending problem
+
+
+
+
+DrRacket
+
+
+
+
+
+
+E
+
+
+
+
+Encryption and decryption
+
+
+asymmetric-key algorithm
+
+
+function
+
+
+symmetric-key algorithm
+
+
+
+
+Executable
+
+
+
+
+
+
+F
+
+
+
+
+Functions
+
+
+
+
+
+
+G
+
+
+
+
+Generic handler
+
+
+
+
+
+
+H, I, J, K
+
+
+
+
+Hashcash algorithm
+
+
+
+
+Hashing
+
+
+
+
+Higher-order procedure
+
+
+
+
+Hygienic macros
+
+
+
+
+
+
+L
+
+
+
+
+Lambda
+
+
+
+
+Language
+
+
+
+
+Ledger
+
+
+
+
+letrec syntax
+
+
+
+
+Lisp
+
+
+abstraction
+
+
+abstract syntax tree
+
+
+composition
+
+
+data structure
+
+
+implementations
+
+
+language
+
+
+primitives/axioms
+
+
+procedure
+
+
+symbolic expressions
+
+
+syntax
+
+
+
+
+List
+
+
+
+
+loop macro
+
+
+
+
+
+
+M, N, O
+
+
+
+
+Macro
+
+
+
+
+main-helper.rkt File
+
+
+
+
+main.rkt File
+
+
+
+
+Mining
+
+
+
+
+Mutation
+
+
+
+
+
+
+P, Q
+
+
+
+
+Package
+
+
+
+
+peer-context structure
+
+
+
+
+Peer context data
+
+
+
+
+peer-info structure
+
+
+
+
+peer-info-io structure
+
+
+
+
+Peer-to-peer implementation
+
+
+architecture
+
+
+main-p2p.rkt file
+
+
+peer-to-peer.rkt file
+
+
+client implementation
+
+
+generic handler
+
+
+peer context structure
+
+
+server implementation
+
+
+updating existing code
+
+
+
+
+Peer-to-peer network
+
+
+
+
+Primitive types
+
+
+
+
+Procedures
+
+
+
+
+Processing transactions
+
+
+
+
+Proof of work
+
+
+
+
+Public-key cryptography
+
+
+
+
+
+
+R
+
+
+
+
+Racket
+
+
+adding definitions
+
+
+calculation
+
+
+conditional procedures
+
+
+configuration and installation
+
+
+construct
+
+
+crypto factory
+
+
+dotted pairs
+
+
+evaluation
+
+
+executable
+
+
+higher-order procedure
+
+
+list
+
+
+mutation
+
+
+package
+
+
+primitive types
+
+
+procedures
+
+
+procedures and functions
+
+
+quote
+
+
+recursive procedures
+
+
+scope
+
+
+structure
+
+
+thread
+
+
+
+
+Recursive function
+
+
+
+
+Recursive procedures
+
+
+
+
+RSA
+
+
+
+
+
+
+S
+
+
+
+
+Scope
+
+
+
+
+Serialization
+
+
+
+
+S-expressions
+
+
+
+
+SHA
+
+
+
+
+Smart contract
+
+
+
+
+Smart contracts implementation
+
+
+smart-contracts.rkt File
+
+
+updating existing code
+
+
+
+
+string-to-peer-info
+
+
+
+
+struct-out syntax
+
+
+
+
+Structure
+
+
+
+
+Symmetric-key algorithm
+
+
+
+
+
+
+T
+
+
+
+
+Thread
+
+
+
+
+Transaction implementation
+
+
+transaction-io.rkt file
+
+
+transaction.rkt file
+
+
+
+
+transaction-io structure
+
+
+
+
+transaction-io.rkt File
+
+
+
+
+transaction.rkt file
+
+
+digital signatures
+
+
+processing transactions
+
+
+
+
+Tree
+
+
+
+
+Trust
+
+
+
+
+
+
+U
+
+
+
+
+Unspent transaction outputs (UTXOs)
+
+
+
+
+utils.rkt file
+
+
+
+
+
+
+V
+
+
+
+
+Variable shadowing
+
+
+
+
+
+
+W, X, Y, Z
+
+
+
+
+wallet.rkt File
+
+
+
+
+Whitespace
+
+
+
+
+Workflows
+
+
+
+
+
+
+<aside id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr/>
+<ol>
+<li id="fn1"><p>We will use this definition of blockchain throughout the
+book, but note that there are many different definitions on the
+Internet. By the end of this book, you should be able to distinguish the
+slight nuances and similarities in each definition of blockchain.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The <a href="https://www.asciitable.com/">ASCII
+table</a> is a table that assigns a unique number to each
+character (such as !, @, a, Z, etc.).<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Hashcash was initially targeted for limiting email spam
+and other attacks. However, recently it’s also become known for its use
+in blockchains as part of the mining process. Hashcash was proposed in
+1997 by Adam Backa.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><a href="https://news.ycombinator.com/"><code>https://news.ycombinator.com/</code></a><a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>We cover more details about macros in Appendix A.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>The empty list doesn’t exist in memory, but a pointer to
+the memory location <code>0</code> is considered the
+empty list.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>In this case, this is a quoted expression (<code>’sha1</code>) but the
+algorithm itself is implemented in the crypto factories.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>A backtick is like a quote, and a comma is like an
+“unquote.” This is further explained in Appendix A.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>More precisely, “the set,” since we will use operations
+such as subtract.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</aside>

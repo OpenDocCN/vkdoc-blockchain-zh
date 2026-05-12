@@ -1,0 +1,398 @@
+name: Testing the Creditcoin Blockchain
+name_cn: Creditcoin 区块链测试指南
+slug: testing-the-creditcoin-blockchain
+toc:
+- - '##'
+  - 前言
+- - '##'
+  - 致谢
+- - '##'
+  - 关于作者
+- - '##'
+  - 关于技术审校者
+- - '#'
+  - 第一部分：区块链入门
+- - '##'
+  - 第1章 介绍
+- - '###'
+  - 区块链简介
+- - '###'
+  - 区块链属性
+- - '###'
+  - 区块链术语表
+- - '###'
+  - 区块链组件
+- - '####'
+  - 点对点网络
+- - '####'
+  - 共识算法
+- - '###'
+  - 交易
+- - '###'
+  - 交易费用
+- - '###'
+  - 区块生产
+- - '###'
+  - 区块奖励
+- - '###'
+  - 远程过程调用（RPC）API
+- - '###'
+  - 存储
+- - '###'
+  - 迁移
+- - '####'
+  - 运行时升级
+- - '####'
+  - 指标与遥测
+- - '####'
+  - 链下工作机（Off-Chain Worker）或预言机（Oracle）
+- - '####'
+  - 智能合约
+- - '###'
+  - 共识机制
+- - '####'
+  - 工作量证明 (PoW)
+- - '####'
+  - 权益证明 (PoS)
+- - '####'
+  - 权威证明 (PoA)
+- - '###'
+  - 本章小结
+- - '##'
+  - 第2章 区块链开发框架
+- - '###'
+  - Hyperledger Sawtooth
+- - '###'
+  - Substrate
+- - '###'
+  - Ethereum
+- - '###'
+  - 编程语言
+- - '###'
+  - 如何构建区块链实现
+- - '###'
+  - 开发与测试的思考
+- - '###'
+  - 总结
+- - '#'
+  - 第二部分：Creditcoin 区块链：目标与目的
+- - '##'
+  - 第3章 介绍 Creditcoin 区块链
+- - '###'
+  - 什么是 Creditcoin
+- - '###'
+  - 对测试活动的影响
+- - '###'
+  - 总结
+- - '#'
+  - 第三部分：测试 Creditcoin 区块链
+- - '##'
+  - 第4章 Creditcoin 1.0 版
+- - '###'
+  - Creditcoin 1.0 版的组件
+- - '####'
+  - 客户端
+- - '####'
+  - 验证器
+- - '####'
+  - 共识
+- - '####'
+  - 交易处理器
+- - '####'
+  - REST API
+- - '####'
+  - 网关
+- - '####'
+  - SDK
+- - '####'
+  - Creditcoin-Legacy-Tests
+- - '####'
+  - Creditcoin-Legacy-Docker-Compose
+- - '####'
+  - Creditcoin-Legacy-Docker-Compose-Testnet
+- - '###'
+  - Creditcoin 1.x 时间线
+- - '###'
+  - 测试 Creditcoin 1.x
+- - '####'
+  - 我加入前的测试状况
+- - '####'
+  - 测试概览
+- - '####'
+  - 测试改进
+- - '#####'
+  - 此 docker-compose 文件使用以下镜像：
+- - '#####'
+  - REPOSITORY | TAG | IMAGE ID | SIZE
+- - '#####'
+  - '--- | --- | --- | ---'
+- - '#####'
+  - gluwa/sawtooth-rest-api-priv | testing-2.0-29 | 7b1d8bd62893 | 224MB
+- - '#####'
+  - gluwa/creditcoin-validator-priv | testing-2.0-29 | 15887c9ed0ba | 390MB
+- - '#####'
+  - gluwa/creditcoin-processor-priv | testing-2.0-29 | 850090b03c6e | 2.93GB
+- - '#####'
+  - gluwa/creditcoin-consensus-priv | testing-2.0-29 | 60f3e9b0e887 | 342MB
+- - '#####'
+  - gluwa/creditcoin-gateway-priv | testing-2.0-29 | 5a6d120fbd2f | 738MB
+- - '#####'
+  - 构建自：
+- - '#####'
+  - 'Sawtooth-Core (validator/rest-api):'
+- - '#####'
+  - '- https://github.com/gluwa/Sawtooth-Core/pull/54'
+- - '#####'
+  - '- https://github.com/gluwa/Sawtooth-Core/pull/55'
+- - '#####'
+  - '- https://github.com/gluwa/Sawtooth-Core/pull/59'
+- - '#####'
+  - '- https://github.com/gluwa/Sawtooth-Core/pull/60'
+- - '#####'
+  - '- https://github.com/gluwa/Sawtooth-Core/pull/61'
+- - '#####'
+  - '- 变基至 dev@f80dc9d5249dcfe3ee1acb121e44f01c1be0dc67'
+- - '#####'
+  - 'Creditcoin-Processor-Rust:'
+- - '#####'
+  - '- dev@ac074bcb2899125b2c5ac6197f24d9a4fca86aae'
+- - '#####'
+  - 'Creditcoin-Consensus-Rust:'
+- - '#####'
+  - '- https://github.com/gluwa/Creditcoin-Consensus-Rust/pull/34'
+- - '#####'
+  - '- https://github.com/gluwa/Creditcoin-Consensus-Rust/pull/19'
+- - '#####'
+  - '- 变基至 dev@48b19e442cb18300cd43db3f400dce19ecba0a73'
+- - '#####'
+  - 'Creditcoin-Gateway:'
+- - '#####'
+  - '- dev@e354f2e2a837f7408f5bba21f9a4fa015120b694'
+- - '####'
+  - 测试 v1.7 -> v1.8 切换及疑似网络问题
+- - '###'
+  - 结局
+- - '###'
+  - 总结
+- - '##'
+  - 第5章 Creditcoin 2.0
+- - '###'
+  - Creditcoin 2.0 的组件
+- - '####'
+  - 外部函数（Extrinsics）和功能模块（Pallets）
+- - '#####'
+  - Creditcoin 功能模块
+- - '#####'
+  - 难度调整模块（Difficulty Pallet）
+- - '#####'
+  - 链下任务调度器模块（Off-Chain Task Scheduler Pallet）
+- - '#####'
+  - 奖励模块（Rewards Pallet）
+- - '####'
+  - 交易费用
+- - '####'
+  - 权重与基准测试
+- - '####'
+  - 运行时（Runtime）
+- - '####'
+  - 存储迁移（Storage Migrations）
+- - '####'
+  - 自定义 RPC（Custom RPCs）
+- - '####'
+  - 遥测与自定义指标
+- - '####'
+  - Creditcoin-js
+- - '####'
+  - Creditcoin-squid
+- - '###'
+  - Creditcoin 2.0 时间线
+- - '###'
+  - Creditcoin 2.0 测试
+- - '####'
+  - 单元测试
+- - '####'
+  - 集成测试
+- - '####'
+  - 冒烟测试与静态分析
+- - '####'
+  - 使用机器人进行测试
+- - '#####'
+  - Dependabot
+- - '#####'
+  - Pre-commit CI
+- - '#####'
+  - 使用 Gluwa-bot 的类型定义
+- - '####'
+  - 使用 `Gluwa-bot` 进行基准测试和权重生成
+- - '####'
+  - 迁移与升级测试
+- - '####'
+  - 在拉取请求、Devnet、Testnet 和 Mainnet 上进行持续测试
+- - '####'
+  - 安全相关测试
+- - '####'
+  - 测试 Creditcoin-squid
+- - '####'
+  - 我们在第 100 万个区块发现了一个漏洞
+- - '####'
+  - 其他有趣事实
+- - '###'
+  - 总结
+- - '##'
+  - 第6章 Creditcoin 2.3
+- - '###'
+  - Creditcoin 2.3 的组件
+- - '####'
+  - 与质押相关的 Pallet
+- - '####'
+  - Creditcoin-cli
+- - '####'
+  - Switch_to_pos()
+- - '####'
+  - 区块历史
+- - '####'
+  - Creditcoin Staking Dashboard
+- - '####'
+  - Subscan Essentials
+- - '####'
+  - Creditcoin-squid
+- - '###'
+  - Creditcoin 2.3 时间线
+- - '###'
+  - Creditcoin 2.3 测试
+- - '####'
+  - 单元测试
+- - '####'
+  - 集成测试
+- - '####'
+  - 测试 Subscan 基础组件
+- - '####'
+  - 测试 Creditcoin 质押仪表板
+- - '####'
+  - 测试 `creditcoin-cli`
+- - '###'
+  - 测试 Gluwa 的 Substrate 分叉
+- - '####'
+  - 注意事项
+- - '####'
+  - 备注
+- - '#####'
+  - 在 PoS 测试网上进行社区测试
+- - '#####'
+  - 文档审阅
+- - '#####'
+  - 负载与性能测试
+- - '#####'
+  - 安全赏金计划
+- - '#####'
+  - 其他有趣的测试及若干缺陷
+- - '###'
+  - 另一个问题：链下工作者的 Nonce 管理
+- - '###'
+  - v2.3 期间的测试挑战
+- - '###'
+  - 从 PoW 迁移到 PoS
+- - '###'
+  - 总结
+- - '##'
+  - 第7章 Creditcoin 3.0
+- - '###'
+  - Creditcoin 3.0 的组件
+- - '####'
+  - Polkadot-sdk
+- - '####'
+  - Frontier
+- - '####'
+  - Creditcoin3
+- - '####'
+  - EVM 跟踪 RPC
+- - '####'
+  - 预编译合约
+- - '####'
+  - Creditcoin 3 命令行界面
+- - '####'
+  - 代理功能
+- - '####'
+  - 质押面板
+- - '####'
+  - Subscan API
+- - '####'
+  - Blockscout
+- - '####'
+  - Crunch
+- - '###'
+  - Creditcoin 3.0 时间线
+- - '###'
+  - Creditcoin 3.0 的测试
+- - '####'
+  - 单元测试
+- - '####'
+  - EVM 和智能合约测试
+- - '####'
+  - 测试 EVM 追踪功能
+- - '####'
+  - 区块链的集成测试
+- - '####'
+  - 预编译测试
+- - '####'
+  - 测试 Creditcoin 3 CLI 和代理功能
+- - '####'
+  - 运行时升级测试
+- - '####'
+  - 测试 Creditcoin 质押面板
+- - '####'
+  - 测试 Gluwa 的 Polkadot-sdk 分支
+- - '####'
+  - 测试 Gluwa 的 Frontier 分支
+- - '####'
+  - 测试 Gluwa 的 Crunch 分支
+- - '####'
+  - 文档审查与第三方工具测试
+- - '####'
+  - 其他有趣的测试
+- - '#####'
+  - 挑战：如何分析并追踪链上设置的变更
+- - '###'
+  - 生产环境中的测试资源管理
+- - '###'
+  - 故障排查指南与 `sos-report` 命令
+- - '###'
+  - 集成测试加速
+- - '###'
+  - 总结
+- - '#'
+  - 第四部分：区块链测试方法
+- - '##'
+  - 第8章 他人如何测试区块链
+- - '###'
+  - 我的区块链测试方法
+- - '###'
+  - 与 Andrew Snaith 一起测试跨区块链栈
+- - '####'
+  - 被测产品
+- - '####'
+  - 协议客户端与桥接
+- - '####'
+  - 库与 SDK
+- - '####'
+  - 浏览器扩展与分布式应用
+- - '####'
+  - 测试策略
+- - '####'
+  - 关键挑战 in 区块链测试
+- - '####'
+  - 拥有专职 QA 工程师的团队
+- - '####'
+  - 没有专职 QA 工程师的团队
+- - '###'
+  - 关于测试自动化和工具
+- - '###'
+  - 与 Sebastian Viquez 一起测试智能合约
+- - '####'
+  - 被测产品
+- - '####'
+  - 测试
+- - '###'
+  - 代码总结
+- - '###'
+  - 总结

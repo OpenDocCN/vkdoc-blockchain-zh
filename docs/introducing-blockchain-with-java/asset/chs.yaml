@@ -1,0 +1,3305 @@
+- '
+
+  '
+- '# 第一章：区块链简介
+
+
+  *本章全部内容摘自博罗·西特尼科夫斯基的《用 Lisp 引入区块链：使用 Racket 语言实现和扩展区块链》一书，经作者许可在此复用。*
+
+
+  *“链式”作者：菲利普·里佐夫*
+
+
+  © 斯皮罗·布扎罗夫斯基 2022
+
+
+  S. 布扎罗夫斯基，《用 Java 引入区块链》，[`doi.org/10.1007/978-1-4842-7927-4_1`](https://doi.org/10.1007/978-1-4842-7927-4_1)
+
+
+  在本章中，我们将了解区块链的一些定义和示例。我们将看到区块链具有哪些特性，它能让我们做什么，以及它的优势所在。
+
+
+  **定义 1-1** *区块链*是一种在连接成对等网络的多个计算机上维护交易记录的系统。¹
+
+
+  我们将给出一个示例作为引子，同时定义加密和哈希技术是什么，以及它们如何帮助我们构建系统。
+
+
+  请注意，本章节我们将跳过一些技术细节，因为它仅作为入门材料。技术细节将在我们开始构建区块链时再行介绍。
+
+
+  ## 1.1 动机与基本定义
+
+
+  假设你经常和朋友之间进行资金往来，比如分摊晚餐或饮品费用。每次都交换现金可能很不方便。
+
+
+  一种可能的解决方案是记录下你和朋友们所有的账单。这被称为*账本*，如图 1-1 所示。
+
+
+  ¹ 本书将沿用这一定义，但请注意，互联网上存在许多不同的定义。阅读完本书后，你应能区分各定义之间的细微差别与相似之处。
+
+
+  ***图 1-1.** 一个账本和一组相连的朋友（对等节点）*
+
+
+  **定义 1-2** *账本*是包含交易记录的本子。
+
+
+  此外，每天结束时，你们会聚在一起，参照账本进行计算以结清账目。我们设想存在一个“资金池”来存放所有资金。如果你支出多于收入，就向资金池中投入相应金额；反之，则从中取出金额。
+
+
+  我们希望设计一个功能类似于常规银行账户的系统。钱包（银行账户）的持有者应只能从其钱包向其他钱包发送资金。因此，系统中的每个人都将拥有一个钱包，该钱包也可用于确定其余额。需要注意的是，在当前使用账本的设置下，我们必须遍历所有现有记录才能确定特定钱包的余额。
+
+
+  如果我们想避免遍历所有现有记录，可以通过*未花费交易输出（UTXO）* 来优化，这一点将在第三章中介绍。
+
+
+  可能出现的一个问题是*双重支付问题*，即鲍勃可以尝试同时将所有资金发送给爱丽丝和你，从而实际上将他发送的金额相对于其拥有的资金翻倍。
+
+
+  有几种方法可以解决这个问题，我们将提供的解决方案是对输入总和与输出总和进行简单检查。
+
+
+  这类系统可能出现的另一个问题是任何人都可以添加交易。例如，鲍勃可以在未经爱丽丝同意的情况下添加一笔交易，声称爱丽丝支付给他几美元。我们需要重新设计系统，使每笔交易都有办法进行验证/签名。
+
+
+  **定义 1-3** *数字签名*是一种验证数字消息或文档真实性的方法。
+
+
+
+  好的，这是根据您的要求翻译和排版后的 Markdown 文档。
+
+
+
+  为了签署和验证交易，我们将依赖数字签名（图 1-2）。现在，先假设任何向账本添加信息的人都会为每条记录添加一个签名，其他人无法修改该签名，只能验证它。我们将在“加密”部分详细介绍技术细节。
+
+
+  ***图 1-2.** 我们的账本现在包含了签名*
+
+
+  ![](img/index-6_1.jpg)
+
+
+  ## 第 1 章 区块链介绍
+
+
+  然而，假设由 Bob 保管账本，并且每个人都同意这一点。此时，账本存储在一个中心化的地方。但这样一来，如果到了每天结算的时候 Bob 无法到场，就没有人能查阅账本了。
+
+
+  我们需要一种去中心化账本的方法，使得任何人在任何时间都可以进行交易。为此，每个参与方都将自己保存一份账本副本，并在每天结束时碰头，同步各自的账本。
+
+
+  你与你的朋友相连，他们与你也相连。非正式地说，这就构成了一个点对点网络。
+
+
+  **定义 1-4** 当两台或多台计算机相互连接时，就形成了一个*点对点网络*。
+
+
+  例如，当你使用浏览器访问互联网上的一个网页时，你的浏览器是*客户端*，而你访问的网页由*服务器*托管。这代表了一个中心化系统，因为每个用户都从一个单一的地点——*服务器*——获取信息。
+
+
+  相比之下，在代表去中心化系统的点对点网络中，客户端和服务器之间的区别变得模糊。每个对等点既是客户端又是服务器。
+
+
+  有了这个系统（图 1-3），随着对等点（人员）列表的增长，我们可能会遇到信任问题。当每个人在一天结束时碰头同步他们的账本时，他们如何相信其他人账本中列出的交易是真实的？即使每个人都信任其他人的账本，如果一个新人想要加入这个网络怎么办？现有用户自然会让这位新来者证明自己值得信任。我们需要修改我们的系统以支持这种信任。实现这一点的一种方法是通过所谓的*工作量证明*，我们接下来将介绍它。
+
+
+  ![](img/index-7_1.png)
+
+
+  ![](img/index-7_2.jpg)
+
+
+  ***图 1-3.** 一个去中心化的账本*
+
+
+  **定义 1-5** *工作量证明*是一种计算耗时、但易于他人验证的数据。
+
+
+  对于每条记录，我们还会包含一个特殊的数字（或称*哈希值*），它代表了工作量证明，用于证明该交易是有效的。我们将在“哈希”部分详细介绍技术细节。
+
+
+  在一天结束时，我们达成共识，我们将信任在账本上投入最多工作量的人。如果 Bob 有事要做，他可以在第二天通过信任网络中的其他对等点来赶上进度。
+
+
+  除此之外，我们希望交易是有序的，因此每条记录还将包含一个指向前一条记录的链接。这代表了实际的区块链，如图 1-4 所示。
+
+
+  ![](img/index-8_1.png)
+
+
+  ![](img/index-8_2.jpg)
+
+
+  ***图 1-4.** 区块的链条：区块链*
+
+
+  如果每个人都同意将这个账本作为事实来源，那么完全不需要交换实物货币。每个人只需使用账本存入或取出资金即可。
+
+
+  为了理解数字签名和工作量证明的技术细节，我们将分别研究加密和哈希。
+
+
+  幸运的是，我们将要使用的编程语言内置了加密和哈希功能。我们不需要深入研究哈希、加密和解密的具体工作原理，但对它们有基本的了解就足够了。
+
+
+  观察我们是如何从一个简单的账本定义开始，逐步构建成一个复杂系统的。我们在编程中将采用同样的方法。
+
+
+  ## 1.2 加密
+
+
+  我们从以下定义开始。
+
+
+  **定义 1-6** *加密*是一种对值进行编码的方法，使得只有授权人员才能查看原始内容。*解密*是一种对加密值进行解码的方法。
+
+
+  ![](img/index-9_1.png)
+
+
+  ![](img/index-9_2.jpg)
+
+
+  请注意，在本节中，我们将主要讨论数字，但字符和字母也可以使用相同的方法，通过使用字符的 ASCII[2] 值来进行加密/解密。
+
+
+  在讨论加密之前，我们首先需要回顾一下什么是函数，因为编码/解码值是通过使用函数来实现的。
+
+
+  ### 1.2.1 函数
+
+
+  ***图 1-5.** 一个函数*
+
+
+  **定义 1-7** *函数*是将唯一的输出分配给给定输入的数学实体。
+
+
+  例如，你可能有一个函数，它接受一个人作为输入，并返回此人的年龄或姓名作为输出。另一个例子是函数 `f(x) = x + 1`。这个函数可以接受许多输入：`1`、`2`、`3.14`。例如，当我们输入
+  `2` 时，它给出的输出是 `3`，因为 `f(2) = 2 + 1 = 3`。
+
+
+  > [!TIP]
+
+  > ASCII 表是一个为每个字符（例如 `!`、`@`、`a`、`Z` 等）分配唯一编号的表。
+
+
+  一种简单的理解函数的方式是表格形式。对于只接受一个参数 `x` 的函数 `f(x)`，我们有一个两列的表格，第一列是输入，第二列是输出。
+
+
+  对于接受两个参数 `x` 和 `y` 的函数 `f(x, y)`，我们有一个三列的表格，其中第一列和第二列代表输入，第三列是输出。因此，将前面讨论的函数以表格形式展示出来，看起来像这样：
+
+
+  | x | `f(x)` |
+
+  |---|--------|
+
+  | 1 | 2      |
+
+  | 2 | 3      |
+
+  | … | …      |
+
+
+  ### 1.2.2 对称密钥算法
+
+
+  我们可以假设存在用于加密和解密的函数 `E(x)` 和 `D(x)`。我们希望这些函数具有以下属性：
+
+
+  - `E(x) ≠ x`，意味着加密后的值不应该与原始值相同。
+
+  - `E(x) ≠ D(x)`，意味着加密和解密函数产生不同的值。
+
+  - `D(E(x)) = x`，意味着对加密值进行解密应返回原始值。
+
+
+  例如，假设存在某种加密方案，比如 `E("Boro") = 426f726f`。我们可以“安全地”传递值 `426f726f` 而不会暴露我们的原始值，只有那些知道解密方案
+  `D(x)` 的人才能看到 `D(426f726f) = "Boro"`。
+
+
+  ![](img/index-11_1.png)
+
+
+  ![](img/index-11_2.png)
+
+
+  加密方案的另一个例子是让 `E(x)` 将 `x` 中的每个字符向前移位，而 `D(x)` 则将 `x` 中的每个字符向后移位。
+
+
+  这种方案被称为凯撒密码。要加密文本 `“abc”`，我们有 `E("abc") = "bcd"`；要解密它，我们有 `D("bcd") = "abc"`。
+
+
+  然而，所描述的方案构成了一种对称算法（图 1-6），这意味着我们必须与相关方共享函数 `E` 和 `D`，因此它们可能容易受到攻击。
+
+
+  ***图 1-6.** 对称密钥算法*
+
+
+  ### 1.2.3 非对称密钥算法
+
+
+  为了解决对称密钥算法带来的问题，我们将使用所谓的*非对称算法*或*公钥密码学*（图 1-7）。在这种方案中，我们有两种密钥：公钥和私钥。
+
+
+  我们将公钥与全世界共享，私钥则自己保留。
+
+
+  ***图 1-7.** 非对称密钥算法*
+
+
+  这种算法方案有一个很好的特性：只有私钥能够解码消息，而公钥可以编码消息。
+
+
+
+
+
+  '
+- '# 第 1 章 区块链简介
+
+
+  我们有两个函数，它们应具有与对称密钥算法相同的属性。
+
+
+  - `E(x, p)`，使用公钥 `p` 加密消息 `x`
+
+  - `D(x'', s)`，使用私钥（秘密密钥）`s` 解密加密消息 `x''`
+
+
+  在我们的示例中，我们将依赖于取模运算。请回忆：`a mod b` 表示 `a` 除以 `b` 后的余数。例如，`4 mod 2 = 0`，因为 4 除以 2 没有余数；而
+  `5 mod 2 = 1`。
+
+
+  下面是一个基于加法和取模运算的基本加密算法示例：
+
+
+  1.  选择一个随机数，例如 100。这将代表一个公共的、公开可用的密钥。
+
+  2.  在范围 (1, 100) 内选择另一个随机数，例如 97。这将代表私钥 `s`。
+
+  3.  公钥 `p` 通过从私有密钥中减去公共密钥得到：`100 - 97 = 3`。
+
+  4.  要加密数据，将其与公钥相加并对 100 取模：`E(x, p) = (x + p) mod 100`。
+
+  5.  要解密数据，我们使用相同的逻辑，但使用我们的私钥，因此 `D(x'', s) = (x'' + s) mod 100`。
+
+
+  例如，假设我们要加密 5。那么 `E(5, 3) = (5 + 3) mod 100 = 8`。要解密 8，我们有 `D(8, 97) = (8 + 97) mod
+  100 = 105 mod 100 = 5`。
+
+
+  这个示例使用了一个非常简单的生成对 `(x + y) mod c`。但在实践中，密钥对生成算法要复杂得多，且更难以被攻击者破解。毕竟，算法计算的复杂性才是使其难以被破解的原因。
+
+
+  我们可以使用类似的算法进行数字签名：
+
+
+  - `S(x, s)`，使用私钥 `s` 签署消息 `x`（加密）
+
+  - `V(x'', sig, p)`，使用签名 `sig` 和公钥 `p` 验证已签名的消息 `x''`（解密）
+
+
+  正如我们之前所说，每条记录还将包含一个特殊数字（或哈希值）。这个哈希值将由 `S(x, s)`（加密）产生。通过使用验证函数来确认记录的归属（解密），可以对哈希值进行验证。
+
+
+  钱包将包含一对公私钥。这些密钥将用于接收或发送货币。使用私钥，可以在区块链上写入新区块（或交易），从而实际花费货币。使用公钥，其他人可以向其发送货币并验证签名。
+
+
+  ### 练习 1-1
+
+
+  提出一个函数表，满足以下条件：
+
+
+  1.  输入是一个数字，输出是一个数字
+
+  2.  输入是一个数字，输出是该数字对应的公司员工姓名
+
+
+  ### 练习 1-2
+
+
+  检查对称密钥算法的三个属性，以确保凯撒密码与之兼容。
+
+
+  ### 练习 1-3
+
+
+  提出一个基于数学替代的加密方案。
+
+
+  ### 练习 1-4
+
+
+  使用我们定义的非对称密钥算法来签署一条消息并验证它。
+
+
+  **提示**：这与前面展示的加密/解密示例类似。
+
+
+  ## 1.3 哈希
+
+
+  **定义 1-8** 哈希是一个单向函数，它对文本进行编码，并且无法找回原始值。
+
+
+  哈希比之前描述的加密方案更简单。哈希函数的一个示例是返回字符长度，如 `H("abc") = 3`，但 `H("bcd") = 3`。这意味着我们无法仅通过返回值
+  3 来恢复原始值。
+
+
+  正如我们之前提到的，使用这种技术的原因是因为它有一些有趣的特性，例如为我们提供工作量证明。
+
+
+  **定义 1-9** *挖矿*是验证交易的过程。为此付出的努力，成功的矿工将获得金钱作为奖励。
+
+
+  **Hashcash** 是一种工作量证明系统[³]。我们将使用它来实现挖矿。我们将在后续实现该算法的章节中详细看到这个算法是如何工作的。
+
+
+  哈希函数还有一个有用的特性，即通过在每个区块中包含当前区块哈希（当前哈希）和前一区块哈希（先前哈希）的信息，可以将两个或多个不同的区块连接起来。例如，区块 1
+  可能有一个哈希值 `123456`，而区块 2 可能有一个哈希值 `345678`。现在，区块 2 的先前哈希将是区块 1 的当前哈希，即 `123456`。这里，我们将这两个区块链接起来，从而有效地创建了一个包含交易账本的区块链表。图
+  1-4 描绘了这种连接。
+
+
+  区块的哈希基于区块数据本身，因此要验证一个哈希，我们只需对区块数据进行哈希，并将其与当前哈希进行比较。
+
+
+  两个或多个相连的区块（或交易）构成一个区块链。区块链的有效性将取决于每笔交易的有效性。
+
+
+  ### 练习 1-5
+
+
+  提出你自己的哈希函数。
+
+
+  ### 练习 1-6
+
+
+  图 1-4 中描绘的链表可以以何种方式遍历？这个属性有什么含义？
+
+
+  [³]: Hashcash 最初的目标是限制电子邮件垃圾邮件和其他攻击。然而，最近它因其在区块链挖矿过程中的使用而闻名。Hashcash 于 1997 年由亚当·贝克提出。
+
+
+  ## 1.4 智能合约
+
+
+  **定义 1-10** *智能合约*是一种自动执行的合约，其中买方和卖方之间的协议条款被直接写入代码行中。
+
+
+  如果交易本身可以由用户编程，那么区块链就是可编程的。例如，用户（不一定是程序员）可以编写脚本，添加在发送资金之前必须满足的额外要求。它可能看起来像这样：
+
+
+  ```
+
+  1 if (用户拥有超过 10 的货币)
+
+  2 then 批准交易
+
+  3 else 拒绝交易
+
+  ```
+
+
+  智能合约被实现为在区块链上发生的计算。
+
+
+  ## 1.5 比特币
+
+
+  比特币是世界上第一个区块链实现。2008 年 11 月，一篇由中本聪撰写的题为“比特币：一种点对点的电子现金系统”的论文链接发布在一个密码学邮件列表中。比特币的白皮书共有九页；然而，它主要是一个理论上的设计解释，因此对新手来说可能有点难以理解。
+
+
+  比特币软件是开源代码，于 2009 年 1 月在 SourceForge 上发布。比特币的设计包括去中心化网络（点对点网络）、区块（挖矿）、区块链、交易和钱包，我们将在本书中详细探讨每一个部分。
+
+
+  尽管有许多区块链模型，且每个模型在实现细节上有所不同，但我们在本书中将要构建的区块链将与比特币非常相似，只是对某些部分进行了简化。
+
+
+  ## 1.6 示例工作流程
+
+
+  我们将列出我们的系统将使用的几个重要工作流程，以及其他一些流程。
+
+
+  挖矿创建一个新区块，使用 Hashcash 来计算区块的当前哈希。它还包括作为区块链中前一个区块链接的先前哈希。
+
+
+  检查钱包余额，适用于个人 A。首先过滤区块链中的所有区块（`发送方 = A` 或 `接收方 = A`），然后对它们求和以计算余额。我们的区块链增长得越大，此操作所需的时间就越长。为此，我们将使用未花费的交易输出或
+  UTXO 模型。此模型是一个交易列表，其中包含关于所有者及其货币数量的信息。因此，每笔交易都将消耗此列表中的元素。
+
+
+
+
+  '
+- '# 向区块链添加区块
+
+
+  向区块链添加区块的过程就是实现从 A 到 B 的资金转移。前提条件是 A 拥有足够的资金，我们可以通过钱包余额工作流程进行验证。具体步骤如下：创建一笔交易（发送方=A，接收方=B）并对其签名，然后基于这笔交易挖出一个新区块，并更新
+  UTXO 中的奖励。
+
+
+  ## 1.6 本章小结
+
+
+  本章旨在让读者对我们将要实现的系统有一个初步概念。下一章我们将明确定义每个实体，届时一切都会变得更加清晰。
+
+
+  '
+- '# 第 1 章 区块链简介
+
+
+  以下是本章的要点速览：
+
+
+  - 系统的核心实体是区块。
+
+  - 区块包含（除其他数据外）交易数据。
+
+  - 我们拥有一个账本，即所有有效区块的有序列表（区块链）。
+
+  - 每个参与账本的节点都拥有一个钱包。
+
+  - 账本中的每条记录均由所有者签名，并可被公众验证（数字签名）。
+
+  - 账本采用去中心化存储，即每个人都拥有其副本。
+
+  - 信任基础建立在工作量证明（挖矿）之上。
+
+
+  ![](img/index-19_1.png)
+
+
+  '
+- '# 第 2 章 模型：区块链核心
+
+
+  *《区块》由菲利普·里佐夫创作*
+
+
+  © 斯皮罗·布扎罗夫斯基 2022
+
+
+  S. 布扎罗夫斯基，《Java 区块链入门》，
+
+  [`doi.org/10.1007/978-1-4842-7927-4_2`](https://doi.org/10.1007/978-1-4842-7927-4_2)
+
+
+  '
+- '# 第 2 章 模型：区块链核心
+
+
+  既然我们已经从理论上解释了什么是区块链以及它的用途，下一步自然是用 Java 来实现它。在本章中，我们将从创建代表应用程序最基本构建模块的模型类开始。你可以查看提供的代码片段，或者从[`github.com/5pir3x/e-coin`](https://github.com/5pir3x/e-coin)下载完整代码库。包含的练习将提供深入见解，并为你修改我的代码以创建应用程序各个方面的替代实现提供思路。我强烈建议你尽可能多地完成这些练习；希望最终你不仅能对区块链技术有更深入的理解，还能为自己的作品集增添一个出色的项目——一个不同于我的实现方案的替代方案，而不仅仅是简单的复制。我选择在代码库的`src.com.company`文件夹结构内创建一个名为`Model`的文件夹，并将模型类保存在其中。建议你为项目选择相同的文件夹结构，以避免出现路径或导入问题。
+
+
+  ## 2.1 Block.java
+
+
+  我们首先列出以下代码片段中的导入语句：
+
+
+  ```
+
+  1 package com.company.Model;
+
+  3 import sun.security.provider.DSAPublicKeyImpl;
+
+  4
+
+  5 import java.io.Serializable;
+
+  6 import java.security.InvalidKeyException;
+
+  7 import java.security.Signature;
+
+  8 import java.security.SignatureException;
+
+  9 import java.util.ArrayList;
+
+  10 import java.util.Arrays;
+
+  11 import java.util.LinkedList;
+
+  ```
+
+
+  接下来我们进入类声明和字段部分：
+
+
+  ```
+
+  13 public class Block implements Serializable {
+
+  15     private byte[] prevHash;
+
+  16     private byte[] currHash;
+
+  17     private String timeStamp;
+
+  18     private byte[] minedBy;
+
+  19     private Integer ledgerId = 1;
+
+  20     private Integer miningPoints = 0;
+
+  21     private Double luck = 0.0;
+
+  23     private ArrayList<Transaction> transactionLedger = new ArrayList<>();
+
+  ```
+
+
+  第 13 行首先注意到的是，这个类实现了`Serializable`接口。由于区块链的所有区块都将使用此类创建，我们需要它们可序列化，以便通过网络共享区块链。
+
+
+  `prevHash`字段将包含前一区块的签名，或者说加密数据。`currHash`字段将包含当前区块的签名，或者说加密数据，该数据将使用挖到此区块的矿工的私钥进行加密。`timeStamp`字段显然包含该区块被挖出/最终确定的时间戳。`minedBy`字段将包含公钥，该公钥同时也作为成功挖到此区块的矿工的公钥地址。在区块链验证过程中，这个公钥地址/公钥将用于验证两件事：一是该区块的`currHash`/签名是否与当前区块所呈现数据的哈希值一致；二是该区块是否确实由该特定矿工挖掘。
+
+
+  我们将在本节稍后解释该类的`isVerified`方法时再讨论这个话题。接下来的`ledgerId`字段：由于我们打算实现一个包含独立 Block 和 Transaction
+  表的数据库，该字段将帮助我们检索与该区块对应的正确账本。你也可以将此字段视为区块编号。接下来的`miningPoints`和`luck`字段将用于在关于选择该区块矿工的问题上形成网络共识。
+
+
+  我们将在第[6](https://doi.org/10.1007/978-1-4842-7927-4_6)章详细探讨这些字段的用法。
+
+
+  `transactionLedger`字段只是一个包含该区块所有交易的`ArrayList`。我们将在"Transaction.java"一节中解释`Transaction`类。
+
+
+  在下面的代码片段中，我们可以看到从第 26 行、第 38 行和第 45 行开始的三个构造函数：
+
+
+  ```
+
+  25 //此构造函数用于从数据库检索区块时
+
+  26 public Block(byte[] prevHash, byte[] currHash, String timeStamp, byte[] minedBy,
+  Integer ledgerId,
+
+  27               Integer miningPoints, Double luck,
+
+  28               ArrayList<Transaction> transactionLedger) {
+
+  29     this.prevHash = prevHash;
+
+  30     this.currHash = currHash;
+
+  31     this.timeStamp = timeStamp;
+
+  32     this.minedBy = minedBy;
+
+  33     this.ledgerId = ledgerId;
+
+  34     this.transactionLedger = transactionLedger;
+
+  35     this.miningPoints = miningPoints;
+
+  36     this.luck = luck;
+
+  37 }
+
+  38 //此构造函数用于检索后初始化新区块
+
+  39 public Block(LinkedList<Block> currentBlockChain) {
+
+  40     Block lastBlock = currentBlockChain.getLast();
+
+  41     prevHash = lastBlock.getCurrHash();
+
+  42     ledgerId = lastBlock.getLedgerId() + 1;
+
+  43     luck = Math.random() * 1000000;
+
+  44 }
+
+  45 //此构造函数仅用于创建区块链中的第一个区块
+
+  46 public Block() {
+
+  47     prevHash = new byte[]{0};
+
+  48 }
+
+  ```
+
+
+  第一个构造函数用于从数据库检索区块链时。此时我们检索到的所有区块都已完全确定，此构造函数帮助我们使用所有正确设置的字段来实例化区块。第二个构造函数在应用程序运行时使用，用于创建全新的区块（即区块链的头部）供我们处理。我们将在第[6](https://doi.org/10.1007/978-1-4842-7927-4_6)章详细讨论如何实现这一点。第
+  45 行的第三个构造函数仅由我们的`init()`方法使用一次，用于创建第一个区块。
+
+
+  下一个代码片段展示了`isVerified`方法：
+
+
+  ```
+
+  49 public Boolean isVerified(Signature signing)
+
+  50     throws InvalidKeyException, SignatureException {
+
+  51     signing.initVerify(new DSAPublicKeyImpl(this.minedBy));
+
+  52     signing.update(this.toString().getBytes());
+
+  53     return signing.verify(this.currHash);
+
+  54 }
+
+  ```
+
+
+  我们接受一个`Signature`类的对象作为参数。`Signature`类实际上是`java.security`包中的一个类。
+
+
+
+
+  `security.Signature`。它是一个辅助单例类，允许我们使用不同的算法加密/解密数据。在第 51 行，我们通过使用此类中`minedBy`字段的公钥来初始化签名参数。我们将使用此密钥来验证此类中的数据是否与`currHash`中存储的签名匹配。在第
+  52 行，我们插入要验证的数据，在本例中就是`toString()`方法的内容。
+
+
+  在第 53 行，在验证了此类中包含的数据与其`currHash`之后，我们返回布尔结果。
+
+
+  如下一个片段所示，剩下的内容是`equals()`和`hashCode()`方法、通用的 getter 和 setter 方法以及`toString()`方法，这些内容总结了我们的`Block.java`类：
+
+
+  ```java
+
+  56 @Override
+
+  57 public boolean equals(Object o) {
+
+  58     if (this == o) return true;
+
+  59     if (!(o instanceof Block)) return false;
+
+  60     Block block = (Block) o;
+
+  61     return Arrays.equals(getPrevHash(), block.getPrevHash());
+
+  62 }
+
+  64 @Override
+
+  65 public int hashCode() {
+
+  66     return Arrays.hashCode(getPrevHash());
+
+  67 }
+
+  69 public byte[] getPrevHash() { return prevHash; }
+
+  70 public byte[] getCurrHash() { return currHash; }
+
+  72 public void setPrevHash(byte[] prevHash) { this.prevHash = prevHash; }
+
+  73 public void setCurrHash(byte[] currHash) { this.currHash = currHash; }
+
+  75 public ArrayList<Transaction> getTransactionLedger() {
+
+  76     return transactionLedger;
+
+  77 }
+
+  78 public void setTransactionLedger(ArrayList<Transaction> transactionLedger) {
+
+  79     this.transactionLedger = transactionLedger;
+
+  80 }
+
+  81 public String getTimeStamp() { return timeStamp; }
+
+  82 public void setMinedBy(byte[] minedBy) { this.minedBy = minedBy; }
+
+  83 public void setTimeStamp(String timeStamp) { this.timeStamp = timeStamp; }
+
+  85 public byte[] getMinedBy() { return minedBy; }
+
+  87 public Integer getMiningPoints() { return miningPoints; }
+
+  88 public void setMiningPoints(Integer miningPoints) { this.miningPoints = miningPoints;
+  }
+
+  89 public Double getLuck() { return luck; }
+
+  90 public void setLuck(Double luck) { this.luck = luck; }
+
+  92 public Integer getLedgerId() { return ledgerId; }
+
+  93 public void setLedgerId(Integer ledgerId) { this.ledgerId = ledgerId; }
+
+  95 @Override
+
+  96 public String toString() {
+
+  97     return "Block{" +
+
+  98         "prevHash=" + Arrays.toString(prevHash) +
+
+  99         ", timeStamp=''" + timeStamp + ''\'''' +
+
+  100         ", minedBy=" + Arrays.toString(minedBy) +
+
+  101         ", ledgerId=" + ledgerId +
+
+  102         ", miningPoints=" + miningPoints +
+
+  103         ", luck=" + luck +
+
+  104         ''}'';
+
+  105 }
+
+  106 }
+
+  ```
+
+
+  首先要注意的是，`equals()`方法比较了区块类的上一个哈希值。我们将在第 6 章进一步解释共识算法时使用它。另一个需要注意的是`toString()`方法中包含的字段。我们包含了用于验证区块是否与当前哈希匹配的所有内容。
+
+
+  **重要提示！**
+
+
+  *   请记住，钱包的公钥也是钱包的公共地址/账户号。
+
+  *   区块的当前哈希/签名只是区块中包含数据的加密版本。
+
+  *   矿工的私钥用于加密区块数据，从而创建签名。
+
+  *   矿工的公钥供其他对等节点通过将签名的哈希值与区块数据的哈希值进行比较来验证区块。
+
+  *   请注意我们如何在整个类中使用`toString()`方法来方便地准备数据以进行比较。
+
+  *   请注意，确保区块唯一性的所有必要字段都包含在`toString()`方法中。
+
+
+  ## 2.2 Transaction.java
+
+
+
+
+  '
+- '# 排版后的文档
+
+
+  在上一节中，我们简要提到在`Block`类中维护了一个交易数组列表，现在详细解释`Transaction.java`类的内容。首先从以下代码片段中的导入开始：
+
+
+  ```java
+
+  1 package com.company.Model;
+
+  3 import sun.security.provider.DSAPublicKeyImpl;
+
+  5 import java.io.Serializable;
+
+  6 import java.security.InvalidKeyException;
+
+  7 import java.security.Signature;
+
+  8 import java.security.SignatureException;
+
+  9 import java.time.LocalDateTime;
+
+  10 import java.util.Arrays;
+
+  11 import java.util.Base64;
+
+  ```
+
+
+  '
+- '# 第 2 章 模型：区块链核心
+
+
+  接下来查看类声明及其字段，如下一个代码片段所示：
+
+
+  ```java
+
+  13 public class Transaction implements Serializable {
+
+  15 private byte[] from;
+
+  16 private String fromFX;
+
+  17 private byte[] to;
+
+  18 private String toFX;
+
+  19 private Integer value;
+
+  20 private String timestamp;
+
+  21 private byte[] signature;
+
+  22 private String signatureFX;
+
+  23 private Integer ledgerId;
+
+  ```
+
+
+  由于此类也会创建构成区块链的对象，它将实现`Serializable`接口，以便通过网络共享。
+
+
+  字段`from`和`to`分别包含发送方和接收方账户的公钥/地址。
+
+
+  `value`是发送的货币数量，`timestamp`是交易发生的时间。`signature`包含所有字段的加密信息，用于验证交易的有效性（其使用方式与上一类中`currHash`字段相同）。`ledgerId`的作用与上一类中相同。带有`FX`后缀的字段是简单的副本，格式化为`String`而非`byte[]`。这样做的目的是为了方便在前端显示。
+
+
+  在本类中还有两个构造函数：第一个用于从数据库检索交易时使用，第二个用于在应用程序内创建新交易时使用。让我们在以下代码片段中观察它们：
+
+
+  ```java
+
+  26 // 用于加载现有签名的构造函数
+
+  27 public Transaction(byte[] from, byte[] to, Integer value, byte[] signature, Integer
+  ledgerId,
+
+  28                    String timeStamp) {
+
+  29     Base64.Encoder encoder = Base64.getEncoder();
+
+  30     this.from = from;
+
+  31     this.fromFX = encoder.encodeToString(from);
+
+  32     this.to = to;
+
+  33     this.toFX = encoder.encodeToString(to);
+
+  34     this.value = value;
+
+  35     this.signature = signature;
+
+  36     this.signatureFX = encoder.encodeToString(signature);
+
+  37     this.ledgerId = ledgerId;
+
+  38     this.timestamp = timeStamp;
+
+  39 }
+
+  40 // 用于创建新交易并对其签名的构造函数
+
+  41 public Transaction(Wallet fromWallet, byte[] toAddress, Integer value, Integer
+  ledgerId,
+
+  42                    Signature signing) throws InvalidKeyException, SignatureException
+  {
+
+  43     Base64.Encoder encoder = Base64.getEncoder();
+
+  44     this.from = fromWallet.getPublicKey().getEncoded();
+
+  45     this.fromFX = encoder.encodeToString(fromWallet.getPublicKey().getEncoded());
+
+  46     this.to = toAddress;
+
+  47     this.toFX = encoder.encodeToString(toAddress);
+
+  48     this.value = value;
+
+  49     this.ledgerId = ledgerId;
+
+  50     this.timestamp = LocalDateTime.now().toString();
+
+  51     signing.initSign(fromWallet.getPrivateKey());
+
+  52     String sr = this.toString();
+
+  53     signing.update(sr.getBytes());
+
+  54     this.signature = signing.sign();
+
+  55     this.signatureFX = encoder.encodeToString(this.signature);
+
+  56 }
+
+  ```
+
+
+  '
+- '# 第 2 章 模型：区块链核心
+
+
+  第一个构造函数根据从数据库检索的数据设置类字段，并使用`Base64.Encoder`类将`byte[]`字段安全地转换为`String`。
+
+
+
+
+  第二个构造函数稍微复杂一些，因此我们将逐段详细解释它。首先，让我们看看不同的构造函数参数：`Wallet fromWallet`和`Signature signing`。我们将在下一节更详细地解释`Wallet`类，目前只需注意`fromWallet`参数包含交易发送者/创建者的公钥和私钥。我们使用了与前一节`Block`类的`isVerified`方法中相同的`Signature`类。
+
+
+  接下来，我们将解释构造函数的主体，以便了解在我们的案例中加密数据是如何工作的。图 2-1 所示的签名创建阶段概述了我们要实现的目标。
+
+
+  ***图 2-1.** 签名创建*
+
+
+  第 2 章 模型：区块链核心
+
+
+  为了实现这一点，首先我们通过参数初始化类的字段来设置数据，并在第 44 到 50 行添加时间戳。现在，一旦我们有了想要加密的数据，我们在第 51 行通过语句将私钥设置到签名对象中。这告诉签名对象在加密时使用我们提供的私钥。在第
+  52 行，我们使用`toString()`方法将所有要加密的数据放入一个`String`对象中。在第 53 行，我们将所有要加密的数据提供给签名对象，在第 54
+  行，我们实际加密数据并将其赋值给我们的`signature`字段。
+
+
+  接下来是用于验证交易的方法，如下面的代码片段所示：
+
+
+  ```
+
+  58 public Boolean isVerified(Signature signing)
+
+  59   throws InvalidKeyException, SignatureException {
+
+  60   signing.initVerify(new DSAPublicKeyImpl(this.
+
+  61   getFrom()));
+
+  62   signing.update(this.toString().getBytes());
+
+  63   return signing.verify(this.signature);
+
+  64 }
+
+  ```
+
+
+  此方法将被其他对等节点用于验证每笔交易是否有效。在解释代码之前，让我们看看图 2-2 以及我们的方法试图实现什么。
+
+
+  ![](img/index-32_1.png)
+
+
+  第 2 章 模型：区块链核心
+
+
+  ***图 2-2.** 验证阶段*
+
+
+  流程示意图非常简单；我们需要使用公钥比较签名哈希与类中包含的数据哈希。
+
+
+  现在，让我们回到`isVerified`方法，解释流程示意图中的工作流是如何实现的。作为参数，我们接收要验证的`Transaction`对象和`Signature`辅助类对象，该对象已像之前一样预先初始化为使用带有
+  DSA 算法的 SHA256。在第 60 行，我们设置用于解密签名的公钥。`new DSAPublicKeyImpl(byte[] encoded)`只是`sun.security.provider`包中的一个包装器，它将帮助将我们的公钥信息从`byte[]`转换为`PublicKey`对象。在第
+  61 行，我们设置要针对签名进行验证的交易数据。最后，在第 62 行（`Blockchaintransaction.java`），我们提供签名，比较/验证过程会执行，并自动为我们返回结果。
+
+
+  第 2 章 模型：区块链核心
+
+
+  我们使用通用的 getter、setter 以及`toString`、`equals`和`hash`方法完成类的其余部分，如下面的代码片段所示：
+
+
+  ```
+
+  65 @Override
+
+  66 public String toString() {
+
+  67   return "Transaction{" +
+
+  68   "from=" + Arrays.toString(from) +
+
+  69   ", to=" + Arrays.toString(to) +
+
+  70   ", value=" + value +
+
+  71   ", timeStamp= " + timestamp +
+
+  72   ", ledgerId=" + ledgerId +
+
+  73   ''}'';
+
+  74 }
+
+  76 public byte[] getFrom() { return from; }
+
+  77 public void setFrom(byte[] from) { this.from = from; }
+
+  79 public byte[] getTo() { return to; }
+
+  80 public void setTo(byte[] to) { this.to = to; }
+
+  82 public Integer getValue() { return value; }
+
+  ```
+
+
+
+
+  83 `public void setValue(Integer value) { this.value = value; }`
+
+
+  84 `public byte[] getSignature() { return signature; }`
+
+
+  86 `public Integer getLedgerId() { return ledgerId; }`
+
+
+  87 `public void setLedgerId(Integer ledgerId) { this.ledgerId = ledgerId; }`
+
+
+  89 `public String getTimestamp() { return timestamp; }`
+
+
+  91 `public String getFromFX() { return fromFX; }`
+
+
+  92 `public String getToFX() { return toFX; }`
+
+
+  ![](img/index-34_1.jpg)
+
+
+  **第 2 章 模型：区块链核心**
+
+
+  93 `public String getSignatureFX() { return signatureFX; }`
+
+
+  96 `@Override`
+
+
+  97 `public boolean equals(Object o) {`
+
+
+  98 `if (this == o) return true;`
+
+
+  99 `if (!(o instanceof Transaction)) return false;`
+
+
+  100 `Transaction that = (Transaction) o;`
+
+
+  101 `return Arrays.equals(getSignature(), that.getSignature());`
+
+
+  102 `}`
+
+
+  104 `@Override`
+
+
+  105 `public int hashCode() {`
+
+
+  106 `return Arrays.hashCode(getSignature());`
+
+
+  107 `}`
+
+
+  109 `}`
+
+
+  **重要提示！**
+
+
+  - 注意我们如何在此类中全程使用 `toString()` 方法来便捷地准备数据以进行比较。
+
+  - 注意在 `toString()` 方法中包含了所有确保交易唯一性的关键字段。
+
+
+  ![](img/index-35_1.jpg)
+
+
+  **第 2 章 模型：区块链核心**
+
+
+  **练习 2-1**
+
+
+  如果在我们的交易对象中，未能将时间戳作为验证过程的一部分，你能想到一种利用此漏洞的方法吗？
+
+
+  **2.3 Wallet.java**
+
+
+  像往常一样，让我们从以下代码片段中该类所需的导入语句开始：
+
+
+  ```
+
+  1 package com.company.Model;
+
+
+  3 import java.io.Serializable;
+
+  4 import java.security.*;
+
+  ```
+
+
+  在以下代码片段中，观察类的声明和字段：
+
+
+  ```
+
+  6 public class Wallet implements Serializable {
+
+
+  8   private KeyPair keyPair;
+
+  ```
+
+
+  由于我们希望能够将钱包存储到数据库中以及从数据库中导出/导入钱包，因此我们也将实现 `Serializable` 接口。
+
+
+  此类将包含一个字段，该字段是一个 `KeyPair` 类的对象。此类属于 `java.security` 包，包含我们在前几节中提到的公钥和私钥。
+
+
+  ![](img/index-36_1.jpg)
+
+
+  **第 2 章 模型：区块链核心**
+
+
+  **重要提示！**
+
+
+  - 注意，我们的区块链钱包不需要任何关于钱包持有者的信息。这是钱包持有者匿名性的基础。
+
+  - 我们的区块链钱包也不会包含任何存储钱包当前余额的字段。我们将在[第 6 章](https://doi.org/10.1007/978-1-4842-7927-4_6)中解释如何获取钱包余额。
+
+
+  接下来，让我们看看下一个代码片段中的前两个构造函数，当我们想要创建一个新钱包并为其分配一个新的密钥对时，将用到它们：
+
+
+  ```
+
+  10 //生成新密钥对的构造函数
+
+  11 public Wallet() throws NoSuchAlgorithmException {
+
+  12   this(2048, KeyPairGenerator.getInstance("DSA"));
+
+  13 }
+
+  14 public Wallet(Integer keySize, KeyPairGenerator keyPairGen) {
+
+  15   keyPairGen.initialize(keySize);
+
+  16   this.keyPair = keyPairGen.generateKeyPair();
+
+  17 }
+
+  ```
+
+
+  第一个无参构造函数将使用默认的 `keySize` 和一个设置为使用 DSA 算法生成密钥的 `KeyPairGenerator` 实例来调用第二个构造函数。第二个构造函数从第一个构造函数或应用程序的其他部分接收这些输入参数，并在第
+  15 行设置密钥的大小，在第 16 行生成密钥本身。
+
+
+  **第 2 章 模型：区块链核心**
+
+
+  当我们从数据库导入一个已有的密钥对后，第三个构造函数将用于创建我们的钱包。我们可以在以下代码片段中观察到它：
+
+
+  ```
+
+  19 //仅用于导入密钥的构造函数
+
+  20 public Wallet(PublicKey publicKey, PrivateKey privateKey) {
+
+  21   this.keyPair = new KeyPair(publicKey,privateKey);
+
+  22 }
+
+  ```
+
+
+  这里的代码只是接收公钥和私钥对象，并用它们创建一个新的 `KeyPair` 对象。
+
+
+
+  好的，作为高级文档工程师和翻译员，我已经仔细阅读了您的注意事项和示例。以下是根据您的要求完成的翻译：
+
+
+
+  最后，我们通过在以下代码片段中包含泛型的 getter 和 setter 方法来结束本课程和本章：
+
+
+  ```
+
+  24 public KeyPair getKeyPair() { return keyPair; }
+
+  26 public PublicKey getPublicKey() { return keyPair.getPublic(); }
+
+  27 public PrivateKey getPrivateKey() { return keyPair.getPrivate(); }
+
+  28 }
+
+  ```
+
+
+  ## 2.4 总结
+
+
+  在本章中，我们涵盖了应用程序模型层的创建。这些类及其方法将作为整个应用程序其余部分的基本构建块。因此，现在很好地掌握它们将极大地帮助你理解后续章节中更复杂的逻辑。以下是到目前为止我们所涵盖概念的简要回顾：
+
+
+  **第 2 章 模型：区块链核心**
+
+
+  -   通过实现我们的 `Block.java` 类来表示区块链的单个区块
+
+  -   从现有区块链导入区块及创建区块链头块的 Java 实现
+
+  -   通过实现我们的 `Transaction.java` 类来表示区块链交易
+
+  -   用于导入交易和创建新交易的 Java 实现
+
+  -   加密和验证（创建签名及验证签名）的 Java 实现
+
+  -   通过实现我们的 `Wallet.java` 类来表示区块链钱包
+
+
+  **练习 2-1 的答案：** 某人可以复制并粘贴一个已签名的交易，该交易将通过验证检查，因为无法确保该交易在时间上是唯一的。
+
+
+  ![](img/index-39_1.png)
+
+
+  '
+- '# **第 3 章 数据库设置**
+
+
+  *“区块数据库” 作者：Filip Rizov*
+
+
+  © Spiro Buzharovski 2022
+
+
+  S. Buzharovski, *Introducing Blockchain with Java*,
+
+  <https://doi.org/10.1007/978-1-4842-7927-4_3>
+
+
+  ![](img/index-40_1.jpg)
+
+
+  '
+- '# 第 3 章 数据库设置
+
+
+  为了更好地可视化我们的区块链和钱包数据，我们选择实现一个 SQLite 数据库，而不是将其存储在原始文件数据格式中。我们的计划是为区块链设置一个数据库，为钱包设置另一个数据库，以便更好地分离关注点并提高安全性。在本章中，我们将学习如何从头开始设置数据库，并为我们的应用程序编写一个
+  `init()` 方法，该方法将使用 SQL 编写我们的表模式，并带有预设的默认值。为此，我们将使用 SQLite JDBC 驱动程序和 SQLite 数据库浏览器。
+
+
+  ## 3.1 SQLite 数据库浏览器设置
+
+
+  首先，我们将从 <https://sqlitebrowser.org/dl/> 下载我们的 SQLite 数据库浏览器。只需为你的操作系统下载推荐版本，并使用推荐设置将其安装到你的机器上。运行它后，应用程序看起来应该类似于图
+  [3-1]。
+
+
+  **图 3-1.** *我们的应用程序*
+
+
+  ![](img/index-41_1.jpg)
+
+
+  这意味着你已经成功安装了数据库浏览器，我们可以继续设置我们的实际数据库了。
+
+
+  ## 3.2 Blockchain.db
+
+
+  我们将实现的第一个数据库是用于存储区块链数据的数据库，我们将其恰当地命名为 `blockchain.db`。在本章中，我们将学习如何使用 SQLite 浏览器逐步设置我们的数据库。然而，在“编写你的应用程序
+  `init()` 方法”部分，我们将学习如何使用 SQL 和 SQL JDBC 驱动程序以编程方式设置我们的数据库。理想情况下，本章将通过数据库浏览器可视化区块链中包含的数据，并帮助缩小那些不熟悉
+  SQL 的人的知识差距。“编写你的应用程序 `init()` 方法”部分将为你提供 SQL 代码，并教你如何在将来以编程方式实现数据库设置。
+
+
+  我们首先点击 **新建数据库** 按钮，或者如果按钮栏没有显示，则转到 **文件**，然后点击 **新建数据库** 命令。这应该会打开一个类似于图 [3-2]
+  的屏幕，要求我们命名数据库并选择保存路径。
+
+
+  ![](img/index-42_1.jpg)
+
+
+  **图 3-2.** *命名并保存我们的数据库*
+
+
+  我选择在我的 `e-coin` 项目文件夹中创建一个名为 `db` 的文件夹，并将数据库命名为 `blockchain`。你可以为你的数据库选择不同的名称或位置；只需确保在以后的步骤中记住使用这些名称，而不是本书说明中的名称。点击
+  **保存** 后，我们会看到如图 [3-3] 所示的窗口，提示我们创建第一个表。
+
+
+  ![](img/index-43_1.jpg)
+
+
+  **图 3-3.** *创建表*
+
+
+  我们将表命名为 `BLOCKCHAIN`，并希望它存储我们所有的区块及其包含的数据。现在，在名为 **字段** 的选项卡的上方窗口中，我们将点击 **添加**
+  按钮来添加一个字段行。这些字段行将代表表的列，因此从现在起我们将这样称呼它们。当你开始在上方窗口中创建列时，你会注意到下方窗口中的 SQL 代码会自动修改以匹配你的选择。现在让我们看一下图
+  [3-4] 并相应地设置我们的表列。
+
+
+  ![](img/index-44_1.jpg)
+
+
+  **图 3-4.** *设置表列*
+
+
+  如果你注意到列的名称与 `Block.java` 类中的字段名称相似，那么做得很好；为每个类字段设置不同的列正是我们想要存储数据的方式。
+
+
+  我们 `BLOCKCHAIN` 表中的每一行将代表一个不同的区块，因此我们在这里还包含一个 `ID` 列，用于为我们的区块编号。为我们的列选择的类型
+
+
+  ![](img/index-45_1.jpg)
+
+
+  与 `Block.java` 类中的字段类型紧密对应，以维护数据的完整性。这对于我们所有字节数组类型的类字段尤其重要，它们必须存储为 `BLOB`；否则，转换为其他类型将改变原始信息，并使其中存储的公钥和签名无效。如果你有兴趣，可以在
+  <https://www.w3resource.com/sqlite/sqlite-data-types.php> 了解更多关于 SQLite 类型的信息。现在，一旦我们点击
+  **确定** 按钮，我们就创建了数据库中的第一个表，我们的数据库浏览器应该看起来像图 [3-5]。
+
+
+  **图 3-5.** *我们数据库中的第一个表*
+
+
+  ![](img/index-46_1.jpg)
+
+
+  我们的下一步是创建一个包含每个区块中交易的表。为此，我们点击 **创建表** 按钮，会弹出另一个窗口，与我们用来创建 `BLOCKCHAIN` 表的窗口完全相同。
+
+
+  #### **练习 3-1**
+
+
+  在学习我们如何操作之前，尝试自己创建下一个名为 `TRANSACTIONS` 的表。
+
+
+  **提示：** 像我们查看 `Block.java` 那样查看 `Transaction.java` 的字段。
+
+
+  如果你做到了，做得好！我们 `Transactions` 表的实现看起来像图 [3-6]。
+
+
+  ![](img/index-47_1.jpg)
+
+
+  **图 3-6.** *Transactions 表*
+
+
+  最后，完整的数据库模式应该看起来像图 [3-7]。
+
+
+  ![](img/index-48_1.jpg)
+
+
+  **图 3-7.** *完整的数据库模式*
+
+
+  现在，显然如果你点击 **浏览数据** 选项卡，表将是空的，但让我们通过查看图 [3-8] 和图 [3-9] 来结束本节，这些图包含一些虚拟数据，以便我们可以想象一旦完成应用程序的其余部分，一切将如何就位。
+
+
+  ![](img/index-49_1.jpg)
+
+
+  ![](img/index-49_2.jpg)
+
+
+  **图 3-8.** *包含虚拟数据的 BLOCKCHAIN 表*
+
+
+  **图 3-9.** *包含虚拟数据的 Transaction 表*
+
+
+  ![](img/index-50_1.jpg)
+
+
+
+
+  '
+- "# 区块链表\n\n对于图 3-8，e 中的`BLOCKCHAIN`表，每一行代表区块链中的一个不同区块。对于图 3-9 中的`Transactions`表，每一行代表一笔单独的交易。所有包含相同`LEDGER_ID`编号的交易代表它们都属于具有相同`LEDGER_ID`编号的单个区块。\n\
+  \n## 3.3 Wallet.db\n\n在我们按照基本相同的步骤创建`Wallet.db`之前，先解释一下设计决策：为什么我们要在单独的数据库中创建钱包，而不是在`blockchain.db`数据库中再创建一张表。这是因为这样做可以实现清晰的关注点分离。\n\
+  \n区块链数据库中的所有数据都应在点对点网络上共享，而`Wallet.db`数据库中的所有数据则应对他人保密；因此，让应用程序分别建立与两者的独立连接也能提高安全性。另一个好处是，钱包或区块链的便携性只需将`blockchain.db`或`wallet.db`从当前机器简单地复制粘贴到另一台机器上即可，无需任何额外代码。当然，这并不是说应用程序无法通过单一数据库运行，也不是说仅凭这些就能确保一切安全。\n\
+  \n### 练习 3-2\n\n在查看我们的做法之前，请尝试自行创建下一个名为`WALLET`的表。\n\n**提示** 遵循与“blockchain.db”部分相同的步骤。\n\
+  \n![](img/index-51_1.jpg)\n\n*第 3 章 数据库设置*\n\n如果你成功完成了操作，并意识到我们可能需要将`Wallet.java`类中的`keyPair`字段拆分为两列，每列对应一个密钥，那么恭喜你做得很好。如果没有，那么让我们重新回顾一下步骤。点击**新建数据库**按钮，将表命名为`WALLET`，并在其中创建两个列：`PRIVATE_KEY`和`PUBLIC_KEY`，它们将构成我们的密钥对。结果应类似于图\
+  \ 3-10。\n\n***图 3-10.** 创建我们的密钥对*\n\n![](img/index-52_1.jpg)\n\n*第 3 章 数据库设置*\n\n\
+  我们的`wallet.db`数据库的完整数据库模式将如图 3-11 所示。\n\n***图 3-11.** `wallet.db`的数据库模式*\n\n## 3.4\
+  \ SQLite 的 JDBC 驱动程序设置\n\n现在让我们安装一个用于 SQLite 的 JDBC 驱动程序，以便在应用程序中使用 SQL 来设置相同的模式。访问\
+  \ [`search.maven.org/artifact/org.xerial/sqlite-jdbc/3.34.0/jar`](https://search.maven.org/artifact/org.xerial/sqlite-jdbc/3.34.0/jar)，并从下载选项中手动下载\
+  \ JAR 文件，如图 3-11 所示。\n\n![](img/index-53_1.jpg)\n\n![](img/index-53_2.jpg)\n\n*第\
+  \ 3 章 数据库设置*\n\n***图 3-12.** 下载 JAR 文件*\n\n你可以在项目文件夹中创建一个`libs`文件夹，并将 JAR 文件保存在那里，就像我们在仓库中所做的那样。接下来选择**文件**，然后选择**项目结构**；接着转到**项目设置**中的**库**选项卡，点击加号添加新的项目库，选择**Java**，然后选择我们刚刚下载的\
+  \ JAR 文件，最后点击**确定**。参考图 3-13 和图 3-14 以获取视觉帮助。\n\n***图 3-13.** 选择 Java*\n\n![](img/index-54_1.jpg)\n\
+  \n*第 3 章 数据库设置*\n\n***图 3-14.** 选择 JAR 文件*\n\n有了这个库，我们就可以开始编写`ECoin`类了，该类将包含我们的`main`方法和`init()`方法。\n\
+  \n## 3.5 编写你的应用 `init()` 方法\n\n在深入探讨`init()`方法之前，我们先简要地看一下`ECoin.java`类。我们的`ECoin.java`类位于仓库中`src.com.company`文件夹结构内。这是我们主应用程序类；换句话说，我们的应用程序从这里开始。接下来的代码片段展示了类的导入、类声明、`main`方法和`start`方法：\n\
+  \n```\n1 package com.company;\n\n3 import com.company.Model.Block;\n\n4 import com.company.Model.Transaction;\n\
+  ```\n\n\n\n5 `import` `com.company.Model.Wallet`;\n\n6 `import` `com.company.ServiceData.BlockchainData`;\n\
+  7 `import` `com.company.ServiceData.WalletData`;\n8 `import` `com.company.Threads.MiningThread`;\n\
+  9 `import` `com.company.Threads.PeerClient`;\n10 `import` `com.company.Threads.PeerServer`;\n\
+  11 `import` `com.company.Threads.UI`;\n12 `import` `javafx.application.Application`;\n\
+  13 `import` `javafx.stage.Stage`;\n15 `import` `java.security.*`;\n16 `import` `java.sql.*`;\n\
+  17 `import` `java.time.LocalDateTime`;\n\n19 `public class ECoin extends Application\
+  \ {`\n\n21 `public static void main(String[] args) {`\n22 `    launch(args);`\n\
+  23 `}`\n\n25 `@Override`\n26 `public void start(Stage primaryStage) throws Exception\
+  \ {`\n27 `    new UI().start(primaryStage);`\n28 `    new PeerClient().start();`\n\
+  29 `    new PeerServer(6000).start();`\n30 `    new MiningThread().start();`\n31\
+  \ `}`\n\n在第 19 行，我们可以看到我们的类继承了`Application`类。  \n`Application`是`javafx`包的一部分，通过继承它，我们表明我们将以\
+  \ JavaFX 应用程序的形式运行我们的应用。由于`Application`类实际上是一个抽象类，继承它之后，我们需要实现`start(Stage s)`方法才能运行我们的应用。\n\
+  \n在第 26 到 31 行，你可以看到我们对`start(Stage s)`方法的实现。方法体中的每一行（第 27-30 行）代表一个不同的线程，这些线程将在我们的应用程序中并行运行。第\
+  \ 27 行的线程将显示我们的用户界面并执行与之关联的命令。第 28 行的线程将充当客户端并查询其他对等节点。第 29 行的线程将充当服务器，并响应来自其他对等节点的传入查询。第\
+  \ 30 行的线程将持续运行区块链验证和共识任务。我们将在后续章节中讨论每个线程，并详细解释每个线程的工作原理。目前，对这些线程试图完成的任务进行说明已经足够，并且应该能让您对我们应用程序在实现目标方面的结构有一个清晰的概览。\n\
+  \n现在终于到了讨论我们的`init()`方法以及我们将用它实现什么的时候了。`init()`方法在我们的应用程序`start(Stage s)`方法之前运行，其目的是检查并设置必要的先决条件，以便我们的应用程序能够运行。在我们的案例中，这些先决条件包括`wallet.db`和`blockchain.db`文件的存在、它们的模式以及内容。让我们看看下面的代码片段并开始解释代码：\n\
+  \n33 `@Override`\n34 `public void init() {`\n35 `    try {`\n36 `        //这段代码用于在钱包不存在时创建钱包，并提供一个\
+  \ KeyPair。`\n37 `        //我们将把它创建在单独的数据库中，以提高安全性并便于移植。`\n38 `        Connection\
+  \ walletConnection = DriverManager`\n39 `            .getConnection(\"jdbc:sqlite:C:\\\
+  \\Users\\\\spiro\\\\IdeaProjects\\\\e-coin\\\\db\\\\wallet.db\");`\n40 `       \
+  \ Statement walletStatment = walletConnection.createStatement();`\n41 `        walletStatment.executeUpdate(\"\
+  CREATE TABLE IF NOT EXISTS WALLET ( \" +`\n42 `            \" PRIVATE_KEY BLOB NOT\
+  \ NULL UNIQUE, \" +`\n43 `            \" PUBLIC_KEY BLOB NOT NULL UNIQUE, \" +`\n\
+  44 `            \" PRIMARY KEY (PRIVATE_KEY, PUBLIC_KEY)\" +`\n45 `            \"\
+  ) \");`\n46 `        ResultSet resultSet = walletStatment.executeQuery(\" SELECT\
+  \ * FROM WALLET \");`\n47 `        if (!resultSet.next()) {`\n48 `            Wallet\
+  \ newWallet = new Wallet();`\n49 `            byte[] pubBlob = newWallet.getPublicKey().getEncoded();`\n\
+  50 `            byte[] prvBlob = newWallet.getPrivateKey().getEncoded();`\n51 `\
+  \            PreparedStatement pstmt = walletConnection`\n52 `                .prepareStatement(\"\
+  INSERT INTO WALLET(PRIVATE_KEY, PUBLIC_KEY) \" +`\n53 `                    \" VALUES\
+  \ (?,?) \");`\n54 `            pstmt.setBytes(1, prvBlob);`\n55 `            pstmt.setBytes(2,\
+  \ pubBlob);`\n56 `            pstmt.executeUpdate();`\n57 `        }`\n58 `    \
+  \    resultSet.close();`\n59 `        walletStatment.close();`\n60 `        walletConnection.close();`\n\
+  61 `    }`\n\n\n\n### 62 `WalletData.getInstance().loadWallet()`; 63\n\n第 38 行和\
+  \ 39 行代表一条语句，它使用我们之前设置的`SQLDriver`来打开与`wallet.db`数据库的连接。`SQLDriver`会检查指定 URL 位置下`wallet.db`文件是否存在，并打开与其的连接。如果文件缺失，`SQLDriver`将自动创建一个空的`wallet.db`文件。\n\
+  \n在第 40 行，我们使用已建立的与`wallet.db`数据库的连接来实例化`Statement`对象。每次我们使用这个`Statement`对象执行查询时，它都会在用于实例化它的连接所指向的数据库中执行这些查询。在本例中，该数据库就是`wallet.db`。在第\
+  \ 41 至 46 行，我们在名为`walletStatment`的`Statement`对象上使用`executeUpdate(String s)`方法，该方法接收一个`String`参数，并将其作为\
+  \ SQL 语句在`wallet.db`中执行。除了在此添加的`IF NOT EXISTS`部分外，这个 SQL 字符串与我们手动创建`WALLET`表时生成的\
+  \ SQL 完全相同，如图 3-10 所示。换句话说，我们这里的 SQL 语句表示：如果`WALLET`表不存在，则创建一个模式与我们之前在“Wallet.db”部分手动创建的表完全相同的表。\n\
+  \n在接下来的代码行（第 47-58 行）中，我们将扩展应用的功能，使其能够识别`wallet.db`中是否已存在密钥对。如果为空，应用将生成一个新的密钥对并将其填充到`WALLET`表中。第\
+  \ 47 行查询`WALLET`表，并将结果保存在`ResultSet`对象中。第 48 行检查`resultSet`对象是否为空，如果为空，则第 49-57\
+  \ 行创建一个新的钱包并将其密钥导出到`Wallet`表中。让我们看看这一组功能能实现什么。我们可以在没有任何`wallet.db`的情况下运行应用，它会自动为其设置数据库并为我们创建一个新钱包。我们可以通过简单地复制`wallet.db`并替换目标机器上的`wallet.db`文件，将钱包移植到另一台机器上。我们的`init()`方法会识别出密钥对已存在，不会尝试覆盖它。最后需要注意的一点是第\
+  \ 65 行。在这里，我们将把`wallet.db`中的内容加载到`WalletData`单例类中。这会将我们的钱包数据存储到应用内存中，使其在整个应用的其余部分更易于访问。我们将在下一章中进一步讨论`WalletData`类。\n\
+  \n现在让我们看看下面的代码片段中`init()`方法的下一部分：\n\n```java\n64 // 这将为区块链创建包含列的数据库表。\n65 Connection\
+  \ blockchainConnection = DriverManager\n66     .getConnection(\"jdbc:sqlite:C:\\\
+  \\Users\\\\spiro\\\\IdeaProjects\\\\e-coin\\\\db\\\\blockchain.db\");\n67 Statement\
+  \ blockchainStmt = blockchainConnection.createStatement();\n68 blockchainStmt.executeUpdate(\"\
+  CREATE TABLE IF NOT EXISTS BLOCKCHAIN ( \" +\n69     \" ID INTEGER NOT NULL UNIQUE,\
+  \ \" +\n70     \" PREVIOUS_HASH BLOB UNIQUE, \" +\n71     \" CURRENT_HASH BLOB UNIQUE,\
+  \ \" +\n72     \" LEDGER_ID INTEGER NOT NULL UNIQUE, \" +\n73     \" CREATED_ON\
+  \ TEXT, \" +\n74     \" CREATED_BY BLOB, \" +\n75     \" MINING_POINTS TEXT, \"\
+  \ +\n76     \" LUCK NUMERIC, \" +\n77     \" PRIMARY KEY( ID AUTOINCREMENT) \" +\n\
+  78     \")\"\n79 );\n```\n\n第 65 行和 66 行将检查`blockchain.db`文件是否存在，如果不存在则创建该文件，并与其建立连接，操作方式与我们之前为`wallet.db`在第\
+  \ 38 和 39 行所做的相同。第 67 至 79 行将准备并执行一条语句，检查`blockchain.db`中是否存在`BLOCKCHAIN`表，如果不存在则创建一个与图\
+  \ 3-4 所示相同的表。\n\n在下一个代码片段中，我们将创建应用的功能，以便在区块链中尚不存在第一个区块时创建它。其逻辑与我们用于检查`wallet.db`是否包含任何数据的方法类似。\n\
+  \n\n```java\n80 ResultSet resultSetBlockchain = blockchainStmt.executeQuery(\" SELECT\
+  \ * FROM BLOCKCHAIN \");\n81 Transaction initBlockRewardTransaction = null;\n82\
+  \ if (!resultSetBlockchain.next()) {\n83     Block firstBlock = new Block();\n84\
+  \     firstBlock.setMinedBy(WalletData.getInstance().getWallet().getPublicKey().getEncoded());\n\
+  85     firstBlock.setTimeStamp(LocalDateTime.now().toString());\n86     //helper\
+  \ class.\n87     Signature signing = Signature.getInstance(\"SHA256withDSA\");\n\
+  88     signing.initSign(WalletData.getInstance().getWallet().getPrivateKey());\n\
+  89     signing.update(firstBlock.toString().getBytes());\n90     firstBlock.setCurrHash(signing.sign());\n\
+  91     PreparedStatement pstmt = blockchainConnection.prepareStatement(\"INSERT\
+  \ INTO BLOCKCHAIN (PREVIOUS_HASH, CURRENT_HASH , LEDGER_ID,\" +\n93            \
+  \ \" CREATED_ON, CREATED_BY,MINING_POINTS,LUCK ) \" +\n94             \" VALUES\
+  \ (?,?,?,?,?,?,?) \");\n95     pstmt.setBytes(1, firstBlock.getPrevHash());\n96\
+  \     pstmt.setBytes(2, firstBlock.getCurrHash());\n97     pstmt.setInt(3, firstBlock.getLedgerId());\n\
+  98     pstmt.setString(4, firstBlock.getTimeStamp());\n99     pstmt.setBytes(5,\
+  \ WalletData.getInstance().getWallet().getPublicKey().getEncoded());\n100    pstmt.setInt(6,\
+  \ firstBlock.getMiningPoints());\n101    pstmt.setDouble(7, firstBlock.getLuck());\n\
+  102    pstmt.executeUpdate();\n103    Signature transSignature = Signature.getInstance(\"\
+  SHA256withDSA\");\n104    initBlockRewardTransaction = new Transaction(WalletData.getInstance().getWallet(),\
+  \ WalletData.getInstance().getWallet().getPublicKey().getEncoded(), 100, 1, transSignature);\n\
+  105 }\n106 resultSetBlockchain.close();\n```\n\n第 80 行查询我们的 `BLOCKCHAIN` 表，第 82\
+  \ 行检查区块链是否存在；如果不存在，则执行第 83–105 行。第 83 行使用我们的第三个区块构造函数。第 84 行从 `WalletData` 单例类中检索我们的公钥，并将我们设置为初始区块的创建者/矿工。第\
+  \ 85 行设置时间戳。第 87 到 90 行实例化并使用 `java.security` 中的 `Signature` 类，通过区块创建者/矿工的私钥加密区块中包含的所有数据，并将其设置为我们当前的哈希值。同样的过程在图\
+  \ 2-1 中有所展示，并在其中进行了更详细的解释。第 91–102 行将初始区块的数据从应用程序导出到我们的 `BLOCKCHAIN` 表中。在第 103 和\
+  \ 104 行，我们为区块准备了初始区块奖励交易。我们暂不将其转移到 `TRANSACTIONS` 表，因为还不确定该表是否存在于数据库中。让我们看看下面处理\
+  \ `TRANSACTIONS` 表的代码片段：\n\n```java\n108 blockchainStmt.executeUpdate(\"CREATE TABLE\
+  \ IF NOT EXISTS TRANSACTIONS ( \" +\n109         \" ID INTEGER NOT NULL UNIQUE,\
+  \ \" +\n110         \" \\\"FROM\\\" BLOB, \" +\n111         \" \\\"TO\\\" BLOB,\
+  \ \" +\n112         \" LEDGER_ID INTEGER, \" +\n113         \" VALUE INTEGER, \"\
+  \ +\n114         \" SIGNATURE BLOB UNIQUE, \" +\n115         \" CREATED_ON TEXT,\
+  \ \" +\n116         \" PRIMARY KEY(ID AUTOINCREMENT) \" +\n117         \")\");\n\
+  118 if (initBlockRewardTransaction != null) {\n119     BlockchainData.getInstance().addTransaction(initBlockRewardTransaction,\
+  \ true);\n120     BlockchainData.getInstance().addTransactionState(initBlockRewardTransaction);\n\
+  121 }\n122 blockchainStmt.close();\n123 blockchainConnection.close();\n124 } catch\
+  \ (SQLException | NoSuchAlgorithmException | InvalidKeyException | SignatureException\
+  \ e) {\n125     System.out.println(\"db failed: \" + e.getMessage());\n126 } catch\
+  \ (GeneralSecurityException e) {\n127     e.printStackTrace();\n128 }\n129 BlockchainData.getInstance().loadBlockChain();\n\
+  130 }\n131 }\n```\n\n在第 108 到 118 行，我们检查 `TRANSACTIONS` 表是否存在，如果不存在则创建它，方式与我们处理之前表格的方式非常相似。第\
+  \ 119 行检查我们是否已创建初始奖励交易，如果已创建，则第 120 和 121 行将其转移到数据库并设置我们的应用程序状态。第 130 行最后的声明显示，我们的单例类\
+  \ `BlockData` 正在加载存储在 `blockhain.db` 数据库中的数据。在下一章中，我们将解释如何实现这一点。\n\n## 3.6 总结\n\n\
+  在本章中，我们介绍了如何创建两个不同的数据库来支持我们的应用程序。我们还创建了 `init()` 方法，其功能可轻松实现钱包的移植和创建。此外，我们确保了当区块链不存在时，应用程序能够创建区块链中的第一个区块。这是对我们目前所涵盖概念的简要回顾：\n\
+  \n- 使用数据库浏览器程序创建数据库和表结构\n- 创建应用程序的主类\n- 创建我们的 `start(Stage s)` 方法\n- 在 Java 中设置\
+  \ SQLite 驱动，并使用它通过 Java 和 SQL 创建和查询数据库\n- 通过使用 SQLite 驱动和 Java 为应用程序的 `init()` 方法创建业务逻辑\n\
+  \n![index-64_1.png](img/index-64_1.png)\n\n"
+- '# 第 4 章 构建用户界面
+
+
+  *“界面” 作者：Filip Rizov*
+
+
+  © Spiro Buzharovski 2022
+
+
+  S. Buzharovski, *《用 Java 引入区块链》*, [`doi.org/10.1007/978-1-4842-7927-4_4`](https://doi.org/10.1007/978-1-4842-7927-4_4)
+
+
+  ![index-65_1.jpg](img/index-65_1.jpg)
+
+
+  本章将介绍如何创建我们的用户界面。通过用户界面，我们将能够查看我们的硬币余额、显示我们的公共地址以便与他人分享、查看最近的交易以及向他人发送硬币。
+
+
+  为此，我们将使用 Scene Builder，这是一个 GUI 工具，可以帮助我们创建前端。对于控制器类，我们将使用 Java 和 JavaFX。最后，我们将解释如何创建单独的
+  UI 线程来监听我们的输入。
+
+
+  ## 4.1 Scene Builder 快速设置
+
+
+  通过访问 [`gluonhq.com/products/scene-builder/`](https://gluonhq.com/products/scene-builder/)
+  下载 Scene Builder。页面将显示不同的选项，如图 4-1 所示。
+
+
+  **图 4-1.** Scene Builder 下载页面
+
+
+  ![index-66_1.jpg](img/index-66_1.jpg)
+
+
+  只需根据您的操作系统选择相应的下载版本。按照提供的说明安装应用程序即可开始使用。
+
+
+  ## 4.2 创建视图
+
+
+  在接下来的部分中，我们将解释如何使用 Scene Builder 创建视图。建议您在图 4-2 所示的文件夹结构中创建一个 View 文件夹。我们将在此文件夹中创建并存放视图类。
+
+
+  **图 4-2.** 创建文件夹结构
+
+
+  ### 4.2.1 MainWindow.fxml
+
+
+  让我们创建 `MainWindow.fxml` 文件。首先启动 Scene Builder 并选择一个空场景，如图 4-3 所示。
+
+
+  ![index-67_1.jpg](img/index-67_1.jpg)
+
+  ![index-67_2.jpg](img/index-67_2.jpg)
+
+
+  **图 4-3.** 选择空场景
+
+
+  完成此操作后，您的下一个屏幕应如图 4-4 所示。
+
+
+  **图 4-4.** 空屏幕
+
+
+  ![index-68_1.jpg](img/index-68_1.jpg)
+
+
+  这意味着我们已准备好开始创建 `MainWindow.fxml` 文件，但首先让我们解释一下在图 4-4 中看到的一些元素。
+
+
+
+  在屏幕的左上侧，我们可以看到用于创建视图的预制可视化元素，只需将它们拖放到屏幕中央或`Hierarchy`选项卡中即可。您还可以注意到，不同类型的元素被分组在不同的选项卡下，例如`Containers`、`Controls`等。在屏幕的左下角，我们可以看到`Hierarchy`选项卡；在这里，我们可以观察到场景的元素结构。在`Hierarchy`选项卡下方是`Controller`选项卡，我们可以在其中查看有关此视图控制器位置以及视图元素关联字段的信息。在中间，我们可以看到视图预览的样子。在屏幕的右侧，有三个选项卡：`Properties`、`Layout`和`Code`，我们可以在其中调整和自定义每个元素的属性。在开始向场景添加可视化元素之前，让我们先将此文件保存到`View`文件夹中，并将其命名为`MainWindow.fxml`，如图
+  4-5 所示。
+
+
+  **图 4-5.** 保存文件
+
+
+  ![](img/index-69_1.jpg)
+
+
+  '
+- '# 第 4 章 构建用户界面
+
+
+  让我们通过将`BorderPane`元素从`Containers`选项卡拖到屏幕中央来开始创建前端场景。您的屏幕应如图 4-6 所示。
+
+
+  **图 4-6.** 添加`BorderPane`
+
+
+  ![](img/index-70_1.jpg)
+
+
+  请注意`Hierarchy`选项卡中的`BorderPane`元素及其子元素。接下来，从`Controls`选项卡中拖出一个`MenuBar`，并将其放入`BorderPane`的`TOP`子元素中，如图
+  4-7 所示。
+
+
+  **图 4-7.** 添加`MenuBar`
+
+
+  ![](img/index-71_1.jpg)
+
+
+  如果您点击`MenuBar`元素旁边的`+`号，您会注意到它自带了三个名为`File`、`Edit`和`Help`的菜单子元素。由于我们只使用`File`子元素，请右键点击`Edit`和`Help`子元素，并从下拉菜单中选择`Delete`来删除它们，如图
+  4-8 所示。
+
+
+  **图 4-8.** 删除部分子菜单
+
+
+  ![](img/index-72_1.jpg)
+
+
+  现在，让我们展开`File`子菜单。在这里，您会注意到我们有一个名为`Close`的嵌套`MenuItem`元素。让我们添加另一个`MenuItem`元素，并将其命名为`Make
+  Transaction`。为此，首先打开`Menu`选项卡，拖出另一个`MenuItem`元素，并将其放置在`Close MenuItem`正上方，如图 4-9
+  所示。
+
+
+  **图 4-9.** 添加元素
+
+
+  在拖拽`MenuItem`元素时，请注意橙色线条，它将帮助您可视化放置元素的位置。
+
+
+  您会注意到这个`MenuItem`默认被命名为`Unspecified Action`。让我们通过在`Hierarchy`选项卡中点击它来选择此元素，然后展开`Properties`选项卡。您会注意到一个名为`text`的属性，其文本值为`Unspecified
+  Action`。让我们将此值更改为`Make Transaction`，这将有效地重命名我们的元素。最终结果应如图 4-10 所示。
+
+
+  ![](img/index-74_1.jpg)
+
+
+  **图 4-10.** 重命名文本元素
+
+
+  ![](img/index-75_1.jpg)
+
+
+  ![](img/index-75_2.jpg)
+
+
+  **练习 4-1**
+
+
+  将名为`File`的`Menu`元素重命名为`Menu`，将`MenuItem`元素`Close`重命名为`Exit`。
+
+
+  我们已经完成了`MenuBar`及其子元素的工作，现在继续往下进行。接下来，从`Controls`选项卡中添加一个`TableView`元素到`BorderPane`的`CENTER`子元素上。展开`TableView`元素后，您应该会找到两个名为`C1`和`C2`的嵌套`TableColumn`元素。将`TableColumn
+  C2`拖入`TableColumn C1`，这将使`TableColumn C2`成为`TableColumn C1`的子元素。如果操作正确，您的层次结构应如图
+  4-11 所示。
+
+
+  **图 4-11.** 两个嵌套的`TableColumn`元素
+
+
+  ![](img/index-76_1.jpg)
+
+
+  让我们再从`Controls`选项卡中添加四个`TableColumn`元素作为`TableColumn C1`的嵌套元素。在我们要创建的此表格视图中，我们希望能够显示当前的区块交易及其关联的详细信息，因此我们应该相应地重命名表格列：将`C1`重命名为`Current
+  Block Transactions`，然后按顺序将嵌套的表格列命名为：`From`、`To`、`Value`、`Signature`和`Created On`。如果一切操作正确，您的屏幕应如图
+  4-12 所示。
+
+
+  **图 4-12.** 完成的表格列
+
+
+  ![](img/index-77_1.jpg)
+
+
+  您很可能已经注意到，我们表格列的宽度并未覆盖整个屏幕区域。要修复表格列的宽度，请选择`TableView`元素，进入其`Properties`选项卡，找到`Column
+  Resize Policy`属性，并选择`constrained-resize`，如图 4-13 所示。
+
+
+  **图 4-13.** 调整表格列的大小
+
+
+  我们的下一个任务是添加一些元素，用于显示我们的硬币余额、公钥/钱包地址，以及一个用于刷新用户界面并检索有关交易和余额最新信息的按钮。我们将通过将另一个`BorderPane`从`Containers`选项卡拖入现有`BorderPane`的`BOTTOM`部分来实现此目的。
+
+
+  这个新的`BorderPane`将自带其自己的`TOP`、`LEFT`、`CENTER`、`RIGHT`和`BOTTOM`部分。换句话说，这个新的`BorderPane`将第一个`BorderPane`的底部区域细分为五个新区域，如图
+  4-14 所示。
+
+
+  ![](img/index-78_1.jpg)
+
+
+  ![](img/index-78_2.jpg)
+
+
+  **图 4-14.** 新`BorderPane`
+
+
+  这将使我们能够将前面提到的元素放置到各自独立的部分中，这有助于组织我们的层次结构。
+
+
+  现在，让我们将`AnchorPane`从`Containers`选项卡插入到新`BorderPane`的`LEFT`、`CENTER`和`RIGHT`部分，如图
+  4-15 所示。
+
+
+  **图 4-15.** 插入`AnchorPane`
+
+
+  ![](img/index-79_1.jpg)
+
+
+  ![](img/index-79_2.jpg)
+
+
+  `AnchorPane`允许我们只需将元素拖拽到不同位置，即可调整其视觉位置。现在，让我们将`Label`和`TextField`元素从`Controls`选项卡拖放到我们的`LEFT`部分的`AnchorPane`中。完成后，您会注意到可以通过在视图屏幕上直接拖拽来轻松地重新定位它们。图
+  4-16 展示了您的层次结构应如何呈现，以及在视图屏幕上拖拽和对齐元素的能力。
+
+
+  **图 4-16.** 重新定位元素
+
+
+  **练习 4-2**
+
+
+  将名为`label`的`label`元素重命名为`Your Balance:`，并重新定位它和`textField`元素，使其在视觉上看起来更美观。
+
+
+  ![](img/index-80_1.jpg)
+
+
+  ![](img/index-80_2.jpg)
+
+
+  接下来，让我们将一个`Label`和`TextArea`元素从`Controls`选项卡拖放到`CENTER`部分的`AnchorPane`中，并将一个`Button`元素从同一选项卡拖放到`RIGHT`部分的`AnchorPane`中。您的层次结构应如图
+  4-17 所示。
+
+
+  **图 4-17.** 将`Label`和`TextArea`添加到`CENTER`
+
+
+  **练习 4-3**
+
+
+  将名为`label`的`label`元素重命名为`Your Address / Public Key:`，将名为`Button`的`Button`重命名为`Refresh`，然后重新定位它们，使其在视觉上更美观。
+
+
+  在图 4-18 中，您可以看到包含展开的层次结构的完整场景 UI/UX 设计。这是一张很好的图，可以供您检查自己的场景中是否遗漏了某些内容。
+
+
+  ![](img/index-81_1.jpg)
+
+
+
+
+  ### 图 4-18. 场景的完整 UX/UI 设计
+
+
+  如果你现在从 IntelliJ 打开 `MainWindow.fxml` 文件，你会注意到 Scene Builder 已自动用相应的 FXML 代码填充了它。请记住，你需要先在
+  Scene Builder 中保存更改，FXML 文件中的代码才会生成。此外，如果你打算手动修改 FXML 文件，请确保在 Scene Builder 中保存最新更改并退出；否则，你可能会使
+  Scene Builder 的工作与本地文件不同步，从而丢失部分更改。
+
+
+  到目前为止，我们只处理了场景的视觉设计。
+
+
+  所有元素都已按照我们想要的方式定位，但我们现在缺少的是对后端方法和字段的引用，以便我们能够使用它们。首先，让我们添加此场景未来控制器类的文件路径。这将在应用程序中创建视图与其控制器之间的链接。换句话说，应用程序将尝试找到并运行/显示我们将在视图中引用的、来自其对应控制器类的任何方法或字段。要添加控制器类的文件路径，请打开屏幕左下角的“Controller”选项卡，并在“Controller
+  class”文本字段中输入它，如图 4-19 所示。
+
+
+  ![](img/index-82_1.jpg)
+
+  ![](img/index-82_2.jpg)
+
+
+  第 4 章 构建 UI
+
+
+  ### 图 4-19. 添加控制器类的文件路径
+
+
+  现在，让我们为刷新按钮添加一个方法引用，该方法将在我们点击按钮时被调用。为此，选择我们的刷新按钮，展开屏幕右下角的“Code”选项卡，并在“On Action”文本字段中输入方法名称，即
+  `refresh`，如图 4-20 所示。
+
+
+  ### 图 4-20. 添加刷新按钮
+
+
+  ![](img/index-83_1.jpg)
+
+
+  第 4 章 构建 UI
+
+
+  接下来，让我们添加对公钥字段的引用，以便我们可以在 TextArea 中显示它。选中 TextArea，然后在“Code”选项卡中找到 `fx:id` 字段；将其命名为
+  `publicKey`，如图 4-21 所示。
+
+
+  ### 图 4-21. 添加对公钥字段的引用
+
+
+  我们将用于显示硬币余额的 TextField 命名为 `eCoins`，如图 4-22 所示。
+
+
+  ![](img/index-84_1.jpg)
+
+  ![](img/index-84_2.jpg)
+
+
+  第 4 章 构建 UI
+
+
+  ### 图 4-22. 命名硬币余额字段
+
+
+  现在我们已经向你展示了如何添加控制器引用，你应该能够自己完成其余部分的添加。
+
+
+  **练习 4-4**
+
+
+  为第一个 BorderPane 的 `fx:id` 字段添加引用，命名为 `borderPane`；为 tableView 添加引用，命名为 `tableview`；为
+  From 列添加引用，命名为 `from`；为 to 列添加引用，命名为 `to`；为 Value 列添加引用，命名为 `value`；为 Signature
+  列添加引用，命名为 `signature`；为 Created On 列添加引用，命名为 `timestamp`。
+
+
+  **注意：** 这些值是区分大小写的，请确保完全按照所示添加。
+
+
+  ![](img/index-85_1.jpg)
+
+
+  第 4 章 构建 UI
+
+
+  **练习 4-5**
+
+
+  为“Make transaction”菜单项的“On action”字段添加引用，命名为 `toNewTransactionController`；为“exit”菜单项添加引用，命名为
+  `handleExit`。
+
+
+  **注意：** 这些值是区分大小写的，请确保完全按照所示添加。
+
+
+  请仔细检查你的更改是否与以下代码片段中的 `MainWindow.fxml` 代码或我们仓库中的代码一致：
+
+
+  ```
+
+  1 <?xml version="1.0" encoding="UTF-8"?>
+
+  2
+
+  3 <?import javafx.scene.control.Button?>
+
+  4 <?import javafx.scene.control.Label?>
+
+  5 <?import javafx.scene.control.Menu?>
+
+  6 <?import javafx.scene.control.MenuBar?>
+
+  7 <?import javafx.scene.control.MenuItem?>
+
+  8 <?import javafx.scene.control.TableColumn?>
+
+  9 <?import javafx.scene.control.TableView?>
+
+  10 <?import javafx.scene.control.TextArea?>
+
+  11 <?import javafx.scene.control.TextField?>
+
+  12 <?import javafx.scene.layout.AnchorPane?>
+
+  13 <?import javafx.scene.layout.BorderPane?>
+
+  14
+
+  15 <BorderPane fx:id="borderPane" maxHeight="-Infinity"
+
+  ```
+
+
+
+
+  '
+- "# 第 4 章 构建用户界面\n\n`maxWidth=\"-Infinity\"` `minHeight=\"-Infinity\"` `minWidth=\"\
+  -Infinity\"`\n\n`prefHeight=\"500.0\"` `prefWidth=\"800.0\"`\n\n`fx:controller=\"\
+  com.company.Controller.MainWindowController\"`\n\n```\n<top>\n    <MenuBar prefHeight=\"\
+  25.0\" prefWidth=\"800.0\" BorderPane.alignment=\"CENTER\">\n        <menus>\n \
+  \           <Menu mnemonicParsing=\"false\" text=\"菜单\">\n                <items>\n\
+  \                    <MenuItem mnemonicParsing=\"false\" onAction=\"#toNewTransactionController\"\
+  \ text=\"发起交易\" />\n                    <MenuItem mnemonicParsing=\"false\" onAction=\"\
+  #handleExit\" text=\"退出\" />\n                </items>\n            </Menu>\n  \
+  \      </menus>\n    </MenuBar>\n</top>\n<center>\n    <TableView fx:id=\"tableview\"\
+  \ prefHeight=\"406.0\" prefWidth=\"800.0\" BorderPane.alignment=\"CENTER\">\n  \
+  \      <columns>\n            <TableColumn prefWidth=\"75.0\" text=\"当前区块交易\">\n\
+  \                <columns>\n                    <TableColumn fx:id=\"from\" prefWidth=\"\
+  160\" text=\"来源\" />\n                    <TableColumn fx:id=\"to\" prefWidth=\"\
+  160\" text=\"去向\" />\n                    <TableColumn fx:id=\"value\" prefWidth=\"\
+  160\" text=\"数值\" />\n                    <TableColumn fx:id=\"signature\" prefWidth=\"\
+  160\" text=\"签名\" />\n                    <TableColumn fx:id=\"timestamp\" prefWidth=\"\
+  160\" text=\"创建时间\" />\n                </columns>\n            </TableColumn>\n\
+  \        </columns>\n        <columnResizePolicy>\n            <TableView fx:constant=\"\
+  CONSTRAINED_RESIZE_POLICY\" />\n        </columnResizePolicy>\n    </TableView>\n\
+  </center>\n<bottom>\n    <BorderPane prefHeight=\"69.0\" prefWidth=\"800.0\">\n\
+  \        <center>\n            <AnchorPane prefHeight=\"83.0\" prefWidth=\"269.0\"\
+  \ BorderPane.alignment=\"CENTER\">\n                <children>\n               \
+  \     <Label layoutY=\"4.0\" prefHeight=\"17.0\" prefWidth=\"149.0\" text=\"你的地址/公钥：\"\
+  \ />\n                    <TextArea fx:id=\"publicKey\" editable=\"false\" layoutY=\"\
+  23.0\" prefHeight=\"36.0\" prefWidth=\"416.0\" />\n                </children>\n\
+  \            </AnchorPane>\n        </center>\n        <left>\n            <AnchorPane\
+  \ prefHeight=\"56.0\" prefWidth=\"136.0\" BorderPane.alignment=\"CENTER\">\n   \
+  \             <children>\n                    <Label layoutX=\"6.0\" layoutY=\"\
+  6.0\" prefHeight=\"17.0\" prefWidth=\"84.0\" text=\"你的余额：\" />\n               \
+  \     <TextField fx:id=\"eCoins\" editable=\"false\" layoutX=\"6.0\" layoutY=\"\
+  23.0\" prefHeight=\"25.0\" prefWidth=\"125.0\" />\n                </children>\n\
+  \            </AnchorPane>\n        </left>\n        <right>\n            <AnchorPane\
+  \ prefHeight=\"200.0\" prefWidth=\"200.0\" BorderPane.alignment=\"CENTER\">\n  \
+  \              <children>\n                    <Button layoutX=\"113.0\" layoutY=\"\
+  20.0\" mnemonicParsing=\"false\" nodeOrientation=\"LEFT_TO_RIGHT\" onAction=\"#refresh\"\
+  \ prefHeight=\"30.0\" prefWidth=\"67.0\" text=\"刷新\" textAlignment=\"CENTER\" />\n\
+  \                </children>\n            </AnchorPane>\n        </right>\n    </BorderPane>\n\
+  </bottom>\n```\n\n![](img/index-89_1.jpg)\n\n![](img/index-89_2.jpg)\n\n完成练习后，我们的主窗口场景就彻底完工了。如果在\
+  \ IntelliJ 中打开该文件，会显示一些错误提示，因为我们添加的引用尚不存在——不过我们将在后续章节中解决这个问题。\n\n### 4.2.2 AddNewTransactionWindow.fxml\n\
+  \n由于到目前为止，我们已经讲解了在 Scene Builder 中创建视图所需的一切知识，现在是时候通过完成以下练习，来创建本节所对应的场景了。\n\n**练习\
+  \ 4-6**\n\n在 Scene Builder 中新建一个文件，并将其保存到与之前场景相同的文件夹结构中。将该文件命名为 `AddNewTransactionWindow.fxml`。\n\
+  \n**练习 4-7**\n\n按照图 4-23 所示的层级结构和外观创建场景。将控制器类路径设置为 `com.company.Controller.AddNewTransactionController`。\n\
+  \n![](img/index-90_1.jpg)\n\n![](img/index-90_2.jpg)\n\n![](img/index-90_3.jpg)\n\
+  \n![](img/index-90_4.jpg)\n\n***图 4-23.** 添加控制器类*\n\n**练习 4-8**\n\n将控制器类路径设置为 `com.company.Controller.AddNewTransactionController`。\n\
+  \n**练习 4-9**\n\n为以下控件的 `fx:id` 字段添加引用：接收地址 `textField` 命名为 `toAddress`，金额 `textField`\
+  \ 命名为 `value`。\n\n\n\n### 练习 4-10\n\n将`createNewTransaction`的引用添加到`发送交易`按钮的`On action`字段中。\n\
+  \n## 第四章 构建用户界面\n\n请仔细检查您的更改是否与以下代码片段中的`AddNewTransactionWindow.fxml`代码一致，或者您可以在我们的仓库中找到该文件：\n\
+  \n```xml\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<?import javafx.scene.control.Button?>\n\
+  <?import javafx.scene.control.DialogPane?>\n<?import javafx.scene.control.Label?>\n\
+  <?import javafx.scene.control.TextField?>\n<?import javafx.scene.layout.AnchorPane?>\n\
+  <?import javafx.scene.text.Font?>\n<DialogPane prefHeight=\"266.0\" prefWidth=\"\
+  667.0\"\nxmlns:fx=\"http://javafx.com/fxml/1\" fx:controller=\"com.company.Controller.AddNewTransactionController\"\
+  >\n<content>\n<AnchorPane minHeight=\"0.0\" minWidth=\"0.0\"\nprefHeight=\"250.0\"\
+  \ prefWidth=\"657.0\">\n<children>\n<TextField fx:id=\"toAddress\"\nlayoutX=\"14.0\"\
+  \ layoutY=\"144.0\" />\n<TextField fx:id=\"value\"\nlayoutX=\"178.0\" layoutY=\"\
+  144.0\" />\n<Label layoutX=\"14.0\" layoutY=\"121.0\"\ntext=\"目标地址\" />\n<Label\
+  \ layoutX=\"178.0\" layoutY=\"121.0\"\ntext=\"金额\" />\n<Label layoutX=\"43.0\" layoutY=\"\
+  28.0\"\ntext=\"添加新交易\">\n![](img/index-92_1.jpg)\n<font>\n<Font size=\"18.0\" />\n\
+  </font>\n</Label>\n<Button layoutX=\"447.0\" layoutY=\"189.0\"\nmnemonicParsing=\"\
+  false\"\nonAction=\"#createNewTransaction\"\ntext=\"发送交易\" />\n</children>\n</AnchorPane>\n\
+  </content>\n</DialogPane>\n```\n\n## 4.3 创建视图控制器\n\n一旦我们的视图类完成，就该创建它们的控制器了。我们将首先在与`View`文件夹相同的路径中添加一个名为`Controller`的文件夹，如图\
+  \ 4-24 所示。\n\n**图 4-24.** 添加文件夹\n\n![](img/index-93_1.jpg)\n\n在继续解释控制器中的代码之前，让我们快速下载并安装一个名为`Base64`的编码器库，它将帮助我们将以字节数组形式存储的公钥转换为字符串，反之亦然。这一点很重要，因为标准的\
+  \ Java 编码器在将字节数组转换为字符串时会更改字节数组的内容，这会使它们作为公钥无效。要安装`Base64`库，请访问[`migbase64.sourceforge.net/`](http://migbase64.sourceforge.net/)并进行下载。下载后，我们需要解压并将其放置在与`SQLite`驱动程序相邻的`libs`文件夹中，如图\
+  \ 4-25 所示。\n\n**图 4-25.** 安装名为`Base64`的编码器库\n\n### 4.3.1 MainWindowController\n\n\
+  让我们观察以下代码片段中`MainWindowController`类的导入部分：\n\n```java\n1 package com.company.Controller;\n\
+  2 \n3 import com.company.Model.Transaction;\n4 import com.company.ServiceData.BlockchainData;\n\
+  5 import com.company.ServiceData.WalletData;\n6 import javafx.application.Platform;\n\
+  7 import javafx.fxml.FXML;\n8 import javafx.fxml.FXMLLoader;\n9 import javafx.scene.control.*;\n\
+  10 import javafx.scene.control.cell.PropertyValueFactory;\n11 import javafx.scene.layout.BorderPane;\n\
+  12 \n13 import java.io.IOException;\n14 import java.util.Base64;\n15 import java.util.Optional;\n\
+  ```\n\n接下来，让我们查看以下代码片段中的类字段并进行解释：\n\n```java\n17 public class MainWindowController\
+  \ {\n18     //这是一个只读的 UI 表格\n19     @FXML\n20     public TableView<Transaction>\
+  \ tableview = new TableView<>();\n21     @FXML\n22     private TableColumn<Transaction,\
+  \ String> from;\n23     @FXML\n24     private TableColumn<Transaction, String> to;\n\
+  25     @FXML\n26     private TableColumn<Transaction, Integer> value;\n27     @FXML\n\
+  28     private TableColumn<Transaction, String> timestamp;\n29     @FXML\n30   \
+  \  private TableColumn<Transaction, String> signature;\n31     @FXML\n32     private\
+  \ BorderPane borderPane;\n33 @FXML\n```\n\n\n\n"
+- '# 第 4 章 构建用户界面
+
+
+  您还记得在 `MainWindow.fxml` 部分，我们如何为控制器类中的字段添加了 `fx:id` 引用吗？
+
+
+  现在我们来创建这些字段。所有这些字段的类都来自 `javafx` 包，该包已包含在您的 Java SDK 中。我们需要使用 `@FXML` 标签注释每个元素，并将每个字段命名为与
+  `fx:id` 引用相同的名称。如果操作正确，行号旁边会出现一个图标，点击它会直接跳转到 FXML 文件中引用该字段的确切位置。同时要确保字段的类与我们选择的
+  FXML 文件中的元素类型相对应。
+
+
+  接下来，我们来看下面的代码片段，将讨论控制器中的 `initialize()` 方法：
+
+
+  ```java
+
+  34 private TextField eCoins;
+
+  35 @FXML
+
+  36 private TextArea publicKey;
+
+  38 public void initialize() {
+
+  39     Base64.Encoder encoder = Base64.getEncoder();
+
+  40     from.setCellValueFactory(new PropertyValueFactory<>("fromFX"));
+
+  41     to.setCellValueFactory(new PropertyValueFactory<>("toFX"));
+
+  42     value.setCellValueFactory(new PropertyValueFactory<>("value"));
+
+  43     signature.setCellValueFactory(new PropertyValueFactory<>("signatureFX"));
+
+  44     timestamp.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
+
+  45     eCoins.setText(BlockchainData.getInstance().getWalletBallanceFX());
+
+  46     publicKey.setText(encoder.encodeToString(
+
+  47         WalletData.getInstance().getWallet().getPublicKey().getEncoded()));
+
+  48     tableview.setItems(BlockchainData.getInstance().getTransactionLedgerFX());
+
+  49     tableview.getSelectionModel().select(0);
+
+  50 }
+
+  ```
+
+
+  在第 39 行，我们初始化了 `Base64.Encoder` 编码器。在第 40–49 行，我们为表格列创建了单元格值工厂。换句话说，我们引用了表格视图所包含的类中的字段值，以便在相应的列中显示。在第
+  50 行，我们设置了要显示的硬币余额。这里您会注意到我们使用了服务层的方法来实现这一点，我们将在下一章中详细解释。第 51 行使用 `Base64.Encoder`
+  来编码我们的公钥，通过服务层类将其作为字节数组检索，并转换为字符串进行显示。在第 52 行，我们通过服务层方法 `BlockchainData.getInstance().getTransactionLedgerFX()`
+  检索要显示的交易，然后将其设置到 `tableview` 中进行显示。最后，第 53 行默认选中第一条交易。
+
+
+  接下来，我们来看最后一个代码片段，并解释剩余的方法：
+
+
+  ```java
+
+  56 @FXML
+
+  57 public void toNewTransactionController() {
+
+  58     Dialog<ButtonType> newTransactionController = new Dialog<>();
+
+  59     newTransactionController.initOwner(borderPane.getScene().getWindow());
+
+  60     FXMLLoader fxmlLoader = new FXMLLoader();
+
+  61     fxmlLoader.setLocation(getClass().getResource("../View/AddNewTransactionWindow.fxml"));
+
+  62     try {
+
+  63         newTransactionController.getDialogPane().setContent(fxmlLoader.load());
+
+  64     } catch (IOException e) {
+
+  65         System.out.println("Cant load dialog");
+
+  66         e.printStackTrace();
+
+  67         return;
+
+  68     }
+
+  69     newTransactionController.getDialogPane().getButtonTypes().add(ButtonType.FINISH);
+
+  70     Optional<ButtonType> result = newTransactionController.showAndWait();
+
+  71     if (result.isPresent()) {
+
+  72         tableview.setItems(BlockchainData.getInstance().getTransactionLedgerFX());
+
+  73         eCoins.setText(BlockchainData.getInstance().getWalletBallanceFX());
+
+  74     }
+
+  75 }
+
+  77 @FXML
+
+  78 public void refresh() {
+
+  79     tableview.setItems(BlockchainData.getInstance().getTransactionLedgerFX());
+
+  80 }
+
+  ```
+
+
+
+
+  80 `tableview.getSelectionModel().select(0);`
+
+  81 `eCoins.setText(BlockchainData.getInstance().getWalletBallanceFX());`
+
+
+  82 `}`
+
+
+  84 `@FXML`
+
+  85 `public void handleExit() {`
+
+
+  ![index-98_1.jpg](img/index-98_1.jpg)
+
+
+  '
+- '# 第 4 章 构建用户界面
+
+
+  86 `BlockchainData.getInstance().setExit(true);`
+
+  87 `Platform.exit();`
+
+
+  88 `}`
+
+
+  89 `}`
+
+
+  你会注意到，和我们的字段一样，所有方法都是我们在关联的 FXML 文件中引用的，因此我们还需要使用 `@FXML` 标签对其进行注解。
+
+
+  **重要提示！** 最佳实践是：控制器类中只包含视图所使用的字段和方法。任何其他可能需要的计算或方法，都应通过服务层进行调用和处理。
+
+
+  让我们从第 57 行的第一个方法 `toNewTransactionController()` 开始。回顾一下，我们在 `On Action` 字段中将此方法与名为
+  `Make Transaction` 的 `MenuItem` 关联了起来。这意味着一旦我们点击该菜单项，此方法就会执行。我们希望这个方法能够打开一个新对话框，并在其中显示
+  `AddNewTransactionController.fxml` 文件的内容。第 58 到 68 行实现了这一功能。
+
+
+  第 69 行会创建一个 `FINISH` 按钮，第 70 行则创建了一个监听器，等待该按钮被点击。第 71 到 74 行在 `FINISH` 按钮被点击后刷新我们的交易列表和货币余额。
+
+
+  在第 78 到 83 行，我们定义了 `refresh()` 方法，该方法在刷新按钮中被引用。换句话说，一旦点击刷新按钮，就会触发 refresh 方法，该方法会利用我们的服务层来刷新交易和余额信息。
+
+
+  最后，第 87 行的 `handleExit()` 方法设置了一个 `布尔值`，该值将触发所有并行线程退出其循环并结束运行，而第 88 行则告知我们的 UI 线程结束运行。
+
+
+  '
+- '# 第 4 章 构建用户界面
+
+
+  ### 4.3.2 AddNewTransactionController
+
+
+  让我们看一下 `AddNewTransactionController.fxml` 中第二个控制器的代码，如下面的代码片段所示：
+
+
+  ```
+
+  1 package com.company.Controller;
+
+
+  3 import com.company.Model.Transaction;
+
+  4 import com.company.ServiceData.BlockchainData;
+
+  5 import com.company.ServiceData.WalletData;
+
+  6 import javafx.fxml.FXML;
+
+  7 import javafx.scene.control.TextField;
+
+
+  9 import java.security.GeneralSecurityException;
+
+  10 import java.security.Signature;
+
+  11 import java.util.Base64;
+
+
+  13 public class AddNewTransactionController {
+
+
+  15 @FXML
+
+  16 private TextField toAddress;
+
+  17 @FXML
+
+  18 private TextField value;
+
+
+  20 @FXML
+
+  21 public void createNewTransaction()
+
+  22 throws GeneralSecurityException {
+
+  23 Base64.Decoder decoder = Base64.getDecoder();
+
+  24 Signature signing =
+
+  25 Signature.getInstance("SHA256withDSA");
+
+  26 Integer ledgerId = BlockchainData.getInstance()
+
+  27 .getTransactionLedgerFX().get(0).getLedgerId();
+
+  28 byte[] sendB = decoder.decode(toAddress.getText());
+
+  29 Transaction transaction =
+
+  30 new Transaction(WalletData.getInstance()
+
+  31 .getWallet(), sendB, Integer.parseInt(
+
+  32 value.getText()), ledgerId, signing);
+
+  33 BlockchainData.getInstance()
+
+  34 .addTransaction(transaction,false);
+
+  35 BlockchainData.getInstance()
+
+  36 .addTransactionState(transaction);
+
+  37 }
+
+  38 }
+
+  ```
+
+
+  如你所见，它遵循了类似的设计模式。它只包含视图中引用的字段和方法，并适当地为它们添加了注解。我们来解释一下 `createNewTransaction()` 方法中的代码。第
+  22 和 23 行从我们的辅助类中实例化了对象。
+
+
+  第 24 行在点击按钮时获取当前的 `ledgerId`。
+
+
+  在第 25 行，我们使用 `Base64` 对象将地址从字符串转换回字节数组，以便第 26 和 27 行可以用它来创建新交易。在第 28 行，我们调用服务层将此交易添加到数据库的当前区块中。在第
+  29 行，我们调用服务层来调整当前应用状态，以包含此交易。
+
+
+  '
+- '# 第 4 章 构建用户界面
+
+
+  ## 4.4 小结
+
+
+  在本章中，我们介绍了如何创建前端用户界面及其对应的控制器。我们学习了如何使用 Scene Builder 快速创建场景的模型，并为后端创建引用。我们还学习了如何创建控制器类以及如何恰当地设计它们。
+
+
+  以下是我们目前已涵盖概念的简要回顾：
+
+
+  -   使用 Scene Builder 创建 FXML 文件
+
+  -   在应用的前端和后端之间创建对象和方法引用
+
+  -   使用 java 和 javafx 创建控制器类
+
+  -   搭建并使用 Base64 外部库编码器
+
+  -   在考虑关注点分离的情况下设计控制器类
+
+  -   在 javafx 中创建对话窗格
+
+
+  ![index-102_1.png](img/index-102_1.png)
+
+
+  ## 第 5 章
+
+
+  ## 搭建网络与多线程
+
+
+  *《联网》，作者：Filip Rizov*
+
+
+  © Spiro Buzharovski 2022
+
+
+  S. Buzharovski, *Introducing Blockchain with Java*,
+
+
+  [`doi.org/10.1007/978-1-4842-7927-4_5`](https://doi.org/10.1007/978-1-4842-7927-4_5#DOI)
+
+
+  '
+- '# 第 5 章 搭建网络与多线程
+
+
+  本章将介绍如何创建网络层；我们将解释多个线程各自的创建过程、功能以及它们如何融入我们的应用。在这里，我们会阐述每个线程存在的必要性，以及如何使用其中一些线程来创建一个点对点网络，在该网络中传输区块链数据并达成区块共识。本章将使用标准的
+  Java 和 Javafx 库，这将帮助你了解实现的每一个细节。在开始本章之前，如果你对 Java 线程的主题不熟悉，可以访问 [`www.javatpoint.com/thread-concept-in-java`](https://www.javatpoint.com/thread-concept-in-java)
+  查找一个快速教程，它将帮助你掌握基本概念。
+
+
+  ## 5.1 UI 线程
+
+
+  由于我们在上一章讨论了 UI 的创建，那就先从 UI 线程开始吧。UI 线程的职责是加载 UI，然后等待并监听任何用户交互。为了使 UI 具有响应性，UI 线程需要主动监听用户输入。为了让
+  UI 线程能够进行等待和监听，我们必须将任何持续运行的操作（例如挖矿或向对等节点发送请求）转移到其他线程中。这个线程相当简单，主要包含一些来自 javafx 包的标准样板代码。让我们看看下面的代码片段：
+
+
+  ```
+
+  1 package com.company.Threads;
+
+
+  3 import javafx.application.Application;
+
+  4 import javafx.fxml.FXMLLoader;
+
+  5 import javafx.scene.Parent;
+
+  6 import javafx.scene.Scene;
+
+  7 import javafx.stage.Stage;
+
+
+  9 import java.io.IOException;
+
+
+  11 public class UI extends Application {
+
+
+  13 @Override
+
+  14 public void start(Stage stage) {
+
+  15 Parent root = null;
+
+  16 try {
+
+  17 root = FXMLLoader.load(getClass()
+
+  18 .getResource("../View/MainWindow.fxml"));
+
+  19 } catch (IOException e) {
+
+  20 e.printStackTrace();
+
+  21 }
+
+  22 stage.setTitle("E-Coin");
+
+  23 stage.setScene(new Scene(root, 900, 700));
+
+  24 stage.show();
+
+  25 }
+
+  26 }
+
+  ```
+
+
+
+
+  由于我们将在此线程中运行 `javafx` 应用程序的 `Stage` 对象，因此实际会继承 `javafx.application` 包中的 `Application`
+  类线程，而非 `java.lang` 库中的标准 `Thread` 类。在此线程中，我们只需重写 `start` 方法，并将剩余逻辑插入其中。`Stage` 对象将从我们的主
+  `ECoin` 线程传递过来。在第 17 行，我们使用从 UI 线程位置到首个屏幕（即 `MainWindow.fxml`）位置的相对文件夹路径来设置根路径。第
+  21–23 行用于设置并显示 UI 的初始场景。如图 5-1 所示，UI 和所有其他线程均位于 `Threads` 文件夹中。
+
+
+  ![](img/index-105_1.jpg)
+
+
+  **图 5-1.** *`Threads` 文件夹*
+
+
+  ## 5.2 挖矿线程
+
+
+  挖矿线程的目标是处理应用程序的所有挖矿操作。只要应用程序在运行，它就需要持续运行，并确保在适当的时间间隔内创建新区块。此外，由于我们将使用挖矿积分作为达成区块共识的方法，因此该线程还需要跟踪积分。我们的挖矿线程首先会检查当前区块链是否为最新版本，然后在精确的时间间隔内启动新区块的挖矿。该线程将每两秒循环一次。
+
+
+  让我们看看下一个代码片段中 `MiningThread` 类的代码：
+
+
+  ```
+
+  1 package com.company.Threads;
+
+  2
+
+  3 import com.company.ServiceData.BlockchainData;
+
+  4
+
+  5 import java.time.LocalDateTime;
+
+  6 import java.time.ZoneOffset;
+
+  7
+
+  8 public class MiningThread extends Thread {
+
+  9
+
+  10     @Override
+
+  11     public void run() {
+
+  12         while (true) {
+
+  13             long lastMinedBlock = LocalDateTime.parse(
+
+  14                 BlockchainData.getInstance()
+
+  15                     .getCurrentBlockChain().getLast()
+
+  16                     .getTimeStamp())
+
+  17                 .toEpochSecond(ZoneOffset.UTC);
+
+  18             if ((lastMinedBlock + BlockchainData
+
+  19                     .getTimeoutInterval()) <
+
+  20                     LocalDateTime.now().toEpochSecond(
+
+  21                         ZoneOffset.UTC)) {
+
+  22                 System.out.println("区块链过于陈旧，无法挖矿！请从对等节点更新");
+
+  23             } else if (((lastMinedBlock + BlockchainData
+
+  24                     .getMiningInterval()) -
+
+  25                     LocalDateTime.now().toEpochSecond(
+
+  26                         ZoneOffset.UTC)) > 0) {
+
+  27                 System.out.println("区块链为最新状态，挖矿将在 " +
+
+  28                     ((lastMinedBlock + BlockchainData
+
+  29                         .getMiningInterval()) -
+
+  30                         LocalDateTime.now()
+
+  31                             .toEpochSecond(ZoneOffset.UTC)) +
+
+  32                     " 秒后开始");
+
+  33             } else {
+
+  34                 System.out.println("正在挖取新区块");
+
+  35                 BlockchainData.getInstance().mineBlock();
+
+  36                 System.out.println(BlockchainData
+
+  37                     .getInstance().getWalletBallanceFX());
+
+  38             }
+
+  39             System.out.println(LocalDateTime
+
+  40                 .parse(BlockchainData.getInstance()
+
+  41                     .getCurrentBlockChain().getLast()
+
+  42                     .getTimeStamp())
+
+  43                 .toEpochSecond(ZoneOffset.UTC));
+
+  44             try {
+
+  45                 Thread.sleep(2000);
+
+  46                 if (BlockchainData.getInstance()
+
+  47                         .isExit()) { break; }
+
+  48                 BlockchainData.getInstance().setMiningPoints(
+
+  49                     BlockchainData.getInstance()
+
+  50                         .getMiningPoints() + 2);
+
+  51             } catch (InterruptedException e) {
+
+  52                 e.printStackTrace();
+
+  53             }
+
+  54         }
+
+  55     }
+
+  56 }
+
+  ```
+
+
+  我们的 `MiningThread` 类继承自 `java.lang` 包中的 `Thread` 类。我们重写了 `run()` 方法来定义该线程将要运行的逻辑。在第
+  12 行，我们设置了一个带 `true` 参数的 `while` 循环，这意味着只要应用程序在运行，我们就会重复执行此方法中的操作。在第 13 和第 14 行，我们设置了一个字段，其值为上次挖出区块的日期（以秒为单位）。
+
+
+  为此，我们使用了 `BlockchainData` 类，该类属于我们的服务层，我们将在下一章解释如何创建它。为了避免代码负担过重，应用程序不会处理不同时区；因此，我们将使用标准的
+  `ZoneOffset.UTC` 常量。第 15 行的第一个 `if` 语句检查自上次挖出区块以来是否已超过 65 秒（即我们在 `BlockchainData`
+  类中设置的超时间隔，将在第 6 章讨论）。这意味着区块链过于陈旧，在获取最新版本之前尝试挖矿毫无意义。因此，在这种情况下，我们在控制台打印第 16 行的消息。如果第一个
+  `if` 语句为假，则第 17 行的 `else if` 语句检查自上次挖出区块以来是否少于 60 秒（即挖矿间隔，也将在第 6 章讨论）。如果为真，我们将打印到
+  60 秒之前的剩余时间。如果执行到第 20 行的 `else` 语句，则意味着我们处于自上次挖出区块后的 60 到 65 秒时间窗口内，是时候挖（创建）另一个区块了。第
+  22 行再次使用服务层调用挖矿方法，第 23 行再次通过服务层将新钱包余额打印到控制台。在第 25 和 26 行，无论之前控制流语句的结果如何，我们都会将上次挖出区块的时间打印到控制台，以保持清晰。
+
+
+  由于该线程无需尽可能快地循环，我们在第 28 行调用线程休眠两秒，这实际上使该线程每两秒重复一次。我们将挖矿积分的获取速率设置为每秒 1 分；因此，在第 29
+  行，每等待两秒，我们就增加两个挖矿积分。
+
+
+  **练习 5-1**
+
+
+  尝试提出一种更高效的方法来循环此线程。
+
+
+  **提示：** 尝试在多个位置使用不同时间的 `Thread.sleep()` 方法。
+
+
+  **注意：** 确保保持相同的挖矿积分获取速率。
+
+
+  ## 5.3 P2P 网络线程
+
+
+  接下来的小节将解释如何创建用于运行对等网络的线程类。为了创建对等网络，我们需要应用程序同时充当客户端（向其他对等节点发送请求）和服务器（监听并响应其他对等节点的请求）。让我们先从
+  `PeerClient` 类线程开始。
+
+
+  出于本书的考虑，由于安全问题，我们不会将网络暴露到互联网；相反，我们将设置不同的本地端口，模拟网络中的不同对等节点。
+
+
+  ### 5.3.1 PeerClient 线程
+
+
+  我们的 `PeerClient` 线程将遍历预定的对等节点列表，并尝试与它们共享我们的区块链。让我们看看下一个代码片段：
+
+
+  ```
+
+  1 package com.company.Threads;
+
+  2
+
+  3 import com.company.Model.Block;
+
+  4 import com.company.ServiceData.BlockchainData;
+
+  5
+
+  6 import java.io.IOException;
+
+  7 import java.io.ObjectInputStream;
+
+  8 import java.io.ObjectOutputStream;
+
+  9 import java.net.Socket;
+
+  10 import java.net.SocketTimeoutException;
+
+  11 import java.util.LinkedList;
+
+  12 import java.util.Queue;
+
+  13 import java.util.concurrent.ConcurrentLinkedQueue;
+
+  14
+
+  15 public class PeerClient extends Thread {
+
+  16
+
+  17     private Queue<Integer> queue = new ConcurrentLinkedQueue<>();
+
+  18
+
+  19     public PeerClient() {
+
+  20         this.queue.add(6001);
+
+  21         this.queue.add(6002);
+
+  22     }
+
+  23 }
+
+  ```
+
+
+  ![](img/index-111_1.jpg)
+
+
+
+
+  '
+- "# 第 5 章 搭建网络与多线程\n\n在重写`run()`方法之前，我们有一个`queue`字段，用于填充想要连接的对等节点的端口号。如第 19-21 行所示，我们通过构造函数将一些预定端口号填入`queue`。之前提到过，我们将使用本地端口作为对等节点。这意味着我们不需要更改\
+  \ IP 地址来连接不同的对等节点，而是使用本地 IP 地址`127.0.0.1`，通过更改连接的本地端口来实现。\n\n**练习 5-2**\n\n尝试运用已学知识创建一个数据库表来存储端口列表，而不是在此处硬编码端口号。\n\
+  \n加分项：尝试使用`ECoin`类中的`init()`方法以编程方式完成所有设置，而不是手动通过 SQLite 浏览器操作。\n\n我们继续看下一段代码，这里将探索该线程的`run()`方法：\n\
+  \n```java\n24 @Override\n25 public void run() {\n26     while (true) {\n27     \
+  \    try (Socket socket = new Socket(\"127.0.0.1\", queue.peek())) {\n28       \
+  \      System.out.println(\"正在端口 \" + queue.peek() + \"发送区块链对象\");\n29         \
+  \    queue.add(queue.poll());\n30             socket.setSoTimeout(5000);\n31 \n\
+  32             ObjectOutputStream objectOutput =\n33                 new ObjectOutputStream(\n\
+  34                     socket.getOutputStream());\n35             ObjectInputStream\
+  \ objectInput =\n36                 new ObjectInputStream(\n37                 \
+  \    socket.getInputStream());\n38 \n39             LinkedList<Block> blockChain\
+  \ = BlockchainData\n40                 .getInstance().getCurrentBlockChain();\n\
+  41             objectOutput.writeObject(blockChain);\n42 \n43             LinkedList<Block>\
+  \ returnedBlockchain =\n44                 (LinkedList<Block>) objectInput\n45 \
+  \                    .readObject();\n46             System.out.println(\" 返回的 BC\
+  \ 账本 ID = \" +\n47                 returnedBlockchain.getLast()\n48            \
+  \         .getLedgerId() +\n49                 \" 大小= \" + returnedBlockchain.getLast()\n\
+  50                     .getTransactionLedger().size());\n51 \n52             BlockchainData.getInstance()\n\
+  53                 .getBlockchainConsensus(\n54                     returnedBlockchain);\n\
+  55 \n56             Thread.sleep(2000);\n57 \n58         } catch (SocketTimeoutException\
+  \ e) {\n59             System.out.println(\"套接字超时\");\n60             queue.add(queue.poll());\n\
+  61         } catch (IOException e) {\n62             System.out.println(\"客户端错误:\
+  \ \" +\n63                 e.getMessage() + \" -- 端口错误: \" +\n64               \
+  \  queue.peek());\n65             queue.add(queue.poll());\n66         } catch (InterruptedException\
+  \ |\n67                 ClassNotFoundException e) {\n68             e.printStackTrace();\n\
+  69             queue.add(queue.poll());\n70         }\n71     }\n72 }\n73 }\n```\n\
+  \n由于我们需要持续联系其他对等节点并共享区块链，因此像挖矿线程一样，我们将此线程置于连续的`while`循环中。首先来看我们的 try-with-resources\
+  \ 结构。我们从实例化一个套接字开始，使用本地 IP 和`queue`中的第一个端口号。接着在控制台打印一条消息以记录操作，然后在第 29 行将刚刚用于实例化套接字的端口号移动到队列末尾。下一行我们设置了套接字超时。在第\
+  \ 32 和 33 行，我们实例化了`ObjectOutputStream`和`ObjectInputStream`对象。我们将主要使用这些对象提供的方法来发送区块链，然后接收响应的区块链。第\
+  \ 35 行我们使用服务层方法获取区块链对象，下一行使用`objectOutput`将区块链对象发送给对等节点。此时，我们发送的区块链将由对等节点检查并与本地区块链进行比较。当该过程完成后，对等节点将根据其共识方法返回胜出的区块链。我们在第\
+  \ 38 行使用`objectInput`检索此区块链。然而，由于我们不信任对等节点，接下来一行我们将其通过自己的共识算法处理。任何对等节点都可以修改本地机器上的应用程序来尝试发送虚假信息。这就是为什么我们要运行共识算法来验证之前收到的区块链，假设它来自良善节点。这样良善节点就能持续传播并扩展正确的区块链，同时阻止任何共享虚假区块链的尝试。\n\
+  \n我们将在下一章介绍服务层时详细解释共识算法以及验证区块链所采取的步骤。第 40 行我们让线程休眠两秒，然后循环尝试连接下一个对等节点。最后，在这个方法中，查看我们的\
+  \ catch 块也很重要。\n\n到目前为止，只有成功连接到对等节点后，我们才会将端口号发送到队列末尾。然而，如果连接失败，我们也在 catch 块中包含了将当前端口号发送到队列末尾的语句。这确保我们不会卡在尝试连接单个对等节点的过程中。\n\
+  \n**重要提醒！** 请记住，任何对等节点都不应信任其他节点。\n\n### 5.3.2 PeerServer 线程\n\n现在我们来研究响应其他对等节点请求的一端。`PeerServer`线程监听特定端口，接收其他对等节点`PeerClient`线程发来的客户端请求。在我们的实现中，将为每个传入请求创建一个独立的`PeerRequestThread`。这样我们就可以同时处理多个请求。让我们查看以下代码片段：\n\
+  \n```java\n1 package com.company.Threads;\n2 \n4 import java.io.IOException;\n5\
+  \ import java.net.ServerSocket;\n6 \n8 public class PeerServer extends Thread {\n\
+  9 \n10     private ServerSocket serverSocket;\n11 \n12     public PeerServer(Integer\
+  \ socketPort) throws IOException {\n13         this.serverSocket = new ServerSocket(socketPort);\n\
+  14     }\n15 \n16     @Override\n17     public void run() {\n18         while (true)\
+  \ {\n19             try {\n20                 new PeerRequestThread(\n21       \
+  \              serverSocket.accept()).start();\n22             } catch (IOException\
+  \ ex) {\n23                 ex.printStackTrace();\n24             }\n25        \
+  \ }\n26     }\n27 }\n```\n\n在第 10 到 12 行，我们声明了一个`ServerSocket`并设置构造函数来为服务器分配`socketPort`。这是服务器监听请求的端口。在`run()`方法内部，我们设置了一个连续循环，每当服务器套接字收到请求时，就创建一个新的`PeerRequestThread`来处理该请求。这样，服务器线程将始终可以处理新的传入请求。\n\
+  \n## 5.4 PeerRequestThread\n\n\n好的，作为一名高级文档工程师和翻译员，我将严格遵循您的注意事项和示例格式，对给定的英文文本进行翻译。\n\
+  \n\n"
+- "# `PeerRequestThread` 类\n\n`PeerRequestThread` 处理到达我们对等节点的每个特定请求。让我们查看以下代码片段并解释其工作原理：\n\
+  \n```java\npackage com.company.Threads;\n\nimport com.company.Model.Block;\nimport\
+  \ com.company.ServiceData.BlockchainData;\n\nimport java.io.IOException;\nimport\
+  \ java.io.ObjectInputStream;\nimport java.io.ObjectOutputStream;\nimport java.net.Socket;\n\
+  import java.util.LinkedList;\n\npublic class PeerRequestThread extends Thread {\n\
+  \n    private Socket socket;\n\n    public PeerRequestThread(Socket socket) {\n\
+  \        this.socket = socket;\n    }\n\n    @Override\n    public void run() {\n\
+  \        try {\n            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());\n\
+  \            ObjectInputStream objectInput = new ObjectInputStream(socket.getInputStream());\n\
+  \n            LinkedList<Block> recievedBC = (LinkedList<Block>) objectInput.readObject();\n\
+  \            System.out.println(\"LedgerId = \" + recievedBC.getLast().getLedgerId()\
+  \ +\n                    \" Size= \" + recievedBC.getLast().getTransactionLedger().size());\n\
+  \            objectOutput.writeObject(BlockchainData.getInstance().getBlockchainConsensus(recievedBC));\n\
+  \        } catch (IOException | ClassNotFoundException ex) {\n            ex.printStackTrace();\n\
+  \        }\n    }\n}\n```\n\n我们需要声明一个套接字和一个构造函数，该构造函数将在创建此线程时从`PeerServer`类接受一个套接字。这个套接字是到发送请求的对等节点的链接。`run()`方法很简单；在第\
+  \ 26 和 27 行，我们使用从`PeerServer`接收的套接字实例化`ObjectOutputStream`和`ObjectInputStream`对象。回想一下，在`PeerClient`类中，我们在请求中发送一个`LinkedList<Block>`对象，其中包含该对等节点的区块链。在第\
+  \ 29 行，我们使用`objectInput`类实例化发送的区块链并将其命名为`receivedBC`。第 30 和 31 行只是从`receivedBC`记录一些信息。最后，在第\
+  \ 32 行，我们使用`objectOutput`在通过区块链共识算法运行`receivedBC`后发回获胜的区块链。你会注意到，我们从服务层调用的方法与我们在`PeerClient`类中收到响应时调用的方法是相同的。换句话说，在验证传入的区块链并在该链与本地链之间达成共识时，无论它是作为请求发送还是作为响应接收，我们最终使用的算法都是相同的。\n\
+  \n## 5.5 总结\n\n在本章中，我们介绍了多个线程的创建，这些线程将使我们的应用程序能够响应迅速且不间断地运行。我们学习了如何使用套接字向其他对等节点发送和接收请求。我们了解了组成点对点网络所需的元素。我们学习了如何运行应用程序的用户界面，以及如何设置挖矿子程序。以下是我们目前涵盖概念的简要总结：\n\
+  \n- 创建线程\n- 使用线程处理需要并行运行的不同操作\n- 创建和使用网络套接字\n- 设置网络客户端和服务器线程\n- 设计点对点网络\n- 使用 JavaFX\
+  \ 应用程序线程\n\n---\n\n"
+- "# 第六章 服务层\n\n> *“分层” — Filip Rizov*\n>\n> © Spiro Buzharovski 2022\n>\n> S. Buzharovski,\
+  \ *Introducing Blockchain with Java*,\n>\n> https://doi.org/10.1007/978-1-4842-7927-4_6\n\
+  \n本章将介绍创建服务层，它将为前几章涵盖的所有内容提供功能。在本章中，我们最终将实现之前章节中简要提到的所有方法。这一章很可能是目前为止最难理解的一章，因为它将尝试把我们应用程序的所有独立元素整合在一起。我们建议在继续本章之前，先熟练掌握之前各章的内容。\n\
+  \n## 6.1 `WalletData`\n\n在本节中，我们将解释`WalletData`类。它用于在应用程序运行时存储我们的钱包，并使其可供应用程序的其他部分使用。钱包的任何额外功能都应通过此类实现。\n\
+  \n现在让我们解释以下代码：\n\n```java\npackage com.company.ServiceData;\n\nimport com.company.Model.Wallet;\n\
+  \nimport java.security.KeyFactory;\nimport java.security.NoSuchAlgorithmException;\n\
+  import java.security.PrivateKey;\nimport java.security.PublicKey;\nimport java.security.spec.InvalidKeySpecException;\n\
+  import java.security.spec.PKCS8EncodedKeySpec;\nimport java.security.spec.X509EncodedKeySpec;\n\
+  import java.sql.*;\n\npublic class WalletData {\n\n    private Wallet wallet;\n\
+  \    //singleton class\n    private static WalletData instance;\n\n    static {\n\
+  \        instance = new WalletData();\n    }\n\n    public static WalletData getInstance()\
+  \ {\n        return instance;\n    }\n```\n\n首先，我们进行常规的类导入。然后，由于我们将钱包存储在这个类中，我们在第\
+  \ 16 行有一个`Wallet`类的字段。\n\n现在，因为我们希望同一个钱包在整个应用程序中可用，我们将把这个类创建为单例类。单例是一种基本的设计模式，意味着这个类在内存中只会作为一个单一对象存在，并且我们无法实例化任何额外的对象。这意味着我们的应用程序中不会出现钱包重复的情况。我们通过在第\
+  \ 18 行有一个`WalletData`类的静态字段，然后在第 20-22 行静态初始化它，使我们的类成为单例类。最后要提到的是`getInstance()`方法。我们使用此方法来访问该类，而不是尝试实例化新对象。让我们查看下一个代码片段，并解释此类中包含的其余代码：\n\
+  \n```java\n    //This will load your wallet from the database.\n    public void\
+  \ loadWallet() throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException\
+  \ {\n        Connection walletConnection = DriverManager.getConnection(\n      \
+  \          \"jdbc:sqlite:C:\\\\Users\\\\spiro\\\\IdeaProjects\\\\e-coin\\\\db\\\\\
+  wallet.db\");\n        Statement walletStatment = walletConnection.createStatement();\n\
+  \        ResultSet resultSet;\n        resultSet = walletStatment.executeQuery(\"\
+  \ SELECT * FROM WALLET \");\n        KeyFactory keyFactory = KeyFactory.getInstance(\"\
+  DSA\");\n        PublicKey pub2 = null;\n        PrivateKey prv2 = null;\n     \
+  \   while (resultSet.next()) {\n            pub2 = keyFactory.generatePublic(\n\
+  \                    new X509EncodedKeySpec(resultSet.getBytes(\"PUBLIC_KEY\")));\n\
+  \            prv2 = keyFactory.generatePrivate(\n                    new PKCS8EncodedKeySpec(resultSet.getBytes(\"\
+  PRIVATE_KEY\")));\n        }\n        this.wallet = new Wallet(pub2, prv2);\n  \
+  \  }\n\n    public Wallet getWallet() {\n        return wallet;\n    }\n}\n```\n\
+  \n首先，我们有`loadWallet()`方法。顾名思义，我们使用它从数据库加载钱包。如果你还记得，我们在`ECoin`类的`init()`方法中使用此方法来加载钱包。\n\
+  \n\n\n"
+- '# 排版后内容
+
+
+  `Lines 30–34`是用于建立数据库连接的常规 JDBC 代码，我们在此数据库中保存钱包密钥，并执行`select`查询以检索它们。在第 35 行，我们初始化了`KeyFactory`辅助类。它来自`java.security`包，将帮助我们创建`PublicKey`和`PrivateKey`对象。在第
+  36 和 37 行，我们声明了`PublicKey`和`PrivateKey`对象。在第 39 和 40 行，我们使用`KeyFactory`辅助类通过插入从数据库检索到的字节数组来生成公钥。然而，由于`generatePublic(KeySpec
+  ks)`接受的是`KeySpec`对象而非字节数组，我们必须通过`X509EncodedKeySpec`构造函数来创建`KeySpec`对象。该类的父类实现了`KeySpec`接口，这意味着我们可以用它来生成公钥，同时该类的构造函数接受我们的字节数组，如图
+  6-1 所示。
+
+
+  ***图 6-1.** `X509EncodedKeySpec`类*
+
+
+  第 41 和 42 行使用类似的方法和`PKCS8EncodedKeySpec`类为我们生成私钥。它也接受一个字节数组，并构建一个实现`KeySpec`接口的对象，如图
+  6-2 所示。
+
+
+  ***图 6-2.** `PKCS8EncodedKeySpec`类*
+
+
+  这两个类都来自`java.security`包，这对我们来说是一个巨大的资产，因为我们可以直接使用它们。最后，在第 44 行，我们使用从数据库检索到的公钥和私钥创建了一个新的钱包对象，并将其赋值给类中的`wallet`字段。
+
+
+  '
+- '# 第 6 章 服务层
+
+
+  本类中的最后一个方法是`getWallet()`方法，如第 47 行所示。它是一个简单的 getter 方法，用于将钱包对象提供给应用程序的其他部分。
+
+
+  ## 6.2 BlockchainData
+
+
+  这是应用程序中最大、最复杂的类。在这里，我们可以找到与区块链相关的所有功能。让我们先展示下一个代码片段中的所有导入，以供参考：
+
+
+  ```
+
+  1 package com.company.ServiceData;
+
+
+  3 import com.company.Model.Block;
+
+
+  4 import com.company.Model.Transaction;
+
+
+  5 import com.company.Model.allet;
+
+
+  6 import javafx.collections.FXCollections;
+
+
+  7 import javafx.collections.ObservableList;
+
+
+  8 import sun.security.provider.DSAPublicKeyImpl; 9
+
+
+  10 import java.security.*;
+
+
+  11 import java.sql.*;
+
+
+  12 import java.time.LocalDateTime;
+
+
+  13 import java.time.ZoneOffset;
+
+
+  14 import java.util.ArrayList;
+
+
+  15 import java.util.Arrays;
+
+
+  16 import java.util.Comparator;
+
+
+  17 import java.util.LinkedList;
+
+  ```
+
+
+  接下来，我们来看一下该类中使用的字段，如下一个代码片段所示：
+
+
+  '
+- "# 第 6 章 服务层\n\n```\n19 public class BlockchainData {\n\n21 private ObservableList<Transaction>\
+  \ newBlockTransactionsFX; 22 private ObservableList<Transaction> newBlockTransactions;\
+  \ 23 private LinkedList<Block> currentBlockChain =\n    new LinkedList<>();\n\n\
+  24 private Block latestBlock;\n25 private boolean exit = false;\n26 private int\
+  \ miningPoints;\n27 private static final int TIMEOUT_INTERVAL = 65;\n28 private\
+  \ static final int MINING_INTERVAL = 60;\n29 //helper class.\n30 private Signature\
+  \ signing = Signature\n    .getInstance(\"SHA256withDSA\");\n31\n32 //singleton\
+  \ class\n33 private static BlockchainData instance;\n```\n\n在第 21 行，我们有一个包含`Transaction`对象的`ObservableList`。我们将仅在前端显示其内容时使用此列表。接下来，在第\
+  \ 22 行，我们也有一个包含`Transaction`对象的`ObservableList`。此列表将代表我们区块链的当前账本。所有关于当前账本的操作都将在此列表上执行。我们之前的列表将始终是此列表的精确副本。在第\
+  \ 23 行，我们终于有了当前的区块链，它被表示为一个包含`Block`对象的`LinkedList`。第 24 行将代表我们试图添加到区块链的最新区块。在第\
+  \ 25 行，我们有一个退出布尔值，用于辅助前端的退出命令。接下来，在第 26 行，我们有`miningPoints`整数字段，它将帮助我们跟踪共识算法中使用的挖矿积分。在第\
+  \ 27 和 28 行，我们有挖矿和区块链超时间隔常量。在第 30 行，我们有一个`Signature`辅助类，用于创建签名。在第 33 行，我们有作为静态对象的`BlockchainData`，这有助于我们使其成为单例类，就像`WalletData`类一样。\n\
+  \n这只是一个关于类字段的快速总结；在我们遍历本类剩余部分时，您将更详细地看到每个字段的使用方式。\n\n在下一个代码片段中，您将看到静态初始化器、构造函数和`getInstance()`方法的其余部分，我们将使用这些方法来创建和访问这个单例类：\n\
+  \n```\n35 static {\n36     try {\n37         instance = new BlockchainData();\n\
+  38     } catch (NoSuchAlgorithmException e) {\n39         e.printStackTrace();\n\
+  40     }\n41 }\n\n43 public BlockchainData() throws NoSuchAlgorithmException {\n\
+  44     newBlockTransactions = FXCollections\n        .observableArrayList();\n45\
+  \     newBlockTransactionsFX = FXCollections\n        .observableArrayList();\n\
+  46 }\n\n48 public static BlockchainData getInstance() {\n49     return instance;\n\
+  50 }\n```\n\n"
+- "# 第 6 章 服务层\n\n如果您还记得，我们在上一节讨论`WalletData`类时已经解释了这些元素的功能。让我们来看下一个代码片段：\n\n```\n\
+  52 Comparator<Transaction> transactionComparator = Comparator\n    .comparing(Transaction::getTimestamp);\n\
+  53 public ObservableList<Transaction> getTransactionLedgerFX() {\n54     newBlockTransactionsFX.clear();\n\
+  55     newBlockTransactions.sort(transactionComparator);\n56     newBlockTransactionsFX.addAll(newBlockTransactions);\n\
+  57     return FXCollections.observableArrayList(\n        newBlockTransactionsFX);\n\
+  58 }\n```\n\n在第 53 到 58 行，我们有一个简单的方法，用于显示当前交易账本。它只是将交易从当前账本传输到一个可以在 UI 上显示的`ObservableList`中。我们这样做仅仅是为了保持关注点分离。唯一需要提及的其他事情是第\
+  \ 52 行的`transactionComparator`，它在创建时对我们的交易进行排序。\n\n让我们继续下一个代码片段：\n\n```\n60 public\
+  \ String getWalletBallanceFX() {\n61     return getBalance(currentBlockChain, newBlockTransactions,\n\
+  62         WalletData.getInstance().getWallet()\n63             .getPublicKey()).toString();\n\
+  64 }\n\n65 private Integer getBalance(LinkedList<Block> blockChain,\n66     ObservableList<Transaction>\
+  \ currentLedger, PublicKey walletAddress) {\n67     Integer balance = 0;\n68   \
+  \  for (Block block : blockChain) {\n69         for (Transaction transaction : block\n\
+  70             .getTransactionLedger()) {\n71             if (Arrays.equals(transaction\n\
+  72                 .getFrom(), walletAddress.getEncoded())) {\n73              \
+  \   balance -= transaction.getValue();\n74             }\n75             if (Arrays.equals(transaction\n\
+  76                 .getTo(), walletAddress.getEncoded())) {\n77                \
+  \ balance += transaction.getValue();\n78             }\n79         }\n80     }\n\
+  81     for (Transaction transaction : currentLedger) {\n```\n\n\n\n"
+- '# 排版后内容
+
+
+  79 `if (Arrays.equals(transaction.getFrom(), walletAddress.getEncoded())) {`
+
+  80 `balance -= transaction.getValue();`
+
+  81 `}`
+
+  82 `}`
+
+  83 `return balance;`
+
+  84 `}`
+
+
+  我们先从第 65 行的`getBalance`方法开始，因为它被第 60 行的方法所调用。该方法会遍历给定的区块链以及包含新区块待定交易的当前账本，然后找出指定公钥地址的余额。此方法不仅可用于显示当前余额，还能在发送代币前验证某个地址是否拥有足够的余额。第
+  65 和 66 行显示了我们刚才提到的输入参数。在第 68 至 77 行，我们遍历区块链中的每个区块，并对每笔交易检查指定地址是发送方还是接收方，同时相应调整余额。
+
+
+  为了防止双重支付，我们还需要减去当前交易账本中正在尝试发送的任何资金。
+
+
+  请记住，双重支付是指发送方试图多次发送其全部资金，从而凭空倍增资金的情况。这种情况发生在第 78–82 行。如果你想知道为什么我们要在交易被写入区块链后才统计入账资金，这是为了防止因先入账无效交易而导致共识机制发现并作废该交易前，我们就能将入账资金转出的漏洞。最后，在第
+  83 行，我们返回计算出的余额。
+
+
+  现在回到第一个方法（第 60–63 行），可以看到它简单地调用了`getBalance`方法，并传入本地区块链、当前账本以及我们钱包的公钥地址。当整个应用程序中需要查询当前余额时，就会调用此方法。
+
+
+  接下来，让我们看看下一段代码片段中的方法：
+
+
+  ```
+
+  86 private void verifyBlockChain(LinkedList<Block> currentBlockChain) throws
+
+  GeneralSecurityException {
+
+  87 for (Block block : currentBlockChain) {
+
+  88 if (! block.isVerified(signing)) {
+
+  89 throw new GeneralSecurityException(
+
+  "Block validation failed" );
+
+  90 }
+
+  91 ArrayList<Transaction> transactions = block
+
+  .getTransactionLedger();
+
+  92 for (Transaction transaction : transactions) {
+
+  93 if (! transaction.isVerified(signing)) {
+
+  94 throw new GeneralSecurityException(
+
+  "Transaction validation failed" );
+
+  95 }
+
+  96 }
+
+  97 }
+
+  98 }
+
+  ```
+
+
+  这是实际检查每笔交易和每个区块有效性的方法。在此方法中，我们终于可以看到`Block`和`Transaction`类中的`isVerified`方法如何实际运行，以及它们如何融入我们的应用程序。如果需要，可以回顾第
+  2 章来回忆这些方法的工作原理。该方法本身很简单：它遍历所有区块以及每个区块内的所有交易，并逐一验证其有效性。在本书后续内容中，你将看到此方法不仅用于验证我们自己的区块链，还用于验证从其他节点接收到的区块链。
+
+
+  现在，让我们转到下一段代码片段：
+
+
+  ```
+
+  99 public void addTransactionState(Transaction transaction) {
+
+  100 newBlockTransactions.add(transaction);
+
+  101 newBlockTransactions.sort(transactionComparator);
+
+  102 }
+
+  ```
+
+
+  ```
+
+  104 public void addTransaction(Transaction transaction, boolean blockReward) throws
+  GeneralSecurityException {
+
+  105 try {
+
+  106 if (getBalance(currentBlockChain, newBlockTransactions,
+
+  107 new DSAPublicKeyImpl(transaction.getFrom())
+
+  ) < transaction.getValue() && ! blockReward) {
+
+  108 throw new GeneralSecurityException("Not enough
+
+  funds by sender to record transaction" );
+
+  109 } else {
+
+  110 Connection connection = DriverManager
+
+  .getConnection
+
+  ```
+
+
+
+
+  111 `Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\spiro\\IdeaProjects\\e-coin\\db\\blockchain.db");`
+
+  112
+
+  113 `PreparedStatement pstmt;`
+
+  114 `pstmt = connection.prepareStatement("INSERT INTO TRANSACTIONS " +`
+
+  115 `"(\"FROM\", \"TO\", LEDGER_ID, VALUE, SIGNATURE, CREATED_ON) " +`
+
+  116 `" VALUES (?,?,?,?,?,?) ");`
+
+  117 `pstmt.setBytes(1, transaction.getFrom());`
+
+  118 `pstmt.setBytes(2, transaction.getTo());`
+
+  119 `pstmt.setInt(3, transaction.getLedgerId());`
+
+  120 `pstmt.setInt(4, transaction.getValue());`
+
+  121 `pstmt.setBytes(5, transaction.getSignature());`
+
+  122 `pstmt.setString(6, transaction.getTimestamp());`
+
+  123 `pstmt.executeUpdate();`
+
+  125 `pstmt.close();`
+
+  126 `connection.close();`
+
+  127 `}`
+
+  128 `} catch (SQLException e) {`
+
+  129 `System.out.println("数据库问题：" + e.getMessage());`
+
+  130 `e.printStackTrace();`
+
+  131 `}`
+
+  133 `}`
+
+
+  ![](img/index-132_1.jpg)
+
+
+  '
+- "# 第 6 章 服务层\n\n在第 99–102 行，你会发现我们的 `addTransactionState` 方法。这是一个简单的方法，用于将给定交易添加到当前交易账本中并对其进行排序。如果你还记得，我们在\
+  \ `init()` 应用程序方法和 `AddNewTransactionController` 类中已经提到过这个方法。\n\n现在让我们看看 `addTransaction`\
+  \ 方法。顾名思义，这个方法的总体思路是将一笔新交易添加到我们的账本中。该方法会接收一个 `Transaction` 对象和一个 `Boolean` 标志，用于标记该交易是矿工的奖励交易还是普通交易。当我们稍后在本章讨论\
+  \ `mineBlock()` 方法时，会进一步深入探讨奖励交易的用途和实现方式。不过需要注意的一点是，在我们的区块链中，奖励交易会创建新的代币并将其授予挖出该区块的矿工，因此我们需标记此类交易，以便跳过\
+  \ `getBalance` 方法执行的余额检查。\n\n**重要！** 请注意，不同的区块链在代币总量是否设限以及如何奖励矿工方面有不同的实现方式。我们的做法只是其中一种。\n\
+  \n回到我们的方法，观察第 106–109 行。可以看到我们调用 `getBalance` 方法进行检查，判断发送方的代币数量是否大于交易金额。这自然可以确保我们拒绝任何试图作弊、发送超出发送方实际持有代币数量的交易。但请同时注意末尾的说明：我们利用奖励交易标志来跳过此检查（当为奖励交易时）。如果不这样做，奖励交易将无法通过检查，因为\
+  \ `getBalance` 方法会发现这些代币凭空出现。鉴于该功能旨在奖励矿工，\n\n![](img/index-133_1.jpg)\n\n在奖励交易中跳过\
+  \ `getBalance` 方法的必要性显而易见。接下来，在我们的方法中可以看到，如果使交易无效的检查未通过，我们就继续将该交易实际添加到账本中。从第 110\
+  \ 行到末尾，使用 JDBC 将交易也添加到数据库中。如果你需要回顾代码中这一部分的工作原理，请记住我们在第 3 章解释应用程序 `init` 方法时已经介绍过类似的\
+  \ JDBC 操作。\n\n**练习 6-1**\n\n如果你熟悉任何 ORM 解决方案（如 Hibernate），可以尝试在此处实现它，以自动将交易添加到数据库中，而不是像我们在\
+  \ `addTransaction` 方法中那样手动操作。\n\n接下来看下一个方法 `loadTransactionLedger`。该方法在 `loadBlockchain()`\
+  \ 方法中使用，用于将每个区块的交易账本从数据库加载到应用程序中。\n\n请看以下代码片段：\n\n```\n172 private ArrayList<Transaction>\
+  \ loadTransactionLedger(\n    Integer ledgerID) throws SQLException {\n```\n\n\n\
+  \n"
+- "# 排版后的内容\n\n173 `ArrayList<Transaction> transactions = new ArrayList<>();`  \n\
+  174 `try {`  \n175 `Connection connection = DriverManager.getConnection(`  \n176\
+  \ `\"jdbc:sqlite:C:\\\\Users\\\\spiro\\\\IdeaProjects\\\\e-coin\\\\db\\\\blockchain.db\"\
+  );`  \n177 `PreparedStatement stmt = connection.prepareStatement(`  \n178 `\"SELECT\
+  \ * FROM TRANSACTIONS WHERE LEDGER_ID = ?\");`  \n179 `stmt.setInt(1, ledgerID);`\
+  \  \n180 `ResultSet resultSet = stmt.executeQuery();`  \n181 `while (resultSet.next())\
+  \ {`  \n182 `transactions.add(new Transaction(`  \n183 `resultSet.getBytes(\"FROM\"\
+  ),`  \n184 `resultSet.getBytes(\"TO\"),`  \n185 `resultSet.getInt(\"VALUE\"),` \
+  \ \n186 `resultSet.getBytes(\"SIGNATURE\"),`  \n187 `resultSet.getInt(\"LEDGER_ID\"\
+  ),`  \n188 `resultSet.getString(\"CREATED_ON\")`  \n189 `));`  \n190 `}`  \n191\
+  \ `resultSet.close();`  \n192 `stmt.close();`  \n193 `connection.close();`  \n194\
+  \ `} catch (SQLException e) {`  \n195 `e.printStackTrace();`  \n196 `}`  \n197 `return\
+  \ transactions;`  \n198 `}`  \n\n该方法从数据库中检索并返回一个`Transaction`（交易）对象列表。它接收一个整数作为参数，该参数表示账本\
+  \ ID，我们使用它仅检索所需账本的交易记录。\n\n第 175 至 180 行是标准的 JDBC 代码，我们在此建立数据库连接、创建语句、将账本 ID 作为查询语句的一部分插入，并执行查询。第\
+  \ 181 至 190 行遍历结果集，为每个结果创建一个新交易，并将其添加到`transactions`（交易）ArrayList 中。方法的其余部分只是关闭连接和返回语句，返回我们刚刚从数据库中检索到的交易列表。\n\
+  \n"
+- "# 第 6 章 服务层\n\n现在让我们回到`loadBlockChain()`方法，我们在解释`loadTransactionLedger`的使用时简要提到过它。每当我们想从数据库加载整个区块链并相应设置应用程序状态时，都会使用此方法。如果你还记得，此方法在应用程序的初始化方法中使用，并且在后续章节讨论共识算法时，你也会看到它在几种情况下被使用。该方法相当庞大，因此我们将将其拆分为接下来的两个代码片段：\n\
+  \n```\n135 public void loadBlockChain() {  \n136   try {  \n137     Connection connection\
+  \ = DriverManager.getConnection(  \n138       \"jdbc:sqlite:C:\\\\Users\\\\spiro\\\
+  \\IdeaProjects\\\\e-coin\\\\db\\\\blockchain.db\");  \n139     Statement stmt =\
+  \ connection.createStatement();  \n140     ResultSet resultSet = stmt.executeQuery(\"\
+  SELECT * FROM BLOCKCHAIN\");  \n141     while (resultSet.next()) {  \n142      \
+  \ this.currentBlockChain.add(new Block(  \n143         resultSet.getBytes(\"PREVIOUS_HASH\"\
+  ),  \n144         resultSet.getBytes(\"CURRENT_HASH\"),  \n145         resultSet.getString(\"\
+  CREATED_ON\"),  \n146         resultSet.getBytes(\"CREATED_BY\"),  \n147       \
+  \  resultSet.getInt(\"LEDGER_ID\"),  \n148         resultSet.getInt(\"MINING_POINTS\"\
+  ),  \n149         resultSet.getDouble(\"LUCK\"),  \n150         loadTransactionLedger(\
+  \  \n151           resultSet.getInt(\"LEDGER_ID\"))  \n152       ));  \n153    \
+  \ }  \n```\n\n第 137 至 140 行是相当标准的 JDBC 代码。我们建立到数据库的连接，创建并执行查询以从`BLOCKCHAIN`（区块链）表中选择所有内容。接着我们遍历结果集，创建一个新的`Block`（区块）对象，并将其添加到此类的`currentBlockChain`（当前区块链）字段中。\n\
+  \n需要注意的一点是第 150 行，我们使用`loadTransactionLedger`方法，传入结果集中的当前账本 ID，以检索此区块的交易列表，并将其包含在`Block`对象的构造函数中。\n\
+  \n让我们继续看这个方法的第二部分：\n\n```\n154 latestBlock = currentBlockChain.getLast();  \n155\
+  \ Transaction transaction = new Transaction(  \n156   new Wallet(),  \n157   WalletData.getInstance().getWallet().getPublicKey().getEncoded(),\
+  \  \n158   100, latestBlock.getLedgerId() + 1, signing);  \n159 newBlockTransactions.clear();\
+  \  \n```\n\n\n```content\n159 `newBlockTransactions.add(transaction)`;  \n160 `verifyBlockChain(currentBlockChain)`;\
+  \  \n161 `resultSet.close()`;  \n162 `stmt.close()`;  \n163 `connection.close()`;\
+  \  \n164 `} catch (SQLException | NoSuchAlgorithmException e) {`  \n165 `System.out.println(\"\
+  Problem with DB: \" + e.getMessage())`;  \n166 `e.printStackTrace()`;  \n167 `}\
+  \ catch (GeneralSecurityException e) {`  \n168 `e.printStackTrace()`;  \n169 `}`\
+  \  \n170 `}`  \n\n# 第 6 章 服务层\n\n在此方法的这一部分中，我们将更新应用程序的状态，使其从此刻开始正常运行。为此，我们需要修改 `latestBlock`\
+  \ 和 `newBlockTransactions` 字段。在第 154 行，我们通过从 `currentBlockChain` 列表中获取最后一个区块来设置\
+  \ `latestBlock` 字段（该列表已在方法的第一部分中被填充）。接下来，为了初始化 `newBlockTransactions` 列表，我们首先在第\
+  \ 155-157 行创建一个新的奖励交易对象。然后清空该列表并添加我们刚刚创建的新交易。这是为未来区块准备的奖励交易。最后一行重要的是第 160 行，在这里我们可以看到针对刚从数据库加载的\
+  \ `currentBlockChain` 调用了 `verifyBlockChain` 方法。这是重要的一步，因为它能够处理当导入他人数据库时需要检查其有效性的情况。\n\
+  \n现在我们来探讨构成挖矿功能的各个方法。在接下来的代码片段中，让我们简要地看一下 `mineBlock()` 方法。\n\n```java\n200 public\
+  \ void mineBlock() {\n201   try {\n202     finalizeBlock(WalletData.getInstance()\n\
+  203             .getWallet());\n204     addBlock(latestBlock);\n205   } catch (SQLException\
+  \ | GeneralSecurityException e) {\n206     System.out.println(\"Problem with DB:\
+  \ \" +\n207             e.getMessage());\n208     e.printStackTrace();\n209   }\n\
+  210 }\n```\n\n首先回忆一下，这是我们在 `MiningThread` 类中需要挖新区块时调用的方法。此方法只是调用了 `finalizeBlock`\
+  \ 和 `addBlock` 方法。`finalizeBlock` 方法执行完成最新区块的必要步骤，并将其添加到 `currentBlockChain` 列表中。不同的矿工可能拥有包含不同交易的最新（未最终确定的）区块。`addBlock`\
+  \ 方法则只需将区块添加到数据库中。\n\n我们先解释 `finalizeBlock` 方法，如下面的代码片段所示：\n\n```java\n210 private\
+  \ void finalizeBlock(Wallet minersWallet) throws GeneralSecurityException, SQLException\
+  \ {\n211   latestBlock = new Block(BlockchainData\n212           .getInstance().currentBlockChain);\n\
+  213   latestBlock.setTransactionLedger(new ArrayList<>(\n214           newBlockTransactions));\n\
+  215   latestBlock.setTimeStamp(LocalDateTime.now()\n216           .toString());\n\
+  217   latestBlock.setMinedBy(minersWallet.getPublicKey()\n218           .getEncoded());\n\
+  219   latestBlock.setMiningPoints(miningPoints);\n220   signing.initSign(minersWallet.getPrivateKey());\n\
+  221   signing.update(latestBlock.toString().getBytes());\n222   latestBlock.setCurrHash(signing.sign());\n\
+  223   currentBlockChain.add(latestBlock);\n224   miningPoints = 0;\n225   //奖励交易\n\
+  226   latestBlock.getTransactionLedger()\n227           .sort(transactionComparator);\n\
+  228   addTransaction(latestBlock.getTransactionLedger()\n229           .get(0),\
+  \ true);\n230   Transaction transaction = new Transaction(new Wallet(), minersWallet.getPublicKey().getEncoded(),\n\
+  231           100, latestBlock.getLedgerId() + 1, signing);\n232   newBlockTransactions.clear();\n\
+  233   newBlockTransactions.add(transaction);\n234 }\n```\n\n在此方法中，我们首先准备/最终确定 `latestBlock`。\n\
+  \n在第 211 行，我们创建一个新的 `Block` 并将其赋值给 `latestBlock`。在第 212 行，我们将 `newBlockTransactions`\
+  \ 添加到 `latestBlock` 的账本中。\n\n在第 213 行，我们将时间戳设置为当前时间。在第 214 行，我们设置自己的钱包地址，因为我们是此区块的挖矿者（`minedBy`）。\n\
+  \n在第 215 行，我们设置当前累积的挖矿点数。如果需要回顾我们是如何累积挖矿点数的，可以重新查看第 5 章的“挖矿线程”部分。到这一步，`latestBlock`\
+  \ 已经包含了除签名之外的所有数据，而签名在此将被设置为当前哈希值。回顾一下，这个签名实际上代表了我们区块中包含的所有数据的编码值。这就是为什么我们总是最后创建签名并设置当前哈希值。一旦完成，对区块的任何修改都会导致区块验证失败，因为用我们的公钥解码后的签名将与区块中的当前数据不匹配。\n\
+  \n**重要提示！** 如果你需要更多帮助来理解我们如何创建和使用签名，请重新查看第 2 章。\n\n接下来，在第 219 行，我们将 `latestBlock`\
+  \ 纳入 `currentBlockChain`，因为我们已完全将其最终确定。然而，在完成此方法之前，我们还需要设置几个项目。在第 220 行，我们将挖矿点数重置为\
+  \ 0。在第 222 行，我们将刚最终确定的区块的奖励交易添加到数据库中，因为到目前为止，它只保存在我们复制到 `latestBlock` 中的 `newBlockTransactions`\
+  \ 列表里。完成后，我们创建一个新的奖励交易对象，清空 `newBlockTransactions` 列表（因为它包含已最终确定区块的旧交易），然后将新的奖励交易添加到\
+  \ `newBlockTransactions` 中。预载了下一个奖励交易的 `newBlockTransactions` 列表现已准备好，它将填充新的交易，直到下一个挖矿周期。这个奖励交易是矿工成功挖出下一个区块后获得的奖励。\n\
+  \n**练习 6-2**\n\n添加奖励交易并对其进行跟踪看起来有些繁琐且多余。你能简化代码库，使得我们不必这样做吗？\n\n**提示** 我们都知道区块的创建者会获得奖励。尝试修改\
+  \ `getBalance` 方法，为相关地址创建的每个区块额外增加 100 个币。这样就不需要显式添加奖励交易了。\n\n现在，一旦我们最终确定/挖出了区块，就需要将其也添加到数据库中。为此，我们提到使用\
+  \ `addBlock` 方法。让我们查看下面的代码片段并进行解释：\n\n```java\n229 private void addBlock(Block block)\
+  \ {\n230   try {\n231     Connection connection = DriverManager.getConnection\n\
+  232             (\"jdbc:sqlite:C:\\\\Users\\\\spiro\\\\IdeaProjects\\\\e-coin\\\\\
+  db\\\\blockchain.db\");\n233     PreparedStatement pstmt;\n234     pstmt = connection.prepareStatement\n\
+  235             (\"INSERT INTO BLOCKCHAIN(PREVIOUS_HASH, CURRENT_HASH, LEDGER_ID,\
+  \ CREATED_ON,\" +\n236              \" CREATED_BY, MINING_POINTS, LUCK) VALUES (?,?,?,?,?,?,?)\
+  \ \");\n237     pstmt.setBytes(1, block.getPrevHash());\n238     pstmt.setBytes(2,\
+  \ block.getCurrHash());\n239     pstmt.setInt(3, block.getLedgerId());\n240    \
+  \ pstmt.setString(4, block.getTimeStamp());\n241     pstmt.setBytes(5, block.getMinedBy());\n\
+  242     pstmt.setInt(6, block.getMiningPoints());\n243     pstmt.setDouble(7, block.getLuck());\n\
+  244     pstmt.executeUpdate();\n245     pstmt.close();\n246     connection.close();\n\
+  247   } catch (SQLException e) {\n248     System.out.println(\"Problem with DB:\
+  \ \" + e.getMessage());\n249     e.printStackTrace();\n250   }\n251 }\n```\n\n\n\
+  # JDBC 查询操作\n\n到目前为止，您应该已经熟悉了执行`JDBC`查询。该方法接受一个单一的`Block`对象参数，并使用它在数据库的`BLOCKCHAIN`表中创建一个新条目，该条目将代表我们最新挖掘的区块。最后需要注意的是，`addBlock`方法也将在我们接下来要解释的方法`replaceBlockchainInDatabase`中使用。\n\
+  \n# 第 6 章 服务层\n\n当我们需要用从其他对等节点接收到的区块链替换我们自己的区块链时，就需要用到此方法。在我们首先解释此方法之后，当讨论共识算法时，我们将涵盖这些原因。让我们看以下代码片段：\n\
+  \n```\n254 private void replaceBlockchainInDatabase(LinkedList<Block> receivedBC)\
+  \ {\n255     try {\n256         Connection connection = DriverManager.getConnection\n\
+  257             (\"jdbc:sqlite:C:\\\\Users\\\\spiro\\\\ IdeaProjects\\\\e-coin\\\
+  \\db\\\\blockchain.db\");\n258         Statement clearDBStatement = connection.createStatement();\n\
+  259         clearDBStatement.executeUpdate(\"DELETE FROM BLOCKCHAIN\");\n260   \
+  \      clearDBStatement.executeUpdate(\"DELETE FROM TRANSACTIONS\");\n261      \
+  \   clearDBStatement.close();\n262         connection.close();\n263         for\
+  \ (Block block : receivedBC) {\n264             addBlock(block);\n265          \
+  \   boolean rewardTransaction = true;\n266             block.getTransactionLedger().sort(transactionComparator);\n\
+  267             for (Transaction transaction : block.getTransactionLedger()) {\n\
+  268                 addTransaction(transaction, rewardTransaction);\n269       \
+  \          rewardTransaction = false;\n270             }\n271         }\n272   \
+  \  } catch (SQLException | GeneralSecurityException e) {\n273         System.out.println(\"\
+  Problem with DB: \" + e.getMessage());\n274         e.printStackTrace();\n275  \
+  \   }\n276 }\n```\n\n此方法接受一个`LinkedList<Block>`对象参数，该参数代表我们要导入数据库的区块链。该方法首先建立与数据库的连接，并在第\
+  \ 259 和 260 行执行清除表中现有数据的语句。\n\n在第 263-271 行，我们遍历要导入的区块链的区块及其交易，并调用之前解释过的`addBlock`和`addTransaction`方法，将每个区块和交易写入数据库。\n\
+  \n**练习 6-3**\n\n在`replaceBlockchainInDatabase`方法中重用`addBlock`和`addTransaction`方法并不是将区块链导入数据库的高效方式。每次调用这些方法之一，都会打开和关闭一次数据库连接。您能编写一个更高效的实现来实现相同的目的吗？\n\
+  \n### 6.2.1 区块链共识协议\n\n终于，我们到达了在应用程序中执行共识算法的方法。在开始解释代码之前，我们需要先讨论一下区块链共识。\n\n*区块链共识*，或者说，关于每个对等节点构建和共享的区块链的网络共识，是这项技术的核心。要实现每次都可靠地达成共识，需要解决的主要问题是所谓的拜占庭将军问题。这个术语源自一个寓言，用于描述这样一种情况：为了避免系统灾难性故障，系统的参与者必须就一项协调策略达成一致，但其中一些参与者是不可靠的。简而言之，拜占庭将军问题是这样描述的：一群拜占庭将军包围了一座敌军城市，正在决定是进攻还是撤退。无论做出什么决定，他们都必须遵循相同的决定。问题因将军们彼此隔离、仅通过消息进行通信而变得更加复杂。此外，有些将军可能是叛徒，可能会向其他将军散布关于他们意图的虚假信息，以制造更多混乱。\n\
+  \n现在让我们回到正题，在将军问题和我们的区块链之间进行一些类比。关于我们的应用程序，这里的将军将是矿工/对等节点。它们之间达成共识的必要性是显而易见的；否则，我们最终会得到许多不同的、无用的区块链。此外，好的对等节点必须有能力发现并丢弃坏的行为者篡改区块链有效性的企图。如果在一个充满坏行为者造成的错误的区块链上达成共识，那将毫无用处。这意味着我们必须将每个对等节点都视为潜在的坏行为者和不可信来源。\n\
+  \n为了探索共识解决方案面临的许多复杂性和问题，我们决定实现一个略微修改的比特币工作量证明算法版本。当然，我们的解决方案远不如比特币和其他加密货币实际使用的方案，但我们认为，它将作为更好的学习工具，帮助掌握共识算法面临的问题。\n\
+  \n```\n278 public LinkedList<Block> getBlockchainConsensus(LinkedList<Block> receivedBC)\
+  \ {\n279     try {\n280         // 验证接收到的区块链的有效性。\n281         verifyBlockChain(receivedBC);\n\
+  282         // 检查我们是否收到了完全相同的区块链。\n283         if (! Arrays.equals(receivedBC.getLast().getCurrHash(),\
+  \ getCurrentBlockChain().getLast().getCurrHash())) {\n284             if (checkIfOutdated(receivedBC)\
+  \ != null) {\n285                 return getCurrentBlockChain();\n286          \
+  \   } else {\n287                 if (checkWhichIsCreatedFirst(receivedBC) != null)\
+  \ {\n288                     return getCurrentBlockChain();\n289               \
+  \  } else {\n290                     if (compareMiningPointsAndLuck(receivedBC)\
+  \ != null) {\n291                         return getCurrentBlockChain();\n292  \
+  \                   }\n293                 }\n294             }\n295         //\
+  \ 如果只有交易账本不同，则合并它们。\n296         } else if (! receivedBC.getLast().getTransactionLedger().equals(getCurrentBlockChain()\n\
+  297             .getLast().getTransactionLedger())) {\n298             updateTransactionLedgers(receivedBC);\n\
+  299             System.out.println(\"Transaction ledgers updated\");\n300      \
+  \       return receivedBC;\n301         } else {\n302             System.out.println(\"\
+  blockchains are identical\");\n303         }\n304     } catch (GeneralSecurityException\
+  \ e) {\n305         e.printStackTrace();\n306     }\n307     return receivedBC;\n\
+  308 }\n```\n\n我们的`getBlockchainConsensus`方法接受一个`LinkedList<Block>`参数，该参数代表我们从对等节点接收到的区块链。我们将对我们的本地区块链和接收到的区块链执行验证检查和多次比较。首先，我们将解释方法的整体逻辑，然后深入解释我们尚未介绍的每个方法。在第\
+  \ 281 行，我们首先验证接收到的区块链的有效性。如前所述，我们不信任任何对等节点，因此我们总是验证从他们那里得到的任何内容。如果我们收到的方法未能通过验证检查，故事就此结束。我们的应用程序会抛出异常，并丢弃接收到的区块链。如果接收到的区块链通过验证，则我们继续进行比较。在第\
+  \ 283 行，我们执行第一个比较：比较我们自己的方法和接收到的那个。这里我们检查每个区块链的当前哈希值是否完全匹配。只有当我们的区块链完全匹配时，此检查才会为真。\n\
+  \n让我们回顾一下我们的区块链与接收到的区块链的当前哈希值不匹配的情况。\n\n这意味着两个区块链有不同矿工挖掘的最后一个区块。当发生这种情况时，意味着我们需要执行一些共识检查，以确定哪个矿工有权挖掘最后一个区块。\n\
+  \n\n\n# 共识检查过程\n\n我们的第一个共识检查是确定是否有任何区块链已经过时，即检查它们是否比一个完整的挖矿间隔更旧。我们将在后面进一步详细解释`checkIfOutdated`方法；现在仅提及它的功能。它简单地确定是否有任何方法过时并将其丢弃。如果接收到的区块链过时，则我们继续使用自己的。如果我们的区块链过时，则丢弃自己的并从此时开始使用接收到的。如果两者都过时，则我们不对共识做任何操作，并等待接收一个最新的区块链。如果两者都是最新的，则我们继续执行共识检查。\n\
+  \n下一个检查在第 287 行，运行`checkWhichIsCreatedFirst`方法。此方法用于确定两个区块链是否具有相同的初始区块。如果不同，我们将使用最先创建的那个。在第\
+  \ 290 行的下一个检查是在两个区块链具有相同初始区块时到达的。这里我们运行`compareMiningPointsAndLuck`方法。当我们到达此方法时，已确定接收到的区块链是有效的，并且两个区块链都是最新的，且在最后一个区块之前完全相同。为了确定我们将使用哪个区块链的最后一个区块，我们将检查每个区块链记录的挖矿点数。如果出现平局，我们将根据它们记录的运气值（只是一个大的随机数）来确定结果。\n\
+  \n现在让我们回到第 283 行，讨论区块链当前哈希值相同的情况。这意味着最后一个区块的矿工在此方法的先前运行中已经确定。回顾第 5 章，我们不断尝试将我们的区块链分享给其他对等节点，因此`getBlockchainConsensus`方法会重复运行。所以如果我们的当前哈希值相同，则继续执行到第\
+  \ 296 行。在第 296 行，我们比较区块链的交易账本。\n\n有些情况下，我们在获取该区块期间发生的所有交易之前就已确定了正确的矿工。让我们设想一种情况：对等节点\
+  \ 1、对等节点 2 和对等节点 3 在刚刚挖出一个新区块后尝试分享它们的区块链。对等节点 1 具有最高的挖矿点数，因此我们期望其区块链在对等节点 2 和对等节点\
+  \ 3 的共识检查中获胜。然而，所有对等节点开始时只拥有它们自己记录在其区块上的交易。首先对等节点 1 将其区块链分享给对等节点 2，对等节点 2 接受对等节点\
+  \ 1 的最后一个区块，但也将其自己的交易添加到对等节点 2 已有的交易中。接下来，对等节点 1 将其区块链分享给对等节点 3，同样的事情发生。此时，对等节点\
+  \ 2 和对等节点 3 都包含对等节点 1 的最后一个区块及其交易。此时，当对等节点 2 尝试将其区块链分享给对等节点 3 时，它们将具有相同的当前哈希值，因为两者都有对等节点\
+  \ 1 的最后一个区块；然而，对等节点 2 缺少对等节点 3 的交易，反之亦然。这就是共识算法到达第 296 行并检查它们交易账本的时刻。由于它们的交易账本不相同，将调用第\
+  \ 298 行的`updateTransactionLedgers`方法。\n\n**问题 6-1**\n\n在前面的场景中，如果对等节点 3 尝试将其区块链分享给对等节点\
+  \ 1，接下来会发生什么？\n\n**问题 6-2**\n\n在前面的场景中，如果对等节点 2 再次尝试将其区块链分享给对等节点 3，接下来会发生什么？\n\n\
+  *答案见本章末尾。*\n\n对于最后一种情况，当两个区块链完全相同时，则在控制台打印第 302 行的消息，并在第 307 行返回接收到的区块链。\n\n## 服务层方法详解\n\
+  \n现在让我们回过头来详细讨论我们所提到的方法。首先从`checkIfOutdated`方法开始，如下面的代码片段所示：\n\n```\n327 private\
+  \ LinkedList<Block> checkIfOutdated(\nLinkedList<Block> receivedBC) {\n328 //检查区块链有多旧。\n\
+  ```\n\n\n\n```java\n329 long lastMinedLocalBlock = LocalDateTime.parse(\n    getCurrentBlockChain().getLast()\n\
+  \        .getTimeStamp())\n    .toEpochSecond(ZoneOffset.UTC);\n330 long lastMinedRcvdBlock\
+  \ = LocalDateTime.parse(\n    receivedBC.getLast().getTimeStamp())\n    .toEpochSecond(ZoneOffset.UTC);\n\
+  331 //若两者都已过时，则不做任何操作\n332 if ((lastMinedLocalBlock + TIMEOUT_INTERVAL) < LocalDateTime.now().toEpochSecond(\n\
+  \    ZoneOffset.UTC) &&\n333     (lastMinedRcvdBlock + TIMEOUT_INTERVAL) < LocalDateTime.now().toEpochSecond(\n\
+  \        ZoneOffset.UTC)) {\n334     System.out.println(\"两者都已过时，检查其他对等节点\");\n\
+  335     //如果你的区块链已过时，但接收到的区块链是新的，则使用接收到的区块链\n336 } else if ((lastMinedLocalBlock\
+  \ + TIMEOUT_INTERVAL) < LocalDateTime.now().toEpochSecond(\n                 ZoneOffset.UTC)\
+  \ &&\n337            (lastMinedRcvdBlock + TIMEOUT_INTERVAL) >=\n338           \
+  \      LocalDateTime.now().toEpochSecond(\n339                     ZoneOffset.UTC))\
+  \ {\n340     //重置挖矿点数，因为我们之前未参与贡献。\n341     setMiningPoints(0);\n342     replaceBlockchainInDatabase(receivedBC);\n\
+  343     setCurrentBlockChain(new LinkedList<>());\n344     loadBlockChain();\n345\
+  \     System.out.println(\"接收到的区块链胜出，本地区块链已过时\");\n346     //如果接收到的区块链已过时，但本地区块链是新的，则向对方发送我们的区块链\n\
+  347 } else if ((lastMinedLocalBlock + TIMEOUT_INTERVAL) > LocalDateTime.now().toEpochSecond(\n\
+  \                 ZoneOffset.UTC) &&\n348            (lastMinedRcvdBlock + TIMEOUT_INTERVAL)\
+  \ < LocalDateTime.now().toEpochSecond(\n                 ZoneOffset.UTC)) {\n349\
+  \     return getCurrentBlockChain();\n350 }\n351 return null;\n352 }\n```\n\n该方法接收接收到的区块链作为参数。我们无需传递本地区块链，因为可以直接在方法内部访问它。第\
+  \ 329–331 行以秒为单位获取两条区块链中最后一个区块的创建时间。第 334 和 335 行通过比较最后一次挖出的区块（以秒计）并将超时间隔与当前时间相加，来检查两者是否都已过时。如果两者都过时，则第\
+  \ 336 行的消息会打印在控制台中，并返回第 352 行的 `null`。接下来的检查在第 338 和 339 行，判断本地区块链是否已过时，而接收到的区块链是否是最新的。如果是这种情况，则执行第\
+  \ 341–345 行。这意味着挖矿点数会被重置，因为之前我们一直在使用一条过时的区块链。然后我们将接收到的区块链添加到数据库中，并更新应用程序的状态以进行匹配。\n\
+  \n在这种情况下，该方法同样返回 `null`。最后一种情况发生在第 347 和 348 行的检查为真时，这意味着接收到的区块链已过时，而我们的本地区块链是最新的。在这种情况下，我们返回本地区块链。\n\
+  \n我们的下一个方法是 `checkWhichIsCreatedFirst` 方法。\n\n```java\n355 private LinkedList<Block>\
+  \ checkWhichIsCreatedFirst(\n    LinkedList<Block> receivedBC) {\n356     //比较时间戳，判断哪条区块链先被创建。\n\
+  357     long initRcvBlockTime = LocalDateTime.parse(\n        receivedBC.getFirst().getTimeStamp())\n\
+  358         .toEpochSecond(ZoneOffset.UTC);\n359     long initLocalBlockTIme = LocalDateTime.parse(\n\
+  \        getCurrentBlockChain().getFirst()\n360         .getTimeStamp()).toEpochSecond(\n\
+  361             ZoneOffset.UTC);\n362     if (initRcvBlockTime < initLocalBlockTIme)\
+  \ {\n363         //重置挖矿点数，因为我们之前未参与贡献。\n364         setMiningPoints(0);\n365   \
+  \      replaceBlockchainInDatabase(receivedBC);\n366         setCurrentBlockChain(new\
+  \ LinkedList<>());\n367         loadBlockChain();\n368         System.out.println(\"\
+  对等客户端区块链胜出，对等服务器区块链已过时\");\n369     } else if (initLocalBlockTIme < initRcvBlockTime)\
+  \ {\n370         return getCurrentBlockChain();\n371     }\n372     return null;\n\
+  373 }\n```\n\n\n\n在`compareMiningPointsAndLuck`方法中，首先以秒为单位检索初始区块的创建时间，如第 357–360\
+  \ 行所示。在第 361 行，检查接收到的区块链的创建时间（以秒为单位）是否小于本地区块链的创建时间。这意味着接收到的区块链先被创建。如果是这种情况，则执行第\
+  \ 363–367 行，并返回第 371 行的`null`。如果情况相反，即本地区块链先被创建，则直接返回本地区块链。\n\n让我们看看以下代码片段中的`compareMiningPointsAndLuck`方法：\n\
+  \n```java\n374 private LinkedList<Block> compareMiningPointsAndLuck(\n        LinkedList<Block>\
+  \ receivedBC) 375 throws GeneralSecurityException {\n376     //检查两个区块链是否具有相同的前一个哈希值，以确认它们都在\n\
+  377     //争夺最后一个区块的挖矿权\n378     //如果相同，则比较挖矿点数，若挖矿点数相等则比较运气值，以判断谁获胜\n379     //of\
+  \ last block to see who wins\n380     if (receivedBC.equals(getCurrentBlockChain()))\
+  \ {\n381         //如果接收到的区块拥有更多挖矿点数，或者在平局时运气更好\n382         //则将所有交易转移到获胜区块，并将其添加至数据库。\n\
+  383         if (receivedBC.getLast().getMiningPoints() > getCurrentBlockChain()\n\
+  384                 .getLast().getMiningPoints() ||\n385                 receivedBC.getLast().getMiningPoints()\n\
+  386                 .equals(getCurrentBlockChain()\n387                        \
+  \ .getLast().getMiningPoints()) &&\n388                 receivedBC.getLast().getLuck()\
+  \ > getCurrentBlockChain().getLast()\n389                         .getLuck()) {\n\
+  390             //从我们失败的区块中移除奖励交易，并\n391             //将交易转移到获胜区块\n392         \
+  \    getCurrentBlockChain().getLast()\n393                     .getTransactionLedger().remove(0);\n\
+  394             for (Transaction transaction :\n395                     getCurrentBlockChain().getLast()\n\
+  396                             .getTransactionLedger()) {\n397                \
+  \ if (!receivedBC.getLast()\n398                         .getTransactionLedger()\n\
+  399                         .contains(transaction)) {\n400                     receivedBC.getLast()\n\
+  401                             .getTransactionLedger()\n402                   \
+  \          .add(transaction);\n403                 }\n404             }\n405   \
+  \          receivedBC.getLast()\n406                     .getTransactionLedger().sort(\n\
+  407                             transactionComparator);\n408             //由于我们的本地区块失败，此处返回挖矿点数\n\
+  409             setMiningPoints(BlockchainData\n410                     .getInstance().getMiningPoints()\
+  \ +\n411                     getCurrentBlockChain().getLast()\n412             \
+  \                .getMiningPoints());\n413             replaceBlockchainInDatabase(receivedBC);\n\
+  414             setCurrentBlockChain(new LinkedList<>());\n415             loadBlockChain();\n\
+  416             System.out.println(\"接收到区块链获胜！\");\n417         } else {\n418  \
+  \           //从他们失败的区块中移除奖励交易，并将\n419             //交易转移到我们获胜的区块\n420          \
+  \   receivedBC.getLast().getTransactionLedger()\n421                     .remove(0);\n\
+  422             for (Transaction transaction :\n423                     receivedBC.getLast()\n\
+  424                             .getTransactionLedger()) {\n425                \
+  \ if (!getCurrentBlockChain().getLast()\n426                         .getTransactionLedger()\n\
+  427                         .contains(transaction)) {\n428                     getCurrentBlockChain().getLast()\n\
+  429                             .getTransactionLedger()\n430                   \
+  \          .add(transaction);\n431                     addTransaction(transaction,\
+  \ false);\n432                 }\n433             }\n434             getCurrentBlockChain().getLast()\n\
+  435                     .getTransactionLedger()\n436                     .sort(transactionComparator);\n\
+  437             return getCurrentBlockChain();\n438         }\n439     }\n440  \
+  \   return null;\n441 }\n```\n\n如代码中的注释所述，该方法首先检查两个区块链是否包含相同的前一个哈希值。这意味着它们共享直到最后一个区块之前的相同区块。如果此检查失败，则返回第\
+  \ 440 行的`null`。第 383–386 行检查是否满足接收区块链的获胜条件。如果是这种情况，则执行第 389–402 行。\n\n\n\n执行这些行代码的具体操作如下：我们从账本中移除奖励交易，合并账本，退还我们自己的挖矿积分，然后将获胜的区块链及其更新后的交易添加到数据库中，并相应地设置应用程序状态。\n\
+  \n第 403 行的`else`表示接收到的区块链未满足获胜条件，这意味着我们本地区块链获胜。第 406–414 行从接收到的区块链中移除奖励交易，将其交易添加到我们自己的账本中，然后返回我们的区块链。\n\
+  \n`getConsensus`方法中唯一需要解释的方法就是`updateTransactionLedgers`方法。让我们看看下面的代码片段：\n\n```\n\
+  310 private void updateTransactionLedgers(LinkedList<Block> receivedBC) throws GeneralSecurityException\
+  \ {\n311     for (Transaction transaction : receivedBC.getLast().getTransactionLedger())\
+  \ {\n312         if (!getCurrentBlockChain().getLast().getTransactionLedger().contains(transaction))\
+  \ {\n313             getCurrentBlockChain().getLast().getTransactionLedger().add(transaction);\n\
+  314             System.out.println(\"current ledger id = \" + getCurrentBlockChain().getLast().getLedgerId()\
+  \ + \" transaction id = \" + transaction.getLedgerId());\n315             addTransaction(transaction,\
+  \ false);\n316         }\n317     }\n318     getCurrentBlockChain().getLast().getTransactionLedger().sort(transactionComparator);\n\
+  319     for (Transaction transaction : getCurrentBlockChain().getLast().getTransactionLedger())\
+  \ {\n320         if (!receivedBC.getLast().getTransactionLedger().contains(transaction))\
+  \ {\n321             receivedBC.getLast().getTransactionLedger().add(transaction);\n\
+  322         }\n323     }\n324     receivedBC.getLast().getTransactionLedger().sort(transactionComparator);\n\
+  325 }\n```\n\n此方法用于在本地和接收到的区块链的最后一个区块之间，共享可能缺失的任何交易。在第 311 行，我们遍历接收到的区块链最后一个区块账本中的交易。在第\
+  \ 312 行，我们检查本地区块链的最后一个区块账本是否包含每个交易。如果不包含，则将其添加到本地区块链和数据库中。在第 319 行，我们进行第二次循环，遍历本地区块链最后一个区块的交易。在第\
+  \ 320 行，我们检查每个交易是否包含在接收到的区块链中。如果不包含，则将其添加到接收到的区块链中。\n\n最后，在这个类中，我们有一些简单的 getter\
+  \ 和 setter 方法，如下面的代码片段所示：\n\n```\n420 public LinkedList<Block> getCurrentBlockChain()\
+  \ {\n421     return currentBlockChain;\n422 }\n424 public void setCurrentBlockChain(LinkedList<Block>\
+  \ currentBlockChain) {\n425     this.currentBlockChain = currentBlockChain;\n426\
+  \ }\n428 public static int getTimeoutInterval() { return TIMEOUT_INTERVAL; }\n430\
+  \ public static int getMiningInterval() { return MINING_INTERVAL; }\n432 public\
+  \ int getMiningPoints() {\n433     return miningPoints;\n434 }\n436 public void\
+  \ setMiningPoints(int miningPoints) {\n437     this.miningPoints = miningPoints;\n\
+  438 }\n440 public boolean isExit() {\n441     return exit;\n442 }\n444 public void\
+  \ setExit(boolean exit) {\n445     this.exit = exit;\n446 }\n447 }\n```\n\n## 总结\n\
+  \n在本章中，我们介绍了应用程序的完整服务层。我们讨论了单例类设计以及它如何适用于我们的应用程序。接着，我们介绍了支持钱包和区块链功能的方法。我们通过实现这些方法所使用的逻辑，了解了前几章的功能是如何实现的。我们介绍的最重要的内容之一就是区块链共识的实现。\n\
+  \n以下是本章内容的简要回顾：\n\n- 钱包功能\n- 使用单例类\n- 与 JavaFX 前端的接口\n- 区块链功能\n- 前几章功能的实现\n- 区块链共识的实现\n\
+  \n问题 6-1 的答案：第 298 行的`updateTransactionLedgers`方法将被调用。\n\n问题 6-2 的答案：两个区块链是相同的；控制台会打印第\
+  \ 302 行的消息，并且接收到的区块链会在第 307 行被返回。\n\n![](img/index-160_1.jpg)\n\n# 额外内容\n\n本章将介绍如何设置和运行我们的区块链应用程序。我们还将讨论扩展应用程序功能的主题和想法，并对本书进行总结。\n\
+  \n## 运行应用程序\n\n在前面的章节中，我们提到由于安全原因，不会将应用程序暴露到互联网上，而是决定在本地进行测试。为此，我们首先需要创建 e-coin\
+  \ 项目文件夹的多个副本，如图 7-1 所示。\n\n***图 7-1.** 创建 e-coin 项目的副本*\n\n下一步是在 IntelliJ 中打开每个项目。你可以通过选择“文件”，然后选择“打开项目”，选择其他文件夹，并在提示时选择在新窗口中打开来实现。你可以参考图\
+  \ 7-2 和图 7-3。\n\n© Spiro Buzharovski 2022\nS. Buzharovski, *Introducing Blockchain\
+  \ with Java*,\n[`doi.org/10.1007/978-1-4842-7927-4_7`](https://doi.org/10.1007/978-1-4842-7927-4_7#DOI)\n\
+  \n![](img/index-161_1.jpg) ![](img/index-161_2.jpg)\n\n***图 7-2.** 导航到文件夹*\n\n***图\
+  \ 7-3.** 打开项目*\n\n完成此步骤并且所有副本都在 IntelliJ 中打开后，就该更改一些硬编码的值，以确保每个副本都是自己独立的对等节点了。首先更改\
+  \ `PeerServer` 端口，因为每个对等节点都需要有自己的端口号。见图 7-4。\n\n![](img/index-162_1.jpg) ![](img/index-162_2.jpg)\
+  \ ![](img/index-162_3.jpg)\n\n***图 7-4.** 更改 `PeerClient` 端口*\n\n接下来，我们需要在 `PeerClient`\
+  \ 类的构造函数中，将其他对等节点的套接字端口号添加到彼此的 `PeerClient` 队列中，如图 7-5 所示。\n\n***图 7-5.** 添加套接字编号*\n\
+  \n最后，我们需要检查 `jdbc` 连接，并将文件路径更改为与副本的文件路径对应。图 7-6 显示了一个示例。\n\n***图 7-6.** 更改文件路径*\n\
+  \n其余的这些连接文件路径可以在 `ECoin` 类的 `init()` 方法以及服务层类 `BlockchainData` 和 `WalletData` 的多个方法中找到。最后这一更改将确保每个对等节点拥有自己独立的数据库来存储区块链和钱包。如果你想将钱包导出到另一个对等节点，只需将\
+  \ `wallet.db` 数据库从一个对等节点的文件夹路径复制到另一个即可。同时请记住，如果你删除了 `wallet.db` 数据库并且没有备份副本，那么该钱包的访问权限和币将永久丢失，因为你将失去密钥对。除此之外，你只需在\
+  \ IntelliJ 中运行每个副本，就能拥有一个运行中的点对点网络。\n\n在运行应用程序之前，请确保你已经安装了 Java SE 8。如果你不确定自己安装的版本，可以在\
+  \ IntelliJ 的控制台中输入 `java -version` 进行检查。\n\n\n\n一旦你挖到了一些币，就可以通过从其他节点的 UI 中复制其地址，并在`Add\
+  \ New Transaction`窗口中输入该地址，来实际地将这些币发送给另一个节点，如图 7-7 所示。请注意，在当前区块达成共识之前，这些币不会出现在接收账户中。这可以防止双花问题，因为共识算法在将币分配给其他节点账户之前，会检查是否存在双花尝试。\n\
+  \n**图 7-7.** 添加交易\n\n![](img/index-164_1.jpg)\n\n# 第 7 章 附加内容\n\n其他功能包括：停止其中一个节点，让其区块链变成旧状态（比其他人落后一到两分钟），然后重启该节点并观察一切如何同步。最后，你可以停止所有节点，并使用`SQLite\
+  \ Developer`检查数据库。这应该能为你提供关于数据如何存储的额外洞察和确认，并且你将对你刚刚创建的整个区块链有一个很好的概览。效果应类似于图 7-8\
+  \ 和图 7-9 所示。\n\n**图 7-8.** 浏览数据\n\n![](img/index-165_1.jpg)\n\n# 第 7 章 附加内容\n\n\
+  **图 7-9.** 交易表\n\n# 第 7 章 附加内容\n\n## 7.2 未来改进方向\n\n如果你决定继续对该应用进行开发，以下是一些供你参考的想法：\n\
+  \n-   实现比特币的工作量证明算法用于共识。\n-   实现权益证明算法。\n-   实现智能合约。\n-   实现对非同质化代币（NFT）的支持。\n-\
+  \   在 UI 中添加钱包功能，例如使用助记词导入/导出和创建钱包。\n-   实现通过 UI 遍历整个区块链；目前只能通过浏览数据库来实现。\n-   添加一个开关，可以在保持发送币功能的同时，开启/关闭挖矿。\n\
+  \n## 7.3 结论\n\n首先，我想感谢你阅读到本书的最后。本书所涵盖的内容远未穷尽所有关于区块链技术的知识，但我真诚地希望，本书为你提供了坚实的基础，并让你在使用基础\
+  \ Java 的同时，对区块链有了更好的理论和实践理解。如你所见，这个应用绝不是一件成品，但它功能足够，可以成为一个不错的学习工具，供你进行实验和进一步自主学习。如果到现在为止，你已经产生了一些关于如何使用你喜欢的框架和库来改进和重写部分代码的想法，那么我认为这本书已经达到了它的目的。\n\
+  \n# 文档大纲\n\n-   第 1 章：区块链简介\n    -   1.1 动机与基本定义\n    -   1.2 加密\n        -   1.2.1\
+  \ 函数\n        -   1.2.2 对称密钥算法\n        -   1.2.3 非对称密钥算法\n    -   1.3 哈希\n    -\
+  \   1.4 智能合约\n    -   1.5 比特币\n    -   1.6 示例工作流程\n    -   1.7 总结\n-   第 2 章：模型：区块链核心\n\
+  \    -   2.1 Block.java\n    -   2.2 Transaction.java\n    -   2.3 Wallet.java\n\
+  \    -   2.4 总结\n-   第 3 章：数据库设置\n    -   3.1 SQLite 数据库浏览器设置\n    -   3.2 Blockchain.db\n\
+  \    -   3.3 Wallet.db\n    -   3.4 为 SQLite 设置 JDBC 驱动\n    -   3.5 编写你的 App init()\
+  \ 方法\n    -   3.6 总结\n-   第 4 章：构建用户界面\n    -   4.1 场景构建器快速设置\n    -   4.2 创建你的视图\n\
+  \        -   4.2.1 MainWindow.fxml\n        -   4.2.2 AddNewTransactionWindow.fxml\n\
+  \    -   4.3 创建你的视图控制器\n        -   4.3.1 MainWindowController\n        -   4.3.2\
+  \ AddNewTransactionController\n    -   4.4 总结\n-   第 5 章：设置网络与多线程\n    -   5.1 UI\
+  \ 线程\n    -   5.2 挖矿线程\n    -   5.3 P2P 网络线程\n        -   5.3.1 PeerClient 线程\n\
+  \        -   5.3.2 PeerServer 线程\n    -   5.4 PeerRequestThread\n    -   5.5 总结\n\
+  -   第 6 章：服务层\n    -   6.1 WalletData\n    -   6.2 BlockchainData\n        -   6.2.1\
+  \ 区块链共识协议\n    -   6.3 总结\n-   第 7 章：附加内容\n    -   7.1 运行应用程序\n    -   7.2 未来改进方向\n\
+  \    -   7.3 结论\n"

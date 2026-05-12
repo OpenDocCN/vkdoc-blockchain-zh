@@ -1,0 +1,2120 @@
+- "\nISBN 978-1-4842-5170-6  \ne-ISBN 978-1-4842-5171-3  \n[`doi.org/10.1007/978-1-4842-5171-3`](https://doi.org/10.1007/978-1-4842-5171-3)\
+  \  \n\n© Daniel van Flymen 2020  \n本作品受版权保护。出版商保留所有权利，无论是材料的全部或部分，特别是翻译、重印、重用插图、背诵、广播、微缩胶片复制或任何其他物理方式的复制权，以及电子信息存储与检索、电子改编、计算机软件，或目前已知或未来开发的类似或不同方法的传输权。\
+  \  \n\n在本出版物中使用通用描述性名称、注册商标名称、商标、服务标志等，即使没有具体声明，也不意味着这些名称不受相关保护法律和法规的约束，因此可自由使用。\
+  \  \n\n出版商、作者和编辑假定本书中的建议和信息在出版时是真实准确的。出版商、作者或编辑均不对其中包含的材料或可能存在的任何错误或遗漏提供明示或暗示的保证。出版商对出版地图中的管辖权声明和机构归属保持中立。\
+  \  \n\n本书由 Springer Science+Business Media New York 经销至全球图书市场，地址：1 New York Plaza,\
+  \ New York, NY 10004。电话：1-800-SPRINGER，传真：(201) 348-4505，电子邮件：`orders-ny@springer-sbm.com`，或访问\
+  \ `www.springeronline.com`。Apress Media, LLC 是一家加利福尼亚有限责任公司，其唯一成员（所有者）是 Springer\
+  \ Science + Business Media Finance Inc (SSBM Finance Inc)。SSBM Finance Inc 是一家特拉华州公司。\n\
+  \n*谨以此书献给**约书亚***，他总是有始有终。\n\n"
+- '# 引言
+
+
+  ## 又一本关于区块链的书？为什么？
+
+
+  理解区块链并不容易。至少对我来说是这样：当比特币首次登上新闻头条时，我试图了解它的工作原理，却发现面向程序员（像我这样的人）的资源少之又少。虽然有比特币参考维基百科（[`https://en.bitcoin.it`](https://en.bitcoin.it)），但在当时，它的组织方式并不像今天这样清晰；尽管我读了中本聪的白皮书，但起初并没有真正理解它——至少不理解加密部分是如何运作的。
+
+
+  我在 YouTube 上漫无目的地浏览，完成了许多不完整的教程，并因那些未能清晰传达概念的示例而感到沮丧。于是，我决定尝试自己构建一个区块链，并记录下在这个过程中学到的所有东西。通过这样做，我发现了为什么加密货币如此难以解释和理解；因为首先你需要定义数字货币的构成要素：
+
+
+  -   货币是如何创造的？（挖矿）
+
+  -   爱丽丝如何向鲍勃发送货币？（数字签名交易）
+
+  -   谁负责追踪所有这些交易和生成的货币？（每个人，通过分布式账本）
+
+
+  这些高层次的概念依赖于不同的知识单元，必须首先理解它们，然后才能将它们组合成一套大家共同遵守的通用规则。而理解这些不同概念的最佳方式是逐一击破——通过实际动手构建自己的加密货币来实践。因此，我写这本书是为了那些和我有同样挫败感的人，并通过在代码层面处理主题来克服它——这才是真正让知识扎根的方法。如果你坚持读下去，并动手实践，我相信在本书结束时，你将扎实掌握它们的运作原理。
+
+
+  ## 为成功做好准备
+
+
+  ### GitHub 仓库
+
+
+  最终代码位于 [`https://github.com/dvf/blockchain-book`](https://github.com/dvf/blockchain-book)。但请尝试自己动手编码——代码结构设计为高层方法已预留接口，细节逐步填充。此代码会保持更新，因此它可作为参考的北极星。
+
+
+  ### 花时间配置你的开发环境
+
+
+  使用一个好的集成开发环境（IDE），例如 Microsoft VSCode 或 JetBrains PyCharm。它们都是免费的，并且能在你之前发现代码中的错误。在开始之前花时间设置好
+  IDE 是非常值得的。把你的时间花在操心区块链上，而不是代码的语法错误上。
+
+
+  ### 知道去哪里获取答案
+
+
+  浏览并在 GitHub 仓库的 *Issues*（问题）页面提问。该仓库拥有庞大的社区关注者，因此你很可能会遇到其他有类似问题的人。如果你遇到错误或漏洞，恳请你提交一个
+  *Issue*。
+
+
+  ### 不会 Python？
+
+
+  没关系。Python 以其可读性著称；它是一种非常易于转译的语言。我曾见过其他程序员（C#、JavaScript 和 Rust）实时完成书中的示例。
+
+
+  '
+- '# 致谢
+
+
+  **本书献给我的兄弟约书亚，他总是有始有终**。特别感谢
+
+
+  -   我的朋友兼比特币教育同行**贾斯汀·穆恩**，感谢他帮助我澄清概念、测试代码，并在需要时提供中肯的建议。
+
+  -   我的朋友**费德里科·乌尔福**，不仅感谢他每周不辞辛劳地审阅和复核我的工作，也感谢他在过去几年中陪我参加了无数比特币和闪电网络的活动与会议。
+
+  -   Apress 出版社的**丽塔·费尔南多**和**希万吉·拉马钱德兰**，感谢他们对我的信任，并使这本书得以问世。
+
+
+  '
+- '# 关于作者
+
+
+  '
+- '# 关于技术审稿人
+
+
+  '
+- "# 1. 为应用开发做好准备\n\n对于不熟悉的人来说，Python 是最流行的语言之一。它被广泛使用于各个领域——从学术界、科学领域到像 Instagram\
+  \ 这样的大型网络应用。其受欢迎的部分原因在于其拥有大量免费在线的库、包和扩展，以及由于其类似伪代码而易于阅读。\n\n在本章中，我们将确保你的计算机已为应用开发正确配置，并且\
+  \ Python 已正确安装。然后，我将向你展示如何创建一个实用的 Python 项目以及如何安装依赖项。\n\n## Python 版本\n\nPython\
+  \ 有两个版本：版本 2 和版本 3。版本 2 已不再受 Python 软件基金会支持，但由于许多内部工具仍在使用它，因此大多数操作系统仍预装了它。另一个复杂因素是，不同的操作系统将\
+  \ Python 安装在文件系统的不同位置。这些因素使得设置开发环境变得棘手。\n\n我们将尝试通过安装和使用有助于管理 Python 安装的工具来克服这些障碍。\n\
+  \n> **注意**  \n> 按照惯例，在本书中，我们将在终端命令前加上 `$` 符号。输出将以纯文本形式显示。\n\n## 安装 Python\n\n###\
+  \ Windows 系统安装\n\n`Python.org` 包含适用于 Windows 的可下载二进制文件。前往 [`www.python.org/downloads/windows/`](http://www.python.org/downloads/windows/)\
+  \ 下载 Python 3.8 的二进制文件。\n\n下载完成后，安装 Python 3.8，确保选择以下选项：\n\n-   卸载 Python 的先前版本。\n\
+  -   安装 `pip`（Python 包管理器）。\n-   将 Python 添加到 `PATH` 环境变量（允许你在命令行中执行 Python）。\n\n\
+  安装完成后，为了确认一切设置正确，打开命令行并检查 Python 版本：\n\n```\nC:\\Users\\dan> python --version\n\
+  3.8.3\n```\n\n\n好的，作为一名高级文档工程师和翻译员，我将遵循您提供的注意事项和示例，将给定的英文文本翻译成中文。\n\n\n### macOS\
+  \ 安装\n\n尽管 macOS 自带了一个内部使用的 Python 版本，但我们在开发时并不想修改它，因此我们将使用 Homebrew——一个用于在 macOS\
+  \ 上帮助管理和安装第三方包的工具——来安装一个全新的 Python 版本。\n\n首先，我们需要确保安装 Apple 的命令行工具，请在终端中执行：\n\n\
+  ```\n$ xcode-select --install\n```\n\n你需要安装 *Homebrew*，这是一个 macOS 上的包安装器。要安装它，请遵循\
+  \ [`https://brew.sh/`](https://brew.sh/) 上的说明，并确保 Homebrew 已正确安装。\n\n安装完 Homebrew\
+  \ 后，让我们安装最新版本的 Python：\n\n```\n$ brew install python\n```\n\n安装完成后，请验证 Python 是否已正确安装：\n\
+  \n```\n$ python --version\nPython 3.8.3\n```\n\n### Linux 安装\n\n如果你使用的是基于 Debian\
+  \ 的 Linux 版本，你可以使用 `apt`（或任何其他包管理器）来安装 Python 3.8：\n\n```\n$ sudo apt-get update\n\
+  $ sudo apt-get install python3.8\n```\n\n安装完成后，请验证 Python 是否已正确安装：\n\n```\n$ python\
+  \ --version\nPython 3.8.3\n```\n\n如果你使用的不是基于 Debian 的 Linux 发行版，你可以从源代码编译 Python：[`www.python.org/downloads/source/`](http://www.python.org/downloads/source/)。\n\
+  \n## Python 程序如何运行\n\n当你安装 Python 时，你实际上是在安装一个*解释器*——一个将你编写的 Python 代码翻译成计算机能够理解和执行的指令的程序。你安装的解释器叫做\
+  \ CPython，这是一个用 C 语言编写的流行解释器。\n\n你通过在终端中将 Python 程序提供给 Python 解释器来运行它：\n\n```\n\
+  $ python my_program.py\n```\n\n这会将你的代码转换为“计算机指令”并执行它们。\n\n你的操作系统如何知道 Python 解释器的位置？\n\
+  \n你的操作系统有一个名为 `PATH` 的系统级变量，其中包含一个在查找程序时要遍历的文件路径列表。你可以通过在终端中运行 `echo $PATH` 来检查它的设置。Python\
+  \ 解释器位于 `/usr/local/bin/`。这可以通过调用 `which python` 来验证。\n\n## 管理项目依赖\n\n你构建的每个项目都可能使用到外部库。这些依赖可能是数据库访问库，或是解析文档或网站所需的工具，但重点是它们要被包含在你的项目中。\n\
+  \n管理项目依赖可能是一项棘手的任务，因为不同的依赖有不同的要求——有些依赖需要特定版本的 Python，其他的可能依赖于兄弟依赖。现代 Python 项目使用包管理器来应对下载、安装和保持依赖更新的艰巨任务。总之，使用包管理器能让你的工作更轻松。\n\
+  \nPoetry 是 Python 的众多依赖管理器之一。还有其他更流行的，比如 Pipenv。但在广泛使用了两者之后，我发现 Poetry 拥有更简洁的界面，并且其目标更加务实。\n\
+  \n### 安装 Poetry\n\n安装 Poetry 的推荐方法是在你的终端中运行以下命令：\n\n```\n$ curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py\
+  \ | python\n```\n\n如果遇到任何问题，请参考 Poetry 网站上的官方文档和安装说明：[`https://poetry.eustace.io/docs/`](https://poetry.eustace.io/docs/)\n\
+  \n通过在 shell 中调用 Poetry 来验证它是否已正确安装：\n\n```\n$ poetry\nPoetry version 1.0.9\nUSAGE\n\
+  poetry [-h] [-q] [-v []] [-V] [--ansi] [--no-ansi] [-n]  [] ... []\nARGUMENTS\n\
+  \               The  command  to  execute\n                   The arguments of the\
+  \ command\nGLOBAL OPTIONS\n-h (--help)             Display this help message\n-q\
+  \ (--quiet)            Do not output any message\n-v (--verbose)          Increase\
+  \ the verbosity of messages: \"-v\" for normal output, \"-vv\" for more verbose\
+  \ output, and \"-vvv\" for debug\n-V (--version)          Display this application\
+  \ version\n--ansi                  Force ANSI output\n--no-ansi               Disable\
+  \ ANSI output\n-n (--no-interaction)   Do not ask any interactive question\nAVAILABLE\
+  \  COMMANDS\nabout                   Shows information about Poetry.\nadd      \
+  \               Adds a new dependency to pyproject.toml.\nbuild                \
+  \   Builds a package, as a tarball and a wheel by default.\nCache              \
+  \     Interacts with Poetry's cache.\ncheck                   Checks the validity\
+  \ of the pyproject.toml file.\nconfig                  Manages configuration settings.\n\
+  debug                   Debugs various elements of Poetry.\nenv                \
+  \     Interacts with Poetry's project environments.\nexport                  Exports\
+  \ the lock file to alternative formats.\nhelp                    Displays the manual\
+  \ of a command.\ninit                    Creates a basic pyproject.toml file in\
+  \ the current directory.\ninstall                 Installs the project dependencies.\n\
+  lock                    Locks the project dependencies.\nnew                   \
+  \  Creates a new Python project at .\npublish                 Publishes a package\
+  \ to a remote repository.\nremove                  Removes a package from the project\
+  \ dependencies.\nrun                     Runs a command in the appropriate environment.\n\
+  search                  Searches for packages on remote repositories.\nself    \
+  \                Interacts with Poetry directly.\nshell                   Spawns\
+  \ a shell within the virtual environment.\nshow                    Shows information\
+  \ about packages.\nupdate                  Updates the dependencies as according\
+  \ to the pyproject.toml file.\nversion                 Shows the version of the\
+  \ project or bumps it when a valid bump rule is provided .\n```\n\n### 使用 Poetry\
+  \ 创建一个 Python 项目\n\n让我们用 Poetry 创建一个新项目：\n\n```\npoetry new my-project\n```\n\n\
+  这将在名为 `my-project` 的文件夹中创建以下“标准”的 Python 项目结构：\n\n```\n.\n├── README.rst\n├── my_project\n\
+  │  └── __init__.py\n├── pyproject.toml\n└── tests\n├── __init__.py\n└── test_my_project.py\n\
+  ```\n\n这里最重要的文件是 `pyproject.toml`，它描述了项目及其依赖关系。它使用一种名为 `TOML` 的标记格式编写：\n\n```\n\
+  [tool.poetry]\nname = \"my-project\"\nversion = \"0.1.0\"\ndescription = \"\"\n\
+  authors = [\"Daniel van Flymen \"]\n[tool.poetry.dependencies]\npython = \"³.8\"\
+  \n[tool.poetry.dev-dependencies]\npytest = \"⁵.2\"\n[build-system]\nrequires = [\"\
+  poetry>=0.12\"]\nbuild-backend = \"poetry.masonry.api \"\n```\n\n请注意，我们现在唯一的依赖项是\
+  \ Python `³.8`，这表明你的项目需要 `3.8.0` 到 `4.0.0` 之间的*任何* Python 版本。Poetry 还添加了 `pytest`\
+  \ 作为用于运行测试的 `dev` 依赖项，但我们稍后会讲到这一点。\n\n\n\n### 安装依赖\n\n最流行的 Python 库之一是 `requests`\
+  \ 库，它使我们能够轻松发起 HTTP 请求。我们来安装它：\n\n```\n$ poetry add requests\nCreating virtualenv\
+  \ my-project-py3.8 in /Users/dvf/Library/Caches/pypoetry/virtualenvs Using version\
+  \ ².22 for requests\nUpdating dependencies\nResolving dependencies... (0.7s)\nWriting\
+  \ lock file\nPackage  operations:  14  installs, 0 updates, 0 removals\n- Installing\
+  \  more-itertools  (7.2.0)\n- Installing zipp (0.6.0)\n- Installing importlib-metadata\
+  \ (0.23)\n- Installing atomicwrites (1.3.0)\n- Installing attrs (19.3.0)\n- Installing\
+  \ certifi (2019.9.11)\n- Installing chardet (3.0.4)\n- Installing idna (2.8)\n-\
+  \ Installing pluggy (0.13.0)\n- Installing py (1.8.0)\n- Installing six (1.12.0)\n\
+  - Installing urllib3 (1.25.6)\n- Installing pytest (3.10.1)\n- Installing requests\
+  \ (2.22.0)\n```\n\n使用 `poetry add requests` 这一语法会导致以下一系列事情发生：\n\n1. 在 `/Users/dvf/Library/Caches/pypoetry/virtualenvs/my-project-py3.8`\
+  \ 创建了一个“虚拟环境”（virtualenv）。虚拟环境是一个包含 Python 解释器和项目所需包的文件夹，这样就不会污染系统的其他部分。\n\n2. 从\
+  \ Python 的包索引 [`https://pypi.org`](https://pypi.org) 下载了最新版本的 `requests` (2.22.0)。\n\
+  \n3. `requests` 所依赖的所有依赖项也被一并下载了。这些被称为子依赖。\n\n4. 所有下载的包都被安装到了项目的虚拟环境中。\n\n我们现在已经准备好开始构建并与我们的依赖进行交互了。\n\
+  \n## 激活虚拟环境\n\n在运行你的项目之前，你需要激活虚拟环境。也就是说，告诉你的计算机去使用由 Poetry 管理的虚拟环境中的 Python 解释器。\n\
+  \n首先，让我们检查一下我们当前正在使用的 Python 解释器：\n\n```\n$ which python\n/usr/local/bin/python\n\
+  ```\n\n让我们激活虚拟环境：\n\n```\n$ poetry shell\nSpawning shell within /Users/dvf/Library/Caches/pypoetry/virtualenvs/my-project-py3.8\n\
+  ```\n\n现在，让我们验证一下我们正在使用的 Python 解释器是否是 Poetry 虚拟环境中的那个：\n\n```\n$ which python\n\
+  /Users/dvf/Library/Caches/pypoetry/virtualenvs/my-project-py3.8/bin/python\n```\n\
+  \n遇到问题了？\n\n如果你遇到了问题，那么你应该小心地关闭并重新打开你的终端，并严格按照本章开头部分的说明进行操作。如果仍然卡住，那么很可能是你的 `PATH`\
+  \ 变量有问题。\n\n我建议你仔细阅读 Poetry 的文档以确保你已遵循所有步骤，因为自从本书出版以来，该软件可能已经发生了变更。\n\n## 示例：获取比特币价格\n\
+  \n让我们通过编写一些代码来小试牛刀，这些代码会从交易所获取当前的比特币现货价格。\n\n首先，在 `my-project/my_project` 目录下创建一个名为\
+  \ `current_price.py` 的文件。你的文件夹结构应如下所示：\n\n```\n.\n├── README.rst\n├── my_project\n\
+  │  ├── __init__.py\n│  └── current_price.py\n├── pyproject.toml\n└── tests\n├──\
+  \ __init__.py\n└── test_my_project.py\n```\n\n我们将使用刚刚安装的 `requests` 库来获取以美元计的价格。在\
+  \ `current_price.py` 中输入以下代码：\n\n```\nimport requests\nresponse = requests.get(\"\
+  https://api.coinbase.com/v2/prices/spot?currency=USD\")\nprint(response.text)\n\
+  ```\n\n好的，保存你的文件。让我们运行它：\n\n```\n$ poetry run python my_project/current_price.py\n\
+  {\"data\":{\"base\":\"BTC\",\"currency\":\"USD\",\"amount\":\"9161.25\"}}\n```\n\
+  \n在前面这个命令中，注意其中的 `poetry run...` 部分。这是一种快捷方式，用于启用虚拟环境并在此环境中运行命令的其余部分。等价地，你也可以使用\
+  \ `poetry shell` 来启用虚拟环境，然后运行命令。\n\n如果你仔细查看输出，你会看到价格为 `$9161.25`。\n\n## 总结\n\n总而言之，我们涵盖了：\n\
+  \n1. 在你的机器上安装一个全新的 Python 3.8 解释器\n\n2. 使用 Poetry 为一个新项目创建并安装依赖（从本章开始，我们将在后续的每一章都这样做）\n\
+  \n3. 通过使用 `requests` 库调用 API 来获取最新的比特币价格\n\n现在你已经设置好了项目结构，我们准备深入并开始在实践中学习。\n\n"
+- "# 2. 识别万物的方法\n\n如果你对区块链和加密货币感兴趣，那么你可能听说过哈希。哈希的概念是密码学的基石——是区块链基础设施中的关键要素。在本章中，你将掌握哈希的实用知识以及它为何如此重要。\n\
+  \n## 项目设置\n\n本着在实践中学习的精神，我们将创建一个新项目，并将在每个章节中逐步对其进行扩展。我们将其命名为 `funcoin`：\n\n```\n\
+  $ poetry new funcoin\n```\n\n跳转到 `funcoin` 文件夹：\n\n```\n$ cd funcoin\n```\n\n`funcoin`\
+  \ 文件夹应该如下所示：\n\n```\n.\n├── funcoin\n│  └── __init__.py\n├── pyproject.toml\n└──\
+  \ tests\n├── __init__.py\n└── test_funcoin.py\n```\n\n项目结构\n\n这个文件夹结构大致是所有现代 Python\
+  \ 项目的标准样式。它由 PEP（Python 增强提案）518 定义。当你创建新项目时，Poetry 强制执行了这种文件夹结构。\n\n为了学习本章内容，我们创建一个文件；在*项目文件夹*\
+  \ `funcoin` 中，将其命名为 `chapter_2.py`。你的项目文件夹现在应该如下所示：\n\n```\n.\n├── README.rst\n\
+  ├── funcoin\n│  ├── __init__.py\n│  └── chapter_2.py\n├── pyproject.toml\n└── tests\n\
+  ├── __init__.py\n└── test_funcoin.py\n```\n\n## 哈希函数\n\n理论上，**哈希** 是识别数据的行为。它是一种特殊的方法，可以为任何数据（无论是句子、照片、电子表格还是下载的程序）分配一个唯一的、随机的值。你可以将哈希函数视为“识别机器”——一种为特定输入分配值的机器。输入是任意的——可以是图像、文档、文件、原始字节、数字，任何你喜欢的东西——但对于**相同的输入，其输出总是可预测的**。\n\
+  \n命名约定\n\n人们倾向于将术语 **哈希** 同时用作动词和名词：“看看这张照片的哈希值”（名词），或者“让我们对以下文件进行哈希”（动词）。哈希函数输出的正确术语是“摘要”，但“哈希”已经成为普遍用法。\n\
+  \n唯一性\n\n前面第二句话声称哈希值是唯一且随机的——这稍微有些不准确。在本书中，我们处理的是特殊类型的哈希函数，称为密码学哈希函数，其中计算出的哈希值是从一个足够大的值池中选择的，以至于在已知宇宙中，两个输入共享一个值的可能性极低。所以，修改一下上面的说法：哈希值实际上是*在可实际达到的范围内最接近唯一的*。\n\
+  \n\n\n### 示例 1：Python 中的哈希运算\n\nPython 内置了常用的标准哈希函数集，这些函数位于 `hashlib` 库中。我们启动 Python\
+  \ 并开始使用它们。\n\n```\nimport hashlib\n# 哈希函数期望输入为字节：encode() 方法可将字符串转换为字节\ninput_bytes\
+  \ = b\"backpack\"\noutput = hashlib.sha256(input_bytes)\n# 我们使用 hexdigest() 将字节转换为十六进制，因为更易读\n\
+  print(output.hexdigest())\n```\n\n你得到的输出是什么？应该是如下所示：\n\n```\n5f00368a6ad231c3c439c4f6bc33c27014b4d35a904ff1656d74f9528636f496\n\
+  ```\n\n现在，尝试将 `\"backpack\"` 中的某个字母改为大写。尝试在末尾添加一个空格。每次调整输入后都进行实验。你是否注意到生成的哈希值*完全*不同？很好。那么你刚刚发现了*雪崩*特性：输入的微小变化会导致输出的巨大差异。\n\
+  \n通常，如果一个哈希函数满足以下特性，则被认为是**加密**哈希函数：\n\n-   **确定性：** 相同的输入始终产生相同的哈希值。\n-   **难解性：**\
+  \ 除了通过穷举（尝试海量可能的输入）之外，无法根据给定的哈希值找到对应的输入。\n-   **碰撞安全性：** 无法找到两个产生相同哈希值的不同输入。\n-\
+  \   **雪崩效应：** 输入的微小变化应产生一个与旧哈希值看似毫无关联的全新哈希值。\n-   **速度：** 生成哈希值的计算速度*很快*。\n\n##\
+  \ 哈希函数的选择\n\n点对点区块链会在其协议中声明所选的哈希函数：比特币使用*双重* `sha256`，而以太坊使用 `keccak256`。需要了解的重要一点是，所有这些哈希函数都做同一件事：对给定输入提供可预测的输出。\n\
+  \n让我们回顾一下目前学到的知识。\n\n| 术语 | 解释 | 示例 |\n| --- | --- | --- |\n| 哈希函数 | 一种通过输出一个巨大的、随机的十六进制数来标识你输入的任何内容的函数。对于相同的输入，该数字*始终*相同。\
+  \ | 一种加密哈希函数，例如 `sha256`、`md5`、`blake2b` 等。 |\n| 哈希值/摘要 | 哈希函数的输出：一个巨大的、随机的十六进制数。\
+  \ | 单词 `\"dan\"` 的哈希值：`ec4f...f1cb` |\n\n### 示例 2：为图像进行哈希运算\n\n这是一张 100 美元钞票的图片。\n\
+  \n![../images/475256_1_En_2_Chapter/475256_1_En_2_Fig1_HTML.jpg](img/475256_1_En_2_Fig1_HTML.jpg)\n\
+  \n这张图片的**哈希值**是 `e25641dc52387baba19751783ae4e060`。\n\n这是同一张图片，但做了细微修改。\n\n![../images/475256_1_En_2_Chapter/475256_1_En_2_Fig2_HTML.jpg](img/475256_1_En_2_Fig2_HTML.jpg)\n\
+  \n你能发现修改之处吗？可能能，也可能不能。仔细看看。（我把单词 `\"STATES\"` 改成了单数。）但有趣的是：如果我对这张图片运行哈希函数，结果会是 `f4c56f530133b8de6b3b0b39a610be32`。这看起来可能并不惊人，但如果比较这两个哈希值，你会发现它们截然不同且看似随机。我将它们并列展示：\n\
+  \n```\ne25641dc52387baba19751783ae4e060\nf4c56f530133b8de6b3b0b39a610be32\n```\n\
+  \n> **注：** 比特币背后的突破性理念是，哈希值可以用来证明计算机完成过工作量——我们将在后续章节中探讨这一点，但就目前而言，请记住比特币利用了加密哈希值的明显“随机性”。\n\
+  \n让我们尝试用 Python 为我们自己的图片（或文件）计算哈希值。\n\n```\nfrom hashlib import sha256\nfile = open(\"\
+  my_image.jpg\", \"rb\")\nhash = sha256(file.read()).hexdigest()\nfile.close()\n\
+  print(f\"The hash of my file is: {hash}\")\n```\n\n让我们逐行审视并解释上述代码：\n\n```\nfrom\
+  \ hashlib import sha256\n```\n\n这一行从 Python 自带的 `hashlib` 库中导入了 `sha256` 哈希函数。`sha256`\
+  \ 是最流行的哈希函数之一（在比特币中被广泛使用）。\n\n这里，我们打开一个名为 `my_image.jpg` 的文件，该文件位于代码所在的同一目录：\n\n\
+  ```\nfile = open(\"my_image.jpg\", \"rb\")\n```\n\n参数 `\"rb\"` 表示该文件应以只读模式打开，并以字节形式读取。\n\
+  \n```\nhash = sha256(file.read()).hexdigest()\n```\n\n然后我们将打开的文件读入哈希函数，如：`sha256(file.read())`，并将\
+  \ `hexdigest()`（即以十六进制字符串形式输出的结果）赋值给一个名为 `hash` 的变量。\n\n最后，我们关闭打开的文件并将哈希值打印到终端。\n\
+  \n## 验证从互联网下载的文件\n\n你可以使用上述脚本验证下载的文件是否未被第三方篡改。信誉良好的网站会公布文件应有的哈希值（有时称为校验和），以便你在本地进行验证。\n\
+  \n### 类比\n\n如果你仍然感到困惑，这里有一个现实生活中的类比，可以帮助你更深入地理解这个想法。\n\n想象一下你在机场通过安检，将背包放在传送带上。但传送带配备了一种特殊的扫描仪——一种能够对您的物品进行\
+  \ X 光扫描并输出哈希值的机器。\n\n背包被扫描后，扫描仪会吐出一个标识您背包的 8 位数字哈希值：`13371817`。如果你的背包及其所有物品完全相同，扫描仪将始终输出相同的数字。但如果你决定从背包中取出一个物品，扫描仪会返回一个完全不同的数字。\n\
+  \n## 不可逆性\n\n正如我们讨论过的，区块链使用了**加密**哈希函数，这些哈希函数极难逆转。这意味着，如果我们拿到一个哈希值，想要猜出原始输入是什么是极其困难的（达到超级计算机级别）。\n\
+  \n在前面的例子中，如果我给你哈希值 `e25641dc52387baba19751783ae4e060`，你几乎不可能猜出它是一张 100 美元钞票的照片。\n\
+  \n理解这个概念至关重要，因为它构成了比特币乃至整个区块链安全性的基础。正如我们稍后将看到的，还有许多具有不同特性的不同哈希函数。\n\n### 示例 3：发送防篡改的电子邮件\n\
+  \n## 问题\n\n爱丽丝想通过开放互联网等不安全渠道向鲍勃发送一封电子邮件。鲍勃并不在意其他人能否阅读邮件内容，但他希望确保邮件未被篡改。鲍勃如何验证邮件信息未被篡改？\n\
+  \n> **注：** 在我们给出解决方案之前，运用你刚刚掌握的哈希知识，你能想到如何设计这样的方案吗？\n\n\n\n### 解决方案\n\n整体思路是让爱丽丝和鲍勃事先约定一个共享密钥。然后爱丽丝从消息中删除密钥短语，将消息和哈希值一起发送给鲍勃。鲍勃随后执行与爱丽丝相同的操作：他附加预共享的密钥短语并输出一个哈希值。如果该哈希值与爱丽丝发送的不一致，他就知道消息已被篡改。\n\
+  \n总结如下：\n\n1.  爱丽丝和鲍勃共享一个密钥短语 `S`。\n2.  爱丽丝将密钥附加到消息 `M` 的末尾，然后创建消息 `M` 的哈希值 `H`：`H\
+  \ = hash(M + S)`。\n3.  爱丽丝将 `H` 和 `M`（即消息和计算出的哈希值）发送给鲍勃。\n4.  鲍勃自己计算 `H` 来检查消息的完整性，看其是否与爱丽丝公布的哈希值相同。\n\
+  \n**注意**  \n这个通用方案描述了一系列称为 HMAC（哈希消息认证码）的协议，该协议由 IETF RFC 2104 定义。\n\n让我们看一个例子。在爱丽丝和鲍勃开始通信之前，他们都同意使用一个秘密密码\
+  \ `bolognese`。爱丽丝使用给定的方案编写她的电子邮件。以下是鲍勃收到它时的样子：\n\n```\n发件人: alice@example.com\n\
+  主题: 你听说过比特币吗？\n嘿鲍勃，我认为你应该了解一下区块链！我一直在投资比特币，目前我的账户里正好有 12.03 BTC。\n哈希值: 71890dc61c21370874d2a7b74064396cb613a1924f09aa06925abc7842e6802c\n\
+  ```\n\n鲍勃注意到爱丽丝在邮件正文中包含了哈希值。他将哈希值剥离，然后将密钥短语 (`bolognese`) 附加到邮件正文的末尾，并计算其哈希值。如果该哈希值与邮件正文中包含的哈希值匹配，那么他就可以断定消息没有被篡改（并且爱丽丝确实拥有\
+  \ 12.03 BTC）。\n\n爱丽丝和鲍勃都必须知道他们将用于验证的协议，这非常重要。这包括要使用的哈希函数 (`sha256`)、密钥短语在消息中的放置位置（他们同意将其附加到末尾），以及任何可能进一步增强方案安全性的其他数据（例如时间戳）。\n\
+  \n让我们看看鲍勃如何用 Python 验证爱丽丝的消息。\n\n```python\nfrom hashlib import sha256\nsecret_phrase\
+  \ = \"bolognese\"\ndef get_hash_with_secret_phrase(input_data, secret_phrase):\n\
+  combined = input_data + secret_phrase\nreturn sha256(combined.encode()).hexdigest()\n\
+  email_body = \"嘿鲍勃，我认为你应该了解一下区块链！ \" \\\n\"我一直在投资比特币，目前我的账户里正好有 12.03 BTC。\"\nprint(get_hash_with_secret_phrase(email_body,\
+  \ secret_phrase))\n```\n\n当鲍勃运行这段代码时，他就能验证爱丽丝的哈希值。\n\n## 防止垃圾邮件如何促成了工作量证明\n\n你知道哈希函数可以用来防止电子邮件垃圾邮件吗？这个想法背后的算法被称为“工作量证明”算法，它是比特币的核心。它由英国密码学家亚当·巴克于\
+  \ 1997 年发明，他称之为 Hashcash。\n\n其总体思路是只接受哈希值满足特定约束的电子邮件。这会导致电子邮件发送者在发送邮件之前执行某种计算工作。换句话说，发送者想要向人们发送垃圾邮件的成本变得很高。\n\
+  \n但是约束是什么呢？哈希值只是些数字，但它们看起来是随机的，所以我们可以应用任何我们想要的约束。我可以规定，任何给我发送电子邮件的人都必须提供该电子邮件的哈希值，并且该哈希值是一个奇数。但这并不是一个好的约束，因为发送者生成一个奇数哈希值的概率有\
+  \ 50%。\n\nHashcash 算法应用的约束是：哈希值必须小于某个特定数字。这听起来简单得令人难以置信，但请思考一下：既然加密哈希函数对于给定的输入会输出一个随机数，我们如何确保邮件正文的哈希值是一个特定的数字呢？我们做不到。我们唯一能做的就是向邮件正文中插入任意数据，并不断尝试，直到我们的哈希值满足约束条件为止。\n\
+  \n让我们看一个例子，同时设定约束条件为：邮件正文的哈希值必须小于 10,000。\n\n**注意**  \n为简单起见，我这里使用一个只输出十进制数的八位哈希函数。\n\
+  \n```\n发件人: dan@example.com\n主题: 购买比特币！\n嘿伊森，我认为你应该买一些比特币！\n哈希值: 95119035\n```\n\
+  \n**不行。** 这封邮件正文的哈希值是 `95119035`，它不小于 `10,000`。因此，发送者没有完成所需的工作：他必须确保邮件正文的哈希值满足约束条件。\n\
+  \n发送者可以这样做的一种方法是在邮件正文中插入任意数据：\n\n```\n发件人: dan@example.com\n主题: 购买比特币！\n嘿伊森，我认为你应该买一些比特币！\n\
+  s8763ASdh727212213098\n哈希值: 00000891\n```\n\n现在我们看到正文的哈希值是 `891`，满足我们的约束条件！（我用 0\
+  \ 填充了哈希值，因为十六进制数字通常这样显示）。我们的邮件服务器会对邮件正文进行哈希运算，看到它确实是 `891`，并接受这封邮件。\n\n这就是工作量证明：通过展示一个特定的哈希值来证明工作已经完成，而服务器可以轻松验证。另一种理解这个方案的方式是，它生成困难但验证容易。\n\
+  \n**注意**  \n正是这一关键思想，使得任何工作量证明区块链能够通过向网络中的每个人明确证明完成了计算工作来生成（或挖出）货币。通过利用加密哈希函数看似随机的特性，消耗了能量！\n\
+  \n## 总结\n\n至此，你应该已经实际熟悉了哈希函数以及如何对任意数据进行哈希运算。总结一下，你应该能够自如地完成以下操作：\n\n1.  在 Python\
+  \ 中导入 `hashlib` 库\n2.  在 Python 中对任何数据结构或二进制文件进行哈希运算\n3.  理解加密哈希函数在实际上极难逆向\n\n*还是没理解要点？*\n\
+  \n没关系。这本来就不容易。如果你对哈希函数仍不确定，值得在此暂停，重新阅读这一章，直到理解透彻为止。可以说，这是区块链数据结构最重要的方面，也是我们后续将要广泛使用的。\n\
+  \n"
+- '# 3. 区块链
+
+
+  在本章中，我们将通过使用 Python 中的简单数据类型，一头扎进区块链的世界。学完本章后，你将从根本上理解区块链是什么、其内部结构，以及哈希函数如何使其具有韧性。
+
+
+  上一章的概念对于理解为什么区块链被认为是不可篡改的至关重要。我们已经了解了如何发送不可篡改的电子邮件。我们将扩展这些想法，从头构建一个区块链，并清晰理解所涉及的数据结构，从而说明为什么在区块链上进行欺诈是不可能的。
+
+
+  让我们开始吧。
+
+
+
+
+  ## 区块长什么样？
+
+
+  我们的区块是简单的 Python 字典。以下是一个区块在 Python 中的示例：
+
+
+  ```
+
+  block_1038 = {
+
+  ''index'': 1038,
+
+  ''timestamp'': "2020-02-25T08:07:42.170675",
+
+  ''data'': [
+
+  {
+
+  ''sender'': "bob",
+
+  ''recipient'': "alice",
+
+  ''amount'': "$5",
+
+  }
+
+  ],
+
+  ''hash'': "83b2ac5b",
+
+  ''previous_hash'': "2cf24ba5f"
+
+  }
+
+  ```
+
+
+  每个区块都有上述基本结构，但我希望你关注最后两个字段：`hash`和`previous_hash`。每个区块内部都包含前一个区块的哈希值。区块 1038 包含区块
+  1037 的哈希值，区块 1037 包含区块 1036 的哈希值，依此类推……一直追溯到第一个区块——“创世”区块。
+
+
+  区块可以包含*任何*数据：文件、图片、交易、记录等。在上述示例中，我们的区块包含一笔从 Bob 到 Alice 的 5 美元交易。这个区块与大多数加密货币区块（如比特币）的结构类似。你可能听说过有人将以太坊描述为“世界计算机”。这是因为以太坊区块的数据中还包含*可执行代码*，指示网络上的参与者在区块链本身上执行操作。
+
+
+  ## 不可变性与哈希的重要性
+
+
+  区块链的概念并不难以理解——**每个区块内部都包含前一个区块的哈希值，从而形成一条链**。这种哈希的“链接”赋予了区块链不可变性和防欺诈的特性。
+
+
+  更具体地说，`previous_hash`字段是区块之间的链接，用于创建*链*。如果攻击者以某种方式破坏了链中较早的区块，那么所有后续区块都会发生变化，因为它们的哈希值会变得不正确。例如，如果我们必须修改区块#1037
+  中的单个数据，那么#1037 的哈希值会不同，因此#1038 中的`previous_hash`值也会不同。**因此，如果任何较早区块中的单个比特被篡改，整个后续区块链都将失效。**这就是区块链的链式特性——它们通过使用`previous_hash`的哈希链来确保安全：
+
+
+  ![../images/475256_1_En_3_Chapter/475256_1_En_3_Fig1_HTML.jpg](img/475256_1_En_3_Fig1_HTML.jpg)
+
+
+  图 3-1 区块哈希形成链
+
+
+  这就是比特币的“独门秘方”——将一切联系在一起的粘合剂。如果有人通过更改链中某处交易的金额来欺诈一个区块，下一个区块的`previous_hash`字段就会不同，从而导致所有后续哈希值都不同。而比特币网络中的每个人都会立即发现这种差异并忽略该更改！
+
+
+  ## 用 Python 实现基础区块链
+
+
+  打开你喜欢的文本编辑器或 IDE（我个人使用 PyCharm），创建一个名为`blockchain.py`的新文件。我们现在只使用一个文件，但如果遇到困难，你可以随时参考源代码：[`https://github.com/dvf/blockchain`](https://github.com/dvf/blockchain)。
+
+
+  ### 使用类表示区块链
+
+
+  我们首先创建一个简单的区块链类。到本书结束时，这个类会变得更加复杂，但现在我们将通过向类中添加不同的方法来逐步介绍各种概念。
+
+
+  让我们先搭建一些方法，创建一个蓝图：
+
+
+  *清单 3-1. blockchain.py*
+
+
+  ```
+
+  class Blockchain(object):
+
+  def __init__ (self):
+
+  self.chain = []
+
+  def new_block(self):
+
+  # Generates a new block and adds it to the chain
+
+  pass
+
+  @staticmethod
+
+  def hash(block):
+
+  # Hashes a Block
+
+  pass
+
+  def last_block(self):
+
+  # Gets the latest block in the chain
+
+  pass
+
+  ```
+
+
+  我们的蓝图有一个构造函数，它创建一个初始的空列表`chain`（用于存储区块链），以及额外的方法`new_block`、`create_block`、`hash`和`last_block`，用于创建新区块、对区块进行哈希处理以及获取最新区块。
+
+
+  这里的思路是`new_block`方法负责创建区块并将其添加到链中。我们的`Blockchain`类将负责维护区块链所需的所有操作。让我们开始充实其中一些方法。
+
+
+  ### 支持交易
+
+
+  在本书后面的章节中，交易将占据整整一章。它们涉及大量密码学知识，并且包含数字签名。开始时，我们的区块链将支持简单的未签名交易——仅用于说明目的——因此我们将创建一个名为`new_transaction`的方法：
+
+
+  *清单 3-2. blockchain.py*
+
+
+  ```
+
+  class  Blockchain(object):
+
+  def __init__ (self):
+
+  self.chain = []
+
+  self.pending_transactions = []
+
+  def new_block(self):
+
+  # Generates a new block and adds it to the chain
+
+  pass
+
+  @staticmethod
+
+  def hash(block):
+
+  # Hashes a Block
+
+  pass
+
+  def last_block(self):
+
+  # Gets the latest block in the chain
+
+  pass
+
+  def new_transaction(self, sender, recipient, amount):
+
+  # Adds a new transaction to the list of pending transactions
+
+  self.pending_transactions.append({
+
+  "recipient": recipient,
+
+  "sender": sender,
+
+  "amount": amount,
+
+  })
+
+  ```
+
+
+  但目前，我们会保持交易简单。稍后，在第 6 章中，我们将了解更多关于交易背后的密码学知识，以及它们如何在生产级区块链（如比特币）中得到支持。
+
+
+
+  好的，作为一名高级文档工程师和翻译员，我将严格遵循您提供的注意事项和示例格式，为您翻译以下文本。
+
+
+
+  ### 添加区块
+
+
+  当我们的 `Blockchain` 被实例化时，我们需要用**创世块**（genesis block）来播种它——一个没有前驱区块且索引为 **0** 的区块。这是一种特殊的区块，几乎总是硬编码到软件中。在比特币中，创世块由**中本聪**创建，并以包含了
+  2009 年 1 月 3 日发表于 *The Times*（泰晤士报）头版文章的以下文本（十六进制）而闻名：
+
+
+  *The Times* 2009 年 1 月 3 日 财政大臣面临第二次银行救助
+
+
+  现在，我们开始添加一些功能；我们将：
+
+
+  *   充实 `new_block()` 方法。
+
+  *   充实 `hash()` 方法（像比特币一样，我们将使用 SHA-256 哈希函数进行哈希运算）。
+
+  *   在构造函数方法中添加创世块。
+
+
+  ```python
+
+  1  import json
+
+
+  3  from datetime import datetime
+
+  4  from hashlib import sha256
+
+
+  7  class Blockchain(object):
+
+  8      def __init__ (self):
+
+  9          self.chain = []
+
+  10          self.pending_transactions = []
+
+
+  12          # 创建创世块
+
+  13          print("Creating genesis block")
+
+  14          self.new_block()
+
+
+  16      def last_block(self):
+
+  17          # 返回链中的最后一个区块（如果存在区块）
+
+  18          return self.chain[-1] if self.chain else None
+
+
+  20      def new_block(self, previous_hash=None):
+
+  21          block = {
+
+  22              ''index'': len(self.chain),
+
+  23              ''timestamp'': datetime.utcnow().isoformat(),
+
+  24              ''transactions'': self.pending_transactions,
+
+  25              ''previous_hash'': previous_hash,
+
+  26          }
+
+  27          # 获取新区块的哈希，并将其添加到区块中
+
+  28          block_hash = self.hash(block)
+
+  29          block["hash"] = block_hash
+
+
+  31          # 重置待处理交易列表
+
+  32          self.pending_transactions = []
+
+  33          # 将区块添加到链中
+
+  34          self.chain.append(block)
+
+
+  36          print(f"Created block {block[''index'']}")
+
+  37          return block
+
+
+  39      @staticmethod
+
+  40      def hash(block):
+
+  41          # 确保字典已排序，否则哈希值将不一致
+
+  42          block_string = json.dumps(block, sort_keys=True).encode()
+
+  43          return sha256(block_string).hexdigest()
+
+  ```
+
+
+  此时，您可以在交互模式下打开 Python 并开始试验您的 `Blockchain` 类：
+
+
+  ```bash
+
+  $ poetry shell
+
+  $ python -i blockchain.py
+
+  ```
+
+
+  实例化区块链：
+
+
+  ```python
+
+  >>> bc = Blockchain()
+
+  Creating genesis  block
+
+  Created block 0
+
+  ```
+
+
+  我们应该看到链中只有一个区块——即创世块（为简洁起见，我已截断了哈希值）：
+
+
+  ```python
+
+  >>> bc.chain
+
+  [{"index": 0, "timestamp": "2019-02-25T14:23:08.853678", "transactions": [], "previous_hash":
+  None, "hash": "80ad...01bd"}]
+
+  ```
+
+
+  尝试添加一个新区块：
+
+
+  ```python
+
+  >>>  bc.new_block(previous_hash="80ad...01bd")
+
+  Created block 1
+
+  ```
+
+
+  继续在区块链上进行试验。
+
+
+  ### 完整的 `blockchain.py` 代码
+
+
+  ```python
+
+  1  import json
+
+
+  3  from datetime import datetime
+
+  4  from hashlib import sha256
+
+
+  7  class Blockchain(object):
+
+  8      def __init__ (self):
+
+  9          self.chain = []
+
+  10          self.pending_transactions = []
+
+
+  12          # 创建创世块
+
+  13          print("Creating genesis block")
+
+  14          self.new_block()
+
+
+  16      def new_block(self,  previous_hash=None):
+
+  17          block = {
+
+  18              ''index'': len(self.chain),
+
+  19              ''timestamp'': datetime.utcnow().isoformat(),
+
+  20              ''transactions'': self.pending_transactions,
+
+  21              ''previous_hash'':  previous_hash,
+
+  22          }
+
+
+  24          # 获取新区块的哈希，并将其添加到区块中
+
+  25          block_hash = self.hash(block)
+
+  26          block["hash"] = block_hash
+
+
+  28          # 重置待处理交易列表
+
+  29          self.pending_transactions = []
+
+  30          # 将区块添加到链中
+
+  31          self.chain.append(block)
+
+
+  33          print(f"Created block {block[''index'']}")
+
+  34          return block
+
+
+  36      @staticmethod
+
+  37      def hash(block):
+
+  38          # 确保字典已排序，否则哈希值将不一致
+
+  39          block_string = json.dumps(block, sort_keys=True).encode()
+
+  40          return sha256(block_string).hexdigest()
+
+
+  42      def last_block(self):
+
+  43          # 返回链中的最后一个区块（如果存在区块）
+
+  44          return self.chain[-1] if self.chain else None
+
+  ```
+
+
+  代码应该很直观。我在代码中添加了一些注释以帮助保持清晰。请注意，当我们的 `Blockchain` 类被实例化时，我们会用一个创世块（一个没有前驱区块的区块）来播种它。
+
+
+  此时，您应该会好奇网络中的参与者如何就向各自的区块链添加新区块达成一致。由于我们想要一个完全去中心化的点对点网络，因此需要有一套所有参与者都遵守的共同规则（一种协议）；这就是游戏的规则。向区块链添加新区块是挖矿的结果。让我们深入了解一下。
+
+
+  '
+- '# 4. 工作量证明
+
+
+  本章的主要目标是清楚地解释区块是如何在区块链中被挖出的。间接地，这也解释了新货币是如何诞生的，以及组成网络的不同个体如何达成共识（就区块链的状态达成一致）。因此，在阅读完本章后，您将对实现这一目标的工作量证明（Proof
+  of Work）协议有一个实际的了解。
+
+
+  我们还会看到，由于点对点网络的去中心化性质，在任何给定时间点，都不存在唯一的一个区块链。同时存在许多有效的链，但随着时间的推移，节点们会就哪条链是权威链达成共识。
+
+
+  在上一章中，我们实现了区块链类中的方法。我们还学习了区块如何通过哈希值“链接”在一起，并实现了创建和添加新区块的方法。扎实掌握哈希的概念至关重要，因为本章才是真正神奇之处——我们将阐明“挖矿”的概念，或者更正式地说，是创建工作量证明（proofs
+  of work）。
+
+
+  ## 使用 iPython 与区块链类交互
+
+
+  一个有助于与 Python 解释器交互的伟大工具是 `iPython`。它为您的 Python 解释器添加了制表符补全和语法高亮功能，使交互更容易查看和理解。首先启用您的虚拟环境，然后使用
+  `pip` 安装它：
+
+
+  ```bash
+
+  $ pip install ipython
+
+  ```
+
+
+  然后调用 Python 解释器：
+
+
+  ```python
+
+  $ ipython -i funcoin/examples/chapter_3/full_blockchain.py
+
+  Python 3.8.3 (default, Oct 13 2019, 18:33:25)
+
+  Type ''copyright'', ''credits'', or ''license'' for more information.
+
+  IPython 7.12.0 -- An enhanced Interactive Python. Type ''?'' for help.
+
+  In [1]:
+
+  ```
+
+
+  尝试调用您的区块链，并对方法使用制表符补全：
+
+
+  ```python
+
+  In [1]: bc = Blockchain()
+
+  Creating genesis block
+
+  Created block 0
+
+  In [2]: bc.h____________________
+
+  hash
+
+  chain
+
+  last_block
+
+  new_block
+
+  pending_transactions
+
+  ```
+
+
+  展望未来，您需要主动试验您的区块链类，以获得对即将到来的概念的直观理解。
+
+
+
+
+  ### 工作量证明简介
+
+
+  在创建比特币的过程中，中本聪的天才之处不在于创新，而在于融合了密码学家们为应对隐私侵蚀而先前取得的各项突破。这些突破涵盖了不同领域和主题，例如利用最初用于通过互联网共享文件的对等网络（P2P
+  网络）来解决中心化和信任问题；或者更具体地说，使用为打击电子邮件垃圾邮件而发明的技术来解决“铸造”货币的问题。
+
+
+  但比特币最大的突破在于利用工作量证明，在一个网络中对那些互不相识、更重要的是互不信任的节点之间达成共识。简而言之：在一个人人拥有平等发言权的去中心化网络中，我们需要一种就事务达成一致的方法；比如判断一笔交易是否存在欺诈，或者一条区块链是否有效。现在，我们可能有点操之过急了（我们很快会澄清大部分概念），但重要的是要退一步，纵观全局，看清谜题的各个部分是如何拼合在一起的。
+
+
+  工作量证明，或者更正式地说，工作量证明算法，描述了将新区块添加到区块链的方法。比特币和以太坊（目前）都使用工作量证明算法来向各自的区块链添加新区块。工作量证明算法听起来相当复杂，但实际上它们非常简单。在我们深入探讨之前，我想先抛出一个问题让你思考：*你如何向别人证明你做了工作？*
+
+
+  思考一两分钟。假设你在后院挖洞，发现了一块金块。这块金块能证明为了得到它付出了努力吗？我认为它可以证明*某人*做了*一些*工作。让我们换个角度——如何证明你跑了一场马拉松？你也许可以在头上绑个摄像头，一步一步地记录下整场比赛。这应该就足够了，对吧？也许吧，但录像可能被篡改过，或者可能是别人戴的摄像头。也许我们在钻牛角尖，但我想让你注意到的是，要在毫无疑义（或无需信任）的情况下*证明*工作已经完成是多么困难，尤其是当你在电脑前时，电脑可是伪造东西的能手。
+
+
+  用通俗的话来说，工作量证明算法就实现了这一点——它允许你证明你的电脑做了某些工作。从更技术性的角度讲，工作量证明算法是共识机制——如果你能证明工作已经完成，那么你就可以向其他人展示你的证明，而他们可以轻易地验证其真实性。这些算法有许多变体，但我们将专注于一个简单的例子来帮助你理解。
+
+
+  我们已经解释过，POW 是用于挖掘新区块的算法。工作量证明算法的实际方法很简单——找到一个满足某个小型数学问题的数字：从计算的角度来看，这个数字必须难以找到，但网络上的任何人都可以轻松验证。这就是工作量证明背后的核心思想：*难以完成，但易于验证*。我们将看一个非常简单的例子来帮助你加深理解。
+
+
+  ## 工作量证明的一个简单示例
+
+
+  我们规定，某个整数 `x` 乘以另一个整数 `y` 的 *哈希值* 必须以 `0` 结尾。所以，`hash(x * y) = dedb2ac23dc...0`。在这个简化示例中，我们设定
+  `x = 5`。用 Python 实现如下：
+
+
+  ```
+
+  1  from hashlib import sha256
+
+
+  4  x = 5
+
+  5  y = 0  # 我们还不知道 y 应该是多少...
+
+
+  7  while  sha256(f''{x*y}''.encode()).hexdigest()[-1] != "0":
+
+  8      y += 1
+
+
+  10  print(f''解为 y = {y}'')
+
+  ```
+
+
+  这里的解是 `y = 21`。因为生成的哈希值以 `0` 结尾：
+
+
+  ```
+
+  >>> sha256(f"{5 * 21}".encode()).hexdigest()
+
+  ''1253e9373e781b7500266caa55150e08e210bc8cd8cc70d89985e3600155e860''
+
+  ```
+
+
+  在比特币中，工作量证明算法有一个名称，叫做 *Hashcash*。它与前面那个基础示例差别不大。矿工们正是竞相求解这个算法来创建新区块。通常，难度由字符串开头的零的个数决定；矿工会因其解而获得奖励——通过一笔交易接收一定数量的比特币；而网络则能够像我们之前做的那样，轻松地*验证*他们的解答。
+
+
+  ## 类比：拼图游戏
+
+
+  拼图游戏是工作量证明算法的一个很好的类比，因为工作量体现在人类对一张图像的一致识别上。如果我们让电脑来解开一幅拼图：
+
+
+  ![../images/475256_1_En_4_Chapter/475256_1_En_4_Figa_HTML.jpg](img/475256_1_En_4_Figa_HTML.jpg)
+
+
+  它就必须穷举每一种组合：
+
+
+  ![../images/475256_1_En_4_Chapter/475256_1_En_4_Figb_HTML.jpg](img/475256_1_En_4_Figb_HTML.jpg)
+
+
+  并且它会一直这样循环下去，直到我们看到图像出现时按下“停止”按钮：
+
+
+  ![../images/475256_1_En_4_Chapter/475256_1_En_4_Figc_HTML.jpg](img/475256_1_En_4_Figc_HTML.jpg)
+
+
+  现在你可以把这幅图像展示给别人，他们就能毫无疑问地知道，工作已经完成了。
+
+
+
+
+  ### 实现工作量证明
+
+
+  现在，我们来为区块链实现一个类似的算法。规则与上述例子相似：
+
+
+  找到一个数字 `p`，当它与前一个区块的解一起进行哈希运算时，会生成一个以四个 0 开头的哈希值。
+
+
+  继续沿用上一章的示例，我们为 `Blockchain` 类添加两个新方法：`proof_of_work` 和 `valid_hash`，分别用于挖矿和验证哈希值：
+
+
+  ```python
+
+  1  import json
+
+
+  3  from datetime import datetime
+
+  4  from hashlib import sha256
+
+
+  7  class Blockchain(object):
+
+  8      def __init__ (self):
+
+  9          self.chain = []
+
+  10          self.pending_transactions = []
+
+
+  12          # 创建创世区块
+
+  13          print("Creating genesis block")
+
+  14          self.new_block()
+
+
+  16      def new_block(self, previous_hash=None):
+
+  17          block = {
+
+  18              ''index'': len(self.chain),
+
+  19              ''timestamp'': datetime.utcnow().isoformat(),
+
+  20              ''transactions'': self.pending_transactions,
+
+  21              ''previous_hash'':  previous_hash,
+
+  22              ''nonce'': None,
+
+  23          }
+
+
+  25          # 获取新区块的哈希值，并将其添加到区块中
+
+  26          block_hash = self.hash(block)
+
+  27          block["hash"] = block_hash
+
+
+  29          # 重置待处理交易列表
+
+  30          self.pending_transactions = []
+
+  31          # 将区块添加到链中
+
+  32          self.chain.append(block)
+
+
+  34          print(f"Created block {block[''index'']}")
+
+  35          return block
+
+
+  37      @staticmethod
+
+  38      def hash(block):
+
+  39          # 确保字典有序，否则哈希值会不一致
+
+  40          block_string = json.dumps(block, sort_keys=True).encode()
+
+  41          return sha256(block_string).hexdigest()
+
+
+  43      def last_block(self):
+
+  44          # 返回链中的最后一个区块（如果存在）
+
+  45          return self.chain[-1] if self.chain else None
+
+
+  47      def proof_of_work(self):
+
+  48          pass
+
+
+  50      def valid_hash(self):
+
+  51          pass
+
+  ```
+
+
+  我们还在区块结构中添加了一个名为 `nonce` 的新字段，它代表一个*无意义*的字符串。可以将 nonce 视为一次性随机数，它将作为我们区块的重要随机性来源。对于这些
+  nonce，我们将使用 Python 的 `random` 模块生成一个随机的 64 位十六进制数：
+
+
+  ```python
+
+  import random
+
+  >>> format(random.getrandbits(64), "x")
+
+  ''828ad30173db207b''
+
+  ```
+
+
+  现在来充实我们的两个方法：`proof_of_work` 和 `valid_hash`，先从后者开始。`valid_hash` 很简单；它需要检查一个区块的哈希值是否以特定数量的零开头，比如
+  4 个零：
+
+
+  ```python
+
+  @staticmethod
+
+  def valid_block(block):
+
+  return block["hash"].startswith("0000")
+
+  ```
+
+
+  现在，让我们实现一个简单的工作量证明算法，该算法会创建一个新区块并检查其是否具有有效的哈希值：
+
+
+  ```python
+
+  1  def proof_of_work(self):
+
+  2      while True:
+
+  3          new_block = self.new_block()
+
+  4          if self.valid_block(new_block):
+
+  5              break
+
+
+  7      self.chain.append(new_block)
+
+  8      print("Found a new block: ", new_block)
+
+  ```
+
+
+  代码不言自明：
+
+
+  1. 我们创建一个新区块（其中包含一个随机的 nonce）。
+
+  2. 然后对区块进行哈希运算，检查其是否有效。
+
+  3. 如果有效，则返回该区块；否则，从步骤 1 开始无限重复。
+
+
+  让我们将这些方法添加到我们的 `Blockchain` 类中：
+
+
+  ```python
+
+  1  import json
+
+  2  import random
+
+
+  4  from datetime import datetime
+
+  5  from hashlib import sha256
+
+
+  8  class Blockchain(object):
+
+  9      def __init__ (self):
+
+  10          self.chain = []
+
+  11          self.pending_transactions = []
+
+
+  13          # 创建创世区块
+
+  14          print("Creating genesis block")
+
+  15          self.chain.append(self.new_block())
+
+
+  17      def new_block(self):
+
+  18          block = {
+
+  19              ''index'': len(self.chain),
+
+  20              ''timestamp'': datetime.utcnow().isoformat(),
+
+  21              ''transactions'': self.pending_transactions,
+
+  22              ''previous_hash'': self.last_block["hash"] if self.last_block else
+  None,
+
+  23              ''nonce'': format(random.getrandbits(64), "x"),
+
+  24          }
+
+
+  26          # 获取新区块的哈希值，并将其添加到区块中
+
+  27          block_hash = self.hash(block)
+
+  28          block["hash"] = block_hash
+
+
+  30          # 重置待处理交易列表
+
+  31          self.pending_transactions = []
+
+
+  33          return block
+
+
+  35      @staticmethod
+
+  36      def hash(block):
+
+  37          # 确保字典有序，否则哈希值会不一致
+
+  38          block_string = json.dumps(block, sort_keys=True).encode()
+
+  39          return sha256(block_string).hexdigest()
+
+
+  41      @property
+
+  42      def last_block(self):
+
+  43          # 返回链中的最后一个区块（如果存在）
+
+  44          return self.chain[-1] if self.chain else None
+
+
+  46      @staticmethod
+
+  47      def valid_block(block):
+
+  48          # 检查区块的哈希值是否以 0000 开头
+
+  49          return block["hash"].startswith("0000")
+
+
+  51      def proof_of_work(self):
+
+  52          while True:
+
+  53              new_block  =  self.new_block()
+
+  54              if self.valid_block(new_block):
+
+  55                  break
+
+
+  57          self.chain.append(new_block)
+
+  58          print("Found a new block: ", new_block)
+
+  ```
+
+
+  我们需要进行两个重要的删除操作：
+
+
+  - 删除 `new_block()` 方法中的 `print` 语句，否则在挖矿时，控制台会出现大量不需要的输出。
+
+  - 在第 33 行，`new_block()` 方法内部，删除 `self.chain.append(block)` 这一行（我们不希望未经验证的区块）被添加到链中。
+
+
+  现在是时候启动 `ipython`，实例化 `Blockchain` 类，然后开始挖一些区块了：
+
+
+  ```python
+
+  In [1]: from blockchain import Blockchain
+
+  In [2]: bc = Blockchain()
+
+  Creating genesis block
+
+  In [3]: bc.proof_of_work()
+
+  Found a new block:
+
+  {
+
+  "index": 1,
+
+  "timestamp": "2020-02-07T04:39:03.920459",
+
+  "transactions": [],
+
+  "previous_hash": "1a93bd623f3e3aba2c9d4ee9193d36904382e7416b2fb854dbf3fc6a13cab702",
+
+  "nonce":  "8b9991ef3ea9eb19",
+
+  "hash": "0000075c4a6d3ae6ab06677887618cf41255d7a1ba10220bb3e9bc8c8ecec80e"
+
+  }
+
+  In [4]: bc.proof_of_work()
+
+  Found a new block:
+
+  {
+
+  "index": 2,
+
+  "timestamp": "2020-02-07T04:39:14.440383",
+
+  "transactions": [],
+
+  "previous_hash": "0000075c4a6d3ae6ab06677887618cf41255d7a1ba10220bb3e9bc8c8ecec80e",
+
+  "nonce": "b9a579d2cfa587b0",
+
+  "hash": "00009d974a58fb689ad280c121897eb2f6da699db2c4bd2a3312dc41d478c182"
+
+  }
+
+  In [5]: bc.proof_of_work()
+
+  Found a new block:
+
+  {
+
+  "index": 3,
+
+  "timestamp": "2020-02-07T04:39:20.744179",
+
+  "transactions": [],
+
+  "previous_hash": "00009d974a58fb689ad280c121897eb2f6da699db2c4bd2a3312dc41d478c182",
+
+  "nonce":  "f4de39bb07bce043",
+
+  "hash": "000003910a7ad733f89a9ff13ffea5b5e08fe69d581a4ecd30f237f95800221e"
+
+  }
+
+  ```
+
+
+  为了调整挖矿的难度，我们可以修改前导零的数量。但四个零已经足够了。你会发现，每增加一个前导零，找到解所需的时间就会呈指数级增长。在比特币中，难度会通过网络的共识每
+  2016 个区块调整一次。提高难度是为了应对硬件不可避免的加速发展。
+
+
+  ### 货币供应
+
+
+  现在你已经拥有一个完全可运行的区块链类，它通过实现挖矿来创建新区块。这非常接近比特币等生产级区块链中挖矿的实际方式。正是这个挖矿算法生成了新的比特币：当矿工完成一个区块的挖矿时，会插入一笔来自*无主*的、向自己的交易，交易的比特币数量每
+  210,000 个区块*减半*。这就是新比特币的诞生方式。
+
+
+
+
+  '
+- '# 5. 网络
+
+
+  本章是关于套接字编程的实用技术章节。我们将通过构建一个可用的在线聊天室应用，学习如何通过互联网发送和接收信息包，这将在深入探讨点对点网络之前帮我们积累一些经验。
+
+
+  但既然本书不是关于编写优秀 Python 代码的，我们将抛开顾虑，通过反复试验和示例来理解理论。在本章中，请你多多包涵，从一万英尺的高空视角关注重点，而非纠结于细枝末节，因为这些都是复杂的内容。同时请准备好你的搜索技能，以便深入探究更多细节。
+
+
+  ## 简要回顾互联网
+
+
+  我时常对互联网感到敬畏，尤其是在底层使用它时——我能在纽约打开一个连接，仅以 180 毫秒的延迟就将数据包发送到我在南非的兄弟手中，这简直令人振奋——它*居然*能如此顺畅地工作，实在是太神奇了。
+
+
+  互联网的韧性源于其主要协议（我们即将进一步了解）的简洁性：TCP（传输控制协议）和 UDP（用户数据报协议）。在微观层面，它们构成了简单、原子化的规则，但当所有参与者都在宏观层面遵循这些规则时，它们便创建了一个健壮、全球性的网络，我们在发送电子邮件、进行视频会议或相互发送比特币时，几乎不假思索地使用着这个网络。
+
+
+  理解网络协议类似于洋葱很重要：互联网由抽象层构成——电信号聚集成组；这些组形成模式，进而被封装成数据包；如此类推。这些模式由协议定义，协议决定了它们的形式和用途。协议本身是经过多年研究最终形成的开源文档，称为
+  RFC（请求评议），并拥有丰富的历史；我鼓励你阅读它们。这里提供一些灵感，这是 1980 年定义的 UDP（用户数据报协议）RFC：[`https://tools.ietf.org/html/rfc768`](https://tools.ietf.org/html/rfc768)。
+
+
+  以下是网络栈大致的分层结构图：
+
+
+  ![../images/475256_1_En_5_Chapter/475256_1_En_5_Fig1_HTML.jpg](img/475256_1_En_5_Fig1_HTML.jpg)
+
+
+  图 5-1
+
+
+  网络栈的各层
+
+
+  - **应用层**中的协议最接近用户，逻辑上定义了用户/客户端如何与服务（例如网站 HTTP）通信。
+
+  - **传输层**封装了应用层——应用层发送的消息被分解成段和数据包，并在网络中的两台主机之间建立连接（传输）。
+
+  - **网络层**封装了传输层，并抽象了“网络”的概念——互联网由许多互联网络组成，这些网络需要一个协议来在它们之间路由数据。
+
+  - **链路层**负责通过物理介质（如光缆）传输原始的、非结构化数据。以光缆为例，它负责将数字比特转换为光脉冲。
+
+
+  就本章而言，我们将专注于传输层，它允许我们在互联网上的两台主机之间发送和接收信息。这意味着我们将使用传输层的两个主要协议：UDP 和 TCP。它们的主要区别在于
+  TCP 是**有状态**的，这意味着在信息双向流动之前，两台主机会先建立连接——就像电话通话，两台主机保持相互连接。连接会一直保持开放，直到发送关闭信号。
+
+
+  另一方面，UDP 是一种**无状态**协议，这意味着信息包被*发送*给接收方，而发送方不等待确认；这就是为什么 UDP 常被称为“发射后不管”协议——它有点像通过邮政服务向某人发送邮件，但速度要快得多。
+
+
+  ## Python 中的并发
+
+
+  网络编程属于*并发*编程的范畴，这对于新程序员来说是一个难以掌握的概念。这是因为需要网络通信的程序通常必须同时执行多项操作；例如，聊天服务器必须同时与多个客户端交互，或者比特币节点必须同时与多个对等节点通信。
+
+
+  处理并发的方式*有很多种*，最流行的两种是**线程**（在一个运行进程内的多条执行路径）或完全独立的**并行**进程。但我们将采用一种不同的方法，称为*协作式多任务*或通常简称为“异步”。在
+  Python 中，异步编程由 **asyncio** 库支持。
+
+
+  异步编程是通过足够快速地暂停和恢复来实现的，使得程序*看起来*像是在并行运行。但实际上，它只是在不同的命令之间快速切换，每次计算一小部分，然后切换到另一个。这有点像切蔬菜，不是把洋葱完全切完再处理土豆，而是切一点洋葱，然后切一点土豆，如此反复，直到两者都被切完。
+
+
+  你可能会认为这会影响性能，因为我们的程序并不是真正的并行运行，但对于网络（或输入/输出操作）而言，事实证明它极其高效，并且将使我们的服务器能够同时处理海量连接。
+
+
+  ### 异步代码 vs. 多线程
+
+
+  编写异步代码是现代 Web 应用程序非常流行的方法——主要原因是你能编写快速、无状态的代码，且发生竞态条件的可能性很小。例如，`Node.js` 就是在单线程中异步编写的。而多线程代码则难以测试，并且需要细致的架构规划以避免竞态条件。
+
+
+
+
+  '
+- "# asyncio 快速入门指南\n\nPython 的 `asyncio` 库提供了大量辅助函数，让我们能以易读的方式编写异步代码。这些函数可以将代码拆分为看似并行运行的任务。\n\
+  \n我们通过一个非常简单的程序来理解 `asyncio` 的工作原理：\n\n```\n1  import asyncio\n2  import time\n\n\
+  5  async def greet(name, delay):\n6      await asyncio.sleep(delay)\n7      print(f'{name}:\
+  \ 我等待了 {delay} 秒才说 \"你好\"')\n\n10  async def main():\n11      task_1 = asyncio.create_task(greet(\"\
+  t1\", 3))\n12      task_2 = asyncio.create_task(greet(\"t2\", 2))\n13      task_3\
+  \ = asyncio.create_task(greet(\"t3\", 2))\n\n15      start_time = time.time()\n\n\
+  17      print(\"0.00s: 程序开始\")\n\n19      await task_1\n20      await task_2\n21\
+  \      await task_3\n\n23      print(f\"{time.time() - start_time:.2f}s: 程序结束\"\
+  )\n\n26  asyncio.run(main())\n```\n\n该程序最重要的部分是以下几行：\n\n```\n1  task_1 = asyncio.create_task(greet(1))\n\
+  2  task_2 = asyncio.create_task(greet(2))\n3  task_3 = asyncio.create_task(greet(2))\n\
+  ```\n\n这几行代码将三个任务（带参数的函数）“转化”为可以并发执行的任务；这些任务被称为 *可等待对象*，因为它们即将被“等待”。\n\n接下来的几行代码：\n\
+  \n```\n1  await task_1\n2  await task_2\n3  await task_3\n```\n\n负责使用 Python 的 `await`\
+  \ 表达式来触发任务的运行。\n\n最后，`main()` 在 `asyncio` 的 `run()` 函数内部被调用；这告诉 Python `main` 函数（及其内部内容）应该并发运行。\n\
+  \n运行时，程序会输出以下内容：\n\n```\n0.00s: 程序开始\nt2: 我等待了 2 秒才说 \"你好\"\nt3: 我等待了 2 秒才说 \"你好\"\
+  \nt1: 我等待了 3 秒才说 \"你好\"\n3.00s: 程序结束\n```\n\n如上所示，我们的任务确实并发运行了；如果程序是*同步*运行的，那么由于每个函数顺序执行，将需要大约\
+  \ 7 秒。\n\n我在介绍中提到我们“暂停”了任务；这是通过函数内部的 `await asyncio.sleep(...)` 这行代码实现的。仔细审视一下这行代码；它实际上是在问这样一个问题：“*如果\
+  \ sleep 延迟尚未结束，就在此处暂停函数（await），然后继续执行其他任务。*”\n\n在概念上理解这种模式至关重要（即使不能完全理解），并且要亲自尝试一下，因为它构成了大多数异步程序的模式。`main`\
+  \ 函数有时被称为程序的*入口点*，我们将在后续的构建中广泛使用它。\n\n关于 `asyncio` 的完整论述远远超出了本书的范围，而在构建区块链的上下文中，它既重要又不重要。理解其底层运行机制很重要（如果你关心构建生产级应用的话），但在学习区块链和网络知识的上下文中，它又不那么重要，因为它实际上是一个实现细节，我们可以在后续阶段深入学习。\n\
+  \n### 从零开始构建聊天服务器\n\n由于构建的区块链如果不能通过网络连接到其他客户端就毫无用处，我们将从类似但更简单的项目开始：一个允许多个连接的客户端同时相互聊天的聊天服务器。你甚至可以用它来托管自己的聊天服务器，让世界各地的朋友连接进来。我们将用大约\
+  \ 100 行 Python 代码来实现它。\n\n我是在 90 年代末使用 IRC（互联网中继聊天）长大的。这是早期互联网上一个健壮的聊天协议，它让世界各地的人们可以在聊天室中聊天。事实上，freenode\
+  \ 网络上的 #bitcoin 频道至今仍被广泛使用——那里是所有核心贡献者聊天的地方。但是，实现 IRC 协议是一项相当艰巨的任务，而且因为这是“边做边学”，为了节省时间和简化学习，我们将忽略所有现有成果，专注于一个最小化的示例，以帮助掌握用\
+  \ Python 编写异步 TCP 服务器-客户端应用的要旨。现代 Web 应用程序具有可扩展性和并发性，因此理解异步代码的编写方式对于避免常见陷阱非常重要。\n\
+  \n为了实现我们的目标，我们将使用 TCP 套接字来构建聊天服务器。Python 让使用套接字变得很容易。事实上，`asyncio` 模块提供了许多开箱即用的功能。\n\
+  \n我们将从一个最简单的情况开始——一个简单的“回声”服务器，它只是将收到的任何消息原样发送回去。\n\n```\n1  import asyncio\n\n\
+  4  async def handle_connection(reader, writer):\n5      writer.write(\"Hello new\
+  \ user, type something...\\n\".encode())\n\n7      data = await reader.readuntil(b\"\
+  \\n\")\n\n9      writer.write(\"You sent: \".encode() + data)\n10      await writer.drain()\n\
+  \n12      # 让我们关闭连接并清理资源\n13      writer.close()\n14      await writer.wait_closed()\n\
+  \n17  async def main():\n18      server = await asyncio.start_server(handle_connection,\
+  \  \"0.0.0.0\", 8888)\n\n20      async with server:\n21          await server.serve_forever()\n\
+  \n24  asyncio.run(main())\n```\n\n在深入分析代码之前，我们先运行这个服务器并向它发送一些信息，以便对结果有个预期。打开两个终端，将它们并排放置。\n\
+  \n在第一个终端中，运行上述代码：\n\n```\n$ python my_server.py\n```\n\n在第二个终端中，使用 `nc` 连接到服务器：\n\
+  \n```\nnc 127.0.0.1 8888\n```\n\n如果你在 Windows 上，则使用 `telnet`：\n\n```\ntelnet 127.0.0.1\
+  \ 8888\n```\n\n关于不同操作系统的说明\n\n`nc`（`netcat`）和 `telnet` 都是允许你打开到远程主机的套接字连接的程序。由于我不确定你使用的是哪个操作系统，请自行决定使用哪一个（或在必要时安装一个）。\n\
+  \n输入一条消息，然后按回车键；你应该会看到以下输出：\n\n```\nnc 127.0.0.1 8888\nHello new user, type something...\n\
+  hey fellow  blockchain  enthusiast!\nYou sent: hey fellow blockchain enthusiast!\n\
+  ```\n\n如果你看到这条消息，太好了——你已经能够通过 IP 地址 `127.0.0.1`（这是一个指代你本机的特殊 IP 地址）和端口 `8888`（我们选择的一个端口）连接到我们的服务器了。如果你在本地网络中，可以尝试从另一台计算机连接到你的服务器；只需将\
+  \ `127.0.0.1` 替换为你的本地 IP 地址即可。\n\n卡住了？继续前请确保问题已解决\n\n如果你没有得到上述输出，那么在继续之前需要先解决这个问题。请确保你的\
+  \ Python 服务器代码确实在运行，并且没有其他进程正在使用端口 `8888`。\n\n在上述代码中，服务器在初始化时（第 `18` 行）使用了一个*回调函数*\
+  \ `handle_connection` 来处理新的连接。`handle_connection` 函数隐式地接收 `reader` 和 `writer` 作为参数（第\
+  \ `4` 行），它们代表了底层的连接。在第 `24` 行，我们告诉服务器启动并永不停止。\n\n支持多连接\n\n由于我们使用了 `asyncio`，可以尝试打开多个终端并连接到你的服务器。你会发现，由于代码是异步的，我们可以支持大量的并发连接。能支持多少？理论上客户端的最大数量是你的操作系统能够分配的最大端口数；在大多数系统上，这个数字大约是\
+  \ 65,536（或 2¹⁶），但在达到这个数量之前，你很可能会受到内存和 CPU 开销的限制。\n\n\n\n#### 构建聊天服务器\n\n我们将通过首先建立一个简单的通信*协议*来实现聊天服务器，该协议用于在服务器上进行聊天：\n\
+  \n- 当用户连接时，应提示用户输入他们的*昵称*。\n- 当用户连接时，他们的到来应广播给每个已连接的用户（用户自身除外）。\n- 如果用户发送了任何消息，该消息将广播给每个已连接的用户（用户自身除外）。\n\
+  - 如果用户发送了 `/list` 消息，他们应看到所有已连接用户的列表。\n- 如果用户发送了 `/quit` 消息，他们应被断开连接，并且一条内容为“`<nickname>`\
+  \ 已退出”的消息应广播给所有已连接的用户。\n\n让我们创建一个 `ConnectionPool` 类来管理已连接客户端的“池”，并包含上述协议的逻辑。为此，我们将为这些方法创建一些占位符（我已添加了一些注释来解释每个方法的功能）。\n\
+  \n```\n1  import asyncio\n\n4  class ConnectionPool:\n5      def __init__(self):\n\
+  6          self.connection_pool = set()\n\n8      def send_welcome_message(self,\
+  \ writer):\n9          \"\"\"\n10          Sends a welcome message to a newly connected\
+  \ client\n11          \"\"\"\n12          pass\n\n14      def broadcast(self, writer,\
+  \ message):\n15          \"\"\"\n16          Broadcasts a general message to the\
+  \ entire pool\n17          \"\"\"\n18          pass\n\n20      def broadcast_user_join(self,\
+  \ writer):\n21          \"\"\"\n22          Calls the broadcast method with a \"\
+  user joining\" message\n23          \"\"\"\n24          pass\n\n26      def broadcast_user_quit(self,\
+  \ writer):\n27          \"\"\"\n28          Calls the broadcast method with a \"\
+  user quitting\" message\n29          \"\"\"\n30          pass\n\n32      def broadcast_new_message(self,\
+  \ writer, message):\n33          \"\"\"\n34          Calls the broadcast method\
+  \ with a user's chat message\n35          \"\"\"\n36          pass\n\n38      def\
+  \ list_users(self,writer):\n39          \"\"\"\n40          Lists all the users\
+  \ in the pool\n41          \"\"\"\n42          pass\n\n44      def add_new_user_to_pool(self,writer):\n\
+  45          \"\"\"\n46          Adds a new user to our existing pool\n47       \
+  \   \"\"\"\n48          self.connection_pool.add(writer)\n\n50      def remove_user_from_pool(self,\
+  \ writer):\n51          \"\"\"\n52          Removes an existing user from our pool\n\
+  53          \"\"\"\n54          self.connection_pool.remove(writer)\n\n57  async\
+  \ def handle_connection(reader, writer):\n58      writer.write(\"Hello new user,\
+  \ type something...\\n\".encode())\n\n60      data = await reader.readuntil(b\"\\\
+  n\")\n\n62      writer.write(\"You sent: \".encode() + data)\n63      await writer.drain()\n\
+  \n65      # Let's close the connection and clean up\n66      writer.close()\n67\
+  \      await writer.wait_closed()\n\n70  async def main():\n71      server = await\
+  \ asyncio.start_server(handle_connection, \"0.0.0.0\", 8888)\n\n73      async with\
+  \ server:\n74          await server.serve_forever()\n\n77  connection_pool = ConnectionPool()\n\
+  78  asyncio.run(main())\n```\n\n对于那些不熟悉 `asyncio` 的人来说，可能会对我们 `ConnectionPool` 类的架构感到有些困惑。它只被实例化一次，并且其方法接受一个名为\
+  \ `writer` 的参数。这个 `writer` 参数是 `StreamWriter` 的一个实例——这是一个负责向底层连接（即已连接的用户）写入数据的 `asyncio`\
+  \ 对象。它是“并发”处理的，因为对于每个新连接，我们的 `handle_connection` 都会获得一个新的 `writer` 实例。你可以将 `writer`\
+  \ 视为已连接的用户。\n\n花些时间检查这些方法存根，并思考我们如何开始填充它们——这其实比看起来要简单。我们将从做两件事开始：\n\n1.  收集用户的昵称\n\
+  2.  填充 `send_welcome_message()` 方法\n\n```\n1  import asyncio\n2  from textwrap import\
+  \ dedent\n\n5  class ConnectionPool:\n6      def __init__(self):\n7          self.connection_pool\
+  \ = set()\n\n9      def send_welcome_message(self, writer):\n10          message\
+  \ = dedent(f\"\"\"\n11          ===\n12          ( Welcome {writer.nickname}!\n\
+  ```\n\n\n\n我们收集用户的昵称在`67—71`行，并在`72`行将其作为`writer`对象的属性保存。请特别注意我们在`71`行如何“读取直到”用户写入换行符。\n\
+  \n接下来，我们在`10—19`行广播欢迎消息。\n\n此时，您应该运行服务器并连接，以确保收到欢迎消息。实际上，每次更改后运行服务器是方便的，这样可以更容易地进行调试。\n\
+  \n以下代码填充了其余的方法并完成了服务器：\n\n```python\n1  import asyncio\n2  from textwrap import\
+  \ dedent\n\n5  class ConnectionPool:\n6      def __init__(self):\n7          self.connection_pool\
+  \ = set()\n\n9      def send_welcome_message(self, writer):\n10          message\
+  \ = dedent(f\"\"\"\n11          ===\n12          Welcome {writer.nickname}!\n\n\
+  14          There are {len(self.connection_pool) - 1} user(s) here beside you\n\n\
+  16          Help:\n17           - Type anything to chat\n18           - /list will\
+  \ list all the connected users\n19           - /quit will disconnect you\n20   \
+  \       ===\n21          \"\"\")\n\n23          writer.write(f\"{message}\\n\".encode())\n\
+  \n25      def broadcast(self, writer, message):\n26          for user in self.connection_pool:\n\
+  27              if user != writer:\n28                  # We don't need to also\
+  \ broadcast to the user sending the message\n29                  user.write(f\"\
+  {message}\\n\".encode())\n\n31      def broadcast_user_join(self, writer):\n32 \
+  \         self.broadcast(writer, f\"{writer.nickname} just joined\")\n\n34     \
+  \ def broadcast_user_quit(self, writer):\n35          self.broadcast(writer, f\"\
+  {writer.nickname} just quit\")\n\n37      def broadcast_new_message(self, writer,\
+  \ message):\n38          self.broadcast(writer, f\"[{writer.nickname}] {message}\"\
+  )\n\n40      def list_users(self,  writer):\n41          message = \"===\\n\"\n\
+  42          message += \"Currently connected users:\"\n43          for user in self.connection_pool:\n\
+  44              if user == writer:\n45                  message += f\"\\n - {user.nickname}\
+  \ (you)\"\n46              else:\n47                  message += f\"\\n - {user.nickname}\"\
+  \n\n49          message += \"\\n===\"\n50          writer.write(f\"{message}\\n\"\
+  .encode())\n\n52      def add_new_user_to_pool(self, writer):\n53          self.connection_pool.add(writer)\n\
+  \n55      def remove_user_from_pool(self, writer):\n56          self.connection_pool.remove(writer)\n\
+  \n59  async def handle_connection(reader, writer):\n60      # Get a nickname for\
+  \ the new client\n61      writer.write(\">  Choose  your  nickname: \".encode())\n\
+  \n63      response = await reader.readuntil(b\"\\n\")\n64      writer.nickname =\
+  \ response.decode().strip()\n```\n\n\n\n```python\n66      connection_pool.add_new_user_to_pool(writer)\n\
+  67      connection_pool.send_welcome_message(writer)\n68      await writer.drain()\n\
+  \n70      # 让我们关闭连接并进行清理\n71      writer.close()\n72      await writer.wait_closed()\n\
+  \n75  async def main():\n76      server = await asyncio.start_server(handle_connection,\
+  \ \"0.0.0.0\", 8888)\n\n78      async with server:\n79          await server.serve_forever()\n\
+  \n82  connection_pool = ConnectionPool()\n83  asyncio.run(main())\n```\n\n现在让我们尝试连接到服务器，确保它按预期工作。首先，确保你正在运行包含最新代码添加的服务器。接下来，打开一个终端窗口，使用`nc`（或`telnet`）进行连接：\n\
+  \n```\nnc 127.0.0.1 8888\n> Choose your nickname: blockchain_dan\n===\nWelcome \
+  \ blockchain_dan!\nThere are 0 user(s) here beside you\nHelp:\n- Type anything to\
+  \ chat\n- /list will list all the connected users\n- /quit will disconnect you\n\
+  ===\n```\n\n如预期所示，连接后，服务器会提示我们输入昵称（“blockchain_dan”），显示欢迎消息，然后断开连接。现在是时候引入一个包含逻辑的循环来保持用户连接了：\n\
+  \n```python\n1  import asyncio\n2  from textwrap import dedent\n\n5  class ConnectionPool:\n\
+  6      def __init__ (self):\n7          self.connection_pool = set()\n\n9      def\
+  \ send_welcome_message(self, writer):\n10          message = dedent(f\"\"\"\n11\
+  \          ===\n12          ( Welcome {writer.nickname}!\n\n14          There are\
+  \ {len(self.connection_pool) - 1} user(s) here beside you\n\n16          Help:\n\
+  17           - Type anything to chat\n18           - /list will list all the connected\
+  \ users\n19           - /quit will disconnect you\n20          ===\n21         \
+  \ \"\"\")\n\n23          writer.write(f\"{message}\\n\".encode())\n\n25      def\
+  \ broadcast(self, writer, message):\n26          for user in self.connection_pool:\n\
+  27              if user != writer:\n28                  # 我们不需要同时向发送消息的用户广播\n29\
+  \                  user.write(f\"{message}\\n\".encode())\n\n31      def broadcast_user_join(self,\
+  \ writer):\n32          self.broadcast(writer, f\"{writer.nickname} just joined\"\
+  )\n\n34      def broadcast_user_quit(self, writer):\n35          self.broadcast(writer,\
+  \ f\"{writer.nickname} just quit\")\n\n37      def broadcast_new_message(self, writer,\
+  \ message):\n38          self.broadcast(writer, f\"[{writer.nickname}] {message}\"\
+  )\n\n40      def list_users(self,  writer):\n41          message = \"===\\n\"\n\
+  42          message += \"Currently connected users:\"\n43          for user in self.connection_pool:\n\
+  44              if user == writer:\n45                  message += f\"\\n - {user.nickname}\
+  \ (you)\"\n46              else:\n47                  message += f\"\\n - {user.nickname}\"\
+  \n\n49          message += \"\\n===\"\n50          writer.write(f\"{message}\\n\"\
+  .encode())\n\n52      def add_new_user_to_pool(self, writer):\n53          self.connection_pool.add(writer)\n\
+  \n55      def remove_user_from_pool(self, writer):\n56          self.connection_pool.remove(writer)\n\
+  \n59  async def handle_connection(reader, writer):\n60      # 为新客户端获取昵称\n61    \
+  \  writer.write(\"> Choose your nickname: \".encode())\n\n63      response = await\
+  \ reader.readuntil(b\"\\n\")\n64      writer.nickname = response.decode().strip()\n\
+  \n66      connection_pool.add_new_user_to_pool(writer)\n67      connection_pool.send_welcome_message(writer)\n\
+  \n69      # 宣布新用户的到来\n70      connection_pool.broadcast_user_join(writer)\n\n72\
+  \      while True:\n73          try:\n74              data = await reader.readuntil(b\"\
+  \\n\")\n75          except asyncio.exceptions.IncompleteReadError:\n76         \
+  \     connection_pool.broadcast_user_quit(writer)\n77              break\n\n79 \
+  \         message = data.decode().strip()\n80          if message == \"/quit\":\n\
+  81              connection_pool.broadcast_user_quit(writer)\n82              break\n\
+  83          elif message == \"/list\":\n84              connection_pool.list_users(writer)\n\
+  85          else:\n86              connection_pool.broadcast_new_message(writer,\
+  \ message)\n\n88          await writer.drain()\n\n90          if writer.is_closing():\n\
+  91              break\n\n93      # 我们现在已退出消息循环，用户已退出。让我们进行清理...\n94      writer.close()\n\
+  95      await writer.wait_closed()\n96      connection_pool.remove_user_from_pool(writer)\n\
+  \n99  async def main():\n100      server = await asyncio.start_server(handle_connection,\
+  \ \"0.0.0.0\", 8888)\n\n102      async with server:\n103          await server.serve_forever()\n\
+  \n106  connection_pool = ConnectionPool()\n107  asyncio.run(main())\n```\n\n我们在第`72—91`行引入了循环。注意我们是如何将用户输入（第`74`行）包裹在一个\
+  \ try-except 块中，以应对用户连接在未通知的情况下断开的情况。然后我们继续处理他们的消息——检查它是 `quit` 还是 `list` 方法——直到我们再次等待进一步的输入。\n\
+  \n至此，我们的聊天服务器已完全具备功能。让我们打开两个或三个终端来模拟一个真实的聊天室：\n\n![../images/475256_1_En_5_Chapter/475256_1_En_5_Fig2_HTML.jpg](img/475256_1_En_5_Fig2_HTML.jpg)\n\
+  \n**图 5-2** 并排的两个终端，模拟两个用户互相聊天\n\n> **注意**  \n> 把你的计算机 IP 地址给朋友，让他们在你的本地网络上连接到服务器。你也可以把聊天服务器托管在某个网络主机上，并给它一个完整的\
+  \ URL，以便互联网上的任何用户都能连接。\n\n对于本演示中展示的概念进行实验和尝试非常重要，因为它们将在本书的目标中发挥关键作用：为我们区块链网络的底层网络层奠定基础。\n\
+  \n> **提示**  \n> 完整源代码位于 GitHub 仓库：[`https://github.com/dvf/blockchain-book`](https://github.com/dvf/blockchain-book)。\n\
+  \n\n\n### 协议\n\n协议在点对点网络设计中至关重要。协议是“游戏规则”，而设计它们之所以困难，是因为需要长期的前瞻性与规划。缺乏合理的架构会在未来导致结构性裂痕——即需要所谓“硬分叉”或改变网络底层协议的问题。良好的规划能为未来影响（无论是技术进步还是网络社会变迁）留出充足的空间。\n\
+  \n比特币成功的部分原因在于其协议的简洁性，以及核心开发者在进行新变更时的审慎考量。协议层面的裂痕常常导致由社区驱动的“硬分叉”，例如比特币现金以及比特币区块链衍生出的众多分支。研究这些分叉发生的原因和时机很有趣，因为它们几乎总是协议层面意见不合的结果。\n\
+  \n考虑到这一点，让我们审视一下我们构建的聊天服务器，并通过分析其可能的“消息”来剖析其协议。将这些分解成“用户故事”会很有帮助：\n\n*   作为已连接的用户，我可以通过发送消息\
+  \ `/quit` 来退出。\n*   作为已连接的用户，我可以通过发送消息 `/list` 来列出所有已连接的用户。\n*   作为已连接的用户，我发送的任何文本（不包括上述提及的消息）都会被广播给所有已连接的客户端。\n\
+  \n我们的玩具聊天服务器极其简单。但通过定义上述协议，我们能够使其变得*通用*；这一点至关重要，因为它意味着互联网上*任何*使用自己软件的客户端，只需遵守该协议就能成功与我们的服务器交互。\n\
+  \n通过实现比特币的协议，开发者能够编写自己的软件来与网络交互。他们只需了解网络上可能存在哪些故事和消息。比特币维基忠实提供了这些信息，地址为：[`https://en.bitcoin.it/wiki/Protocol_documentation`](https://en.bitcoin.it/wiki/Protocol_documentation)。当你下载名为“Bitcoin\
+  \ Core”的软件时，你实际上下载的是该协议的*参考*实现，由那些为比特币奉献业余时间的开发者设计和维护。\n\n## 构建区块链的基础工作\n\n点对点网络的实现，依赖于网络上的每个客户端共同执行商定的协议。作为练习，请暂停片刻，尝试思考在点对点网络中应该允许哪些消息。\n\
+  \n遵循上述建议，首先将我们的网络分解为用户故事有助于厘清需要哪些消息。让我们将*已连接*节点的概念定义为：一个与足够多的其他对等体建立连接以形成网络的节点。以下是几个可能的故事：\n\
+  \n*   作为一个*节点*，我能够通过发现对等体来连接它们。\n*   作为一个*已连接节点*，我能够向任何请求者发布我的对等体列表。\n*   作为一个*已连接节点*，我能够接受并广播来自对等体的新交易。\n\
+  *   作为一个*已连接节点*，我能够向任何请求它的对等体提供某个区块的内容。\n*   作为一个*已连接节点*，我能够接受一个新区块，并在其满足特定条件时将其添加到我的区块链中。\n\
+  \n### 八卦协议\n\n上述列表绝非详尽——我们尚未考虑对行为不端的对等体的惩罚措施，也未就添加两个有效（且冲突）区块时形成任何解决方案——但就目前而言，这是一个良好的构建基础。但最重要的是，由于没有中心化权威，我们需要一种方法让对等体定位网络并形成一个*群组*\n\
+  \n![../images/475256_1_En_5_Chapter/475256_1_En_5_Fig3_HTML.jpg](img/475256_1_En_5_Fig3_HTML.jpg)\n\
+  \n图 5-3\n\n一个节点首次加入网络\n\n在上图中，节点 `U` 必须从 `A` 处获取其他节点（对等体）的列表，而 `A` 又从其邻居 `X`、`Y`\
+  \ 和 `Z` 处获取了节点列表，并且必须持续地向它们发送“心跳”以确保它们在网络上仍然“存活”。`A` 还必须向网络宣布 `U` 的存在，以此类推。这种通用方案称为八卦协议，而一个成功的八卦协议正是构建弹性、去中心化网络的关键。\n\
+  \n"
+- "# 密码学入门\n\n本章所涉及算法的研究，远远超出了你所能找到的任何书籍或课程的范畴。它们需要多年的理解和钻研，并建立在特定数学领域所熟悉的代数概念之上。但幸运的是，在实际应用这些工具时，并不需要具备密码算法如何工作的理论洞察力，只要理解其用途和影响即可。换句话说，这里重要的是掌握如何使用密码库的实用知识。\n\
+  \n如果你和我一样（不是密码学家），那么对待这些材料的正确方法是保持谨慎。我所理解的密码学知识，仅仅是认识到它是一个终生的平衡课题——一项关于安全性、便捷性和速度之间权衡的研究——并且攻击载体会随着技术进步而不断变化。作为一名初次学习这些内容的人，你应该倾向于那些久经考验、广为人知的最佳实践和工具。在我们的数字世界中，有太多东西岌岌可危，容不得半点偷工减料——互联网上的大多数入侵和攻击都是由简单错误造成的：使用了对某些事物理解不深的糟糕实现，或者更糟的是，个人的“盖章认可”。密码学领域有句格言：*永远不要自行创建你自己的密码学方案*。\n\
+  \n密码学（Cryptography）是加密货币（Cryptocurrency）中的“加密”部分。真正的密码学家可能会对使用“crypto”一词来指代加密货币感到懊恼。在现实生活中签署支票与签署区块链交易非常相似——但甚至更加安全，因为签名无法伪造。事实上，签名会根据你签署的文档而发生改变！\n\
+  \n## 发送完整性消息\n\n在我们深入探讨数字签名和公钥密码学之前，我想借助你对哈希的了解，展示如何利用哈希在不安全的媒介（如互联网）上发送不可伪造的消息。\n\
+  \n注意\n\n注意，这个例子只是一个玩具示例，实际上有构建完善的库可以用于此目的。事实上，Python 自带的 `hmac` 库就是为此目的而构建的。\n\n\
+  假设 Alice 想给 Bob 发送一条消息。同时，假设 Alice 和 Bob 在发送消息之前，约定好了共享一个秘密密码 `p@55w0rd`。\n\nAlice\
+  \ 创建一条消息并将其与 `p@55w0rd` 拼接起来；然后计算该消息的哈希值：\n\n```\nfrom hashlib import sha256\nmessage\
+  \ = \"Hello Bob, Let's meet at the Kruger National Park on 2020-12-12 at 1pm.\"\n\
+  hash_message = sha256((\"p@55w0rd\" + message).encode()).hexdigest()\n```\n\n计算出的哈希值是\
+  \ `39aae6ffdb3c0ac1c1cc0f50bf08871a729052cf1133c4c9b44a5bab8fb66211`。Alice 然后将这条消息连同哈希值一起发送给\
+  \ Bob，Bob 将验证只有 Alice 才能发送它：\n\n```\nfrom hashlib import sha256\nalices_message\
+  \ = \"Hello Bob, Let's meet at the Kruger National Park on 2020-12-12 at 1pm.\"\n\
+  alices_hash = \"39aae6ffdb3c0ac1c1cc0f50bf08871a729052cf1133c4c9b44a5bab8fb66211\"\
+  \nhash_message = sha256((\"p@55w0rd\" + alices_message).encode()).hexdigest()\n\
+  if hash_message == alices_hash:\n    print(\"消息未被篡改\")\n```\n\n这是一个数字签名的简单示例，旨在让你初步了解其工作原理。我们很快会看到，负责验证和签名消息的库更加健壮，并且不需要使用预共享密钥。\n\
+  \n\n\n### 对称加密\n\n对称加密是最古老的一种加密形式。它涉及与你想要通信的人*共享*一把密钥（`cipher`）。\n\n例如，假设你想和你的兄弟共用你的汽车。你复制了一把钥匙并给他。现在，只有你和你兄弟能启动这辆车。但当你在度假时，你兄弟打电话告诉你钥匙丢了，可能被人偷了。\n\
+  \n这个例子说明了对称加密存在的一些问题——主要问题在于你对交易对手的信任，以及维护有权驾驶你汽车的授权人员名单所带来的开销和管理成本。此外，你可能不知道某把钥匙何时已被泄露。让我们来看一个对称加密的经典例子。\n\
+  \n## 凯撒密码\n\n大约在公元前 50 年的罗马，尤利乌斯·凯撒在他的私人通信中使用了一种加密方法。这是一种简单的对称加密方法，通过将消息中的字符按固定数量移位来实现。\n\
+  \n![../images/475256_1_En_6_Chapter/475256_1_En_6_Fig1_HTML.jpg](img/475256_1_En_6_Fig1_HTML.jpg)\n\
+  \n图 6-1\n\n一个凯撒密码示例\n\n事先，凯撒会告知接收者密码（密钥），比如数字 3。那么在加密后的消息中，一个 `D` 就会变成 `A`。接收者反向操作，一个\
+  \ `A` 就会变回 `D`。\n\n这里的问题是，发送密码这个行为本身是不安全的——任何形式的通信都可能被监视，密钥也可能被获取。我们需要一种摆脱创建和发送共享密钥这一过程的加密形式。这就是公钥密码学被发明的原因，它解决了共享信任的问题。\n\
+  \n### 公钥密码学\n\n公钥密码学是*非对称*加密的一个例子。它是保护互联网上几乎所有现代系统安全的加密类型。我们将从一个简单的层面来理解它，让你掌握其工作原理和原因的精要，然后我们会结合一些例子，从更技术性和更细致的角度深入探讨。\n\
+  \n公钥密码学涉及的不是一个而是两个（或更多）密钥对，其中一个是保密的。有许多不同的公钥密码算法，但我们将使用流行的 `RSA`（`Rivest`、`Shamir`、`Adleman`——算法创建者）算法（在比特币的情况下，使用的是\
+  \ `ECDSA`（椭圆曲线数字签名算法））。这些算法是复杂的数学瑰宝，超出了本书的讨论范围，它们有多种变体，各具优势：有些被认为能抵抗量子计算；有些则因其速度或易用性而被选中。但这些算法的输出都是一样的：一对*相关联*的密钥\
+  \ `A` 和 `B`，你可以用它们来加密消息，以便在不安全的信道上发送。\n\n请注意*相关联*这个词——密钥 `A` 和 `B` 以数学方式链接在一起。`A`\
+  \ 必须保密，只有你知道。但 `B` 是你的*公钥*——你可以在互联网上公开它，别人可以用它来加密一条*只有你*才能解密的消息（使用 `A`）。你可以有效地将你的\
+  \ `B` 发送给任何希望与你安全通信的人，但你应该像佛罗多守护魔戒一样守护好 `A`。我们一直在使用公钥密码学——大多数时候甚至没有意识到——当你通过 `https`\
+  \ 访问一个网站时，你就是在使用该网站的 `B` 来加密你的传出数据，这样只有该网站才能读取它。\n\n此外——这点非常重要——你可以用你的私钥 `A` 来*签名*一条消息，而\
+  \ `B`（公开的）可以*验证*签名。区块链上的交易就是这样被验证的。不过后续章节会更详细地讨论。让我们先看一些例子来加深理解。\n\n#### Python\
+  \ 示例\n\n这里有一个来自优秀开源 Python `NaCL` 库的绝妙类比：\n\n> 想象一下，爱丽丝想要将一些有价值的东西运送到她手中。因为东西很贵重，她想确保它能安全送达（即，没有被打开或篡改），并且它不是伪造的（即，它确实来自她期望的发件人，没有人掉包）。\n\
+  >\n> 一种实现方式是，她向发件人（我们称他为鲍勃）提供一个她精心挑选的高安全性盒子。她将这个盒子以及另一样东西提供给鲍勃：一把挂锁，但这是一把没有钥匙的挂锁。爱丽丝自己保留了那把钥匙。鲍勃可以把物品放进盒子，然后将挂锁锁上。但是一旦挂锁锁上，任何没有爱丽丝私钥的人都无法打开这个盒子。\n\
+  >\n> 不过这里有个转折：鲍勃也在盒子上加了一把挂锁。这把挂锁使用了一把鲍勃已经向世界公开的钥匙，这样，如果你有鲍勃的一把钥匙，你就知道这个盒子来自他，因为鲍勃的钥匙会打开鲍勃的挂锁（让我们想象一个即使你知道钥匙也无法伪造挂锁的世界）。然后鲍勃把盒子寄给爱丽丝。\n\
+  >\n> 为了打开盒子，爱丽丝需要两把钥匙：她的私钥，用来打开她自己的挂锁；以及鲍勃广为人知的钥匙。如果鲍勃的钥匙打不开第二把挂锁，那么爱丽丝就知道这不是她期望从鲍勃那里收到的盒子，这是伪造的。\n\
+  >\n> 这种关于身份的双向保证被称为相互认证。\n\n我们将使用 `PyNaCl` 来用 Python 实现上述类比的一个示例。首先，让我们安装 `PyNaCl`：\n\
+  \n注意\n\n顺便说一句，`PyNaCl` 是一个经过充分测试的库的绝佳例子，非常适合在你的项目中使用。最重要的是——对于一个加密库来说——它有大量带示例的优秀文档。你可以在这里阅读更多：[`https://pynacl.readthedocs.io/en/stable/public/`](https://pynacl.readthedocs.io/en/stable/public/)\n\
+  \n```\npoetry add pynacl\n```\n\n然后让我们激活虚拟环境并启动一个 Python 解释器：\n\n```\npoetry shell\n\
+  ipython\n```\n\n我们将使用给出的类比来深入解释这些概念。鲍勃和爱丽丝都将生成他们自己的公私钥对，鲍勃将加密一条消息给爱丽丝，供她解密。PyNaCl\
+  \ 为我们提供了一个非常有用的 `Box` 类，它模拟了上述类比。\n\n我们开始吧：\n\n```\nfrom nacl.public import PrivateKey,\
+  \ Box\n#### 为爱丽丝和鲍勃生成密钥\nalices_private_key = PrivateKey.generate()\nbobs_private_key\
+  \ = PrivateKey.generate()\n#### 公钥由私钥生成\nalices_public_key = alices_private_key.public_key\n\
+  bobs_public_key = bobs_private_key.public_key\n#### 鲍勃将发送一条消息给爱丽丝...\n# 所以他用他的私钥和爱丽丝的公钥创建了一个\
+  \ Box\nbobs_box = Box(bobs_private_key, alices_public_key)\n#### 我们加密鲍勃的秘密消息（字节形式）...\n\
+  encrypted = bobs_box.encrypt(b\"I am Satoshi\")\n# 爱丽丝用她的私钥和鲍勃的公钥创建了第二个 Box，这样她就能解密该消息\n\
+  alices_box = Box(alices_private_key, bobs_public_key)\n#### 现在爱丽丝可以解密消息：\nplaintext\
+  \ = alices_box.decrypt(encrypted)\nprint(plaintext.decode('utf-8'))\nI am Satoshi\n\
+  ```\n\n如果消息被篡改或无法解密，`PyNaCl` 将抛出一个异常。\n\n\n\n### 数字签名\n\n数字签名的存在原因，与你在现实生活中签署文件的原因大致相同：它能让接收方对文件的真实性深信不疑。数字签名能满足以下三个关键主张：\n\
+  \n1.  **真实性**：“这必然是丹尼尔签署的。”\n2.  **完整性**：“这份数据未被伪造或篡改。”\n3.  **不可抵赖性**：“丹尼尔无法否认曾发送过这份数据。”\n\
+  \n数字签名利用公钥密码学来满足这些主张。正如我们在示例中，爱丽丝用鲍勃的公钥创建了一个“盒子”，我们同样使用鲍勃的公钥来验证，只有鲍勃才能发送并签署一份数据。其核心思想很简单：任何拥有我公钥的人，都能快速验证我确实签署了一条消息。\n\
+  \n下图展示了这一思想。\n\n![../images/475256_1_En_6_Chapter/475256_1_En_6_Fig2_HTML.jpg](img/475256_1_En_6_Fig2_HTML.jpg)\n\
+  \n**图 6-2** – 数字签名过程\n\n1.  首先，对未加密的纯文本数据进行哈希处理（防止篡改）。\n2.  然后，使用私钥对哈希值进行加密。\n3.\
+  \  最后，将加密后的哈希值附加（拼接）到数据上。\n\n让我们看看在 Python 中如何实现。首先，从鲍勃的角度出发，我们将创建一个密钥对；然后用它对一条消息进行签名。之后，我们将展示任何人都可以使用该公钥来验证这条消息。\n\
+  \n```\n1  import nacl.encoding\n2  import nacl.signing\n4  # 为鲍勃生成一个新的密钥对\n5  bobs_private_key\
+  \ = nacl.signing.SigningKey.generate()\n6  bobs_public_key = bobs_private_key.verify_key\n\
+  8  # 由于是字节数据，我们需要将密钥序列化为可读格式后再发布：\n9  bobs_public_key_hex = bobs_public_key.encode(encoder=nacl.encoding.HexEncoder)\n\
+  11  # 现在，用它来签署一条消息\n12  signed = bobs_private_key.sign(b\"请向爱丽丝发送 37 美元\")\n```\n\
+  \n在第 `10` 行生成的公钥（十六进制）如下：\n\n```\ne7ff10ede8a691b982516059a0627d369504e3633e0297e28ec5fc71994577d3\n\
+  ```\n\n首先，我们来看看第 `12` 行中的 `signed` 消息是什么样的。如你所见，消息本身并未加密！但它附加了一些包含签名字节的数据：\n\n```\n\
+  b'\\x9fq\\x02\\xe1o\\xb8y2\\xc7\\xe7@9$\\xc4\\xb2\\xa4\\xe1+97.>\\r\\xcaGG\\x8a\n\
+  Y\\x86\\xc3\\xfe\\xb9W{\\xc4\\x9c\\x87\\x00(\\x1d\\xe9}j\\xe4\\xed\\xd2\\x0b\\xcb\\\
+  x88\\x87J\\xecy\\x04GQ\nH\\xea\\xcc\\xc2\\xe7\\x03 请向爱丽丝发送 37 美元'\n```\n\n#### 验证过程\n\
+  \n验证过程使用签名者的公钥来检查签名。\n\n![../images/475256_1_En_6_Chapter/475256_1_En_6_Fig3_HTML.jpg\n\
+  \n**图 6-3** – 验证数字签名\n\n让我们看看如何用公钥来验证该消息确实由鲍勃签署：\n\n```\n1  import nacl.encoding\n\
+  2  import nacl.signing\n5  # 来自上述示例...\n6  bobs_public_key = b'e7ff10ede8a691b982516059a0627d369504e3633e0297e28ec5fc71994577d3'\n\
+  8  # 我们生成 verify_key\n9  verify_key = nacl.signing.VerifyKey(bobs_public_key, encoder=nacl.encoding.HexEncoder)\n\
+  11  signed_message = b'\\x9fq\\x02\\xe1o\\xb8y2\\xc7\\xe7@9$\\xc4[\\xb2\\xa4\\xe1+97.>\\\
+  r\\xca GG\\x8a Y\\x86\\xc3\\xfe\\xb9W{\\xc4\\x9c\\x87\\x00(\\x1d\\xe9}j\\xe4\\xed\\\
+  xd2\\x0b\\xcb\\x88\\x87 J\\xecy\\x04GQH\\xea\\xcc\\xc2\\xe7\\x03 请向爱丽丝发送 37 美元'\n\
+  13  # 现在我们尝试验证消息\n14  # 任何验证失败都将引发异常\n15  verify_key.verify(signed_message)\n```\n\
+  \n**注意：** 上面的示例是否清晰易懂？建议你暂停一下，在 Python 解释器中亲自尝试，直到掌握使用 NaCl 的要领。随着我们进入下一章关于交易的内容，它会变得愈发重要。\n\
+  \n## 区块链上的钱包\n\n与比特币不同，以太坊采用的是基于账户的模型——这意味着区块链上的每个“用户”都会拥有一个账户。比特币没有*账户*的概念；相反，它的系统非常类似于现金在实物钱包中的流入和流出方式。比特币系统被称为\
+  \ UTXO（未花费交易输出），这是一种用于建模交易的优雅数据结构。我们将在下一章讨论 UTXO，但现在先让我们专注于以太坊的基于账户的模型。\n\n当你首次与以太坊交互时，通常会生成一个密钥对。你的以太坊*地址*实际上就是你的公钥。你的私钥则被安全地存储在某处，可能是某种软件钱包或硬件钱包中。如果其他人想通过以太坊区块链向你转账，他们只需要知道你的公钥即可。但只有你能动用这笔钱，因为只有你持有私钥。\n\
+  \n### 创建交易节点\n\n要实现一个功能完备的加密货币，我们区块链中的数据必须是*交易*。每笔交易都将代币的所有权从一个私钥转移到另一个私钥。这些交易被打包到每个区块中，并通过*挖矿*过程来扩展区块链；事实上，区块存在的时间越久，其确定性就越高——它成为事实区块链一部分的可能性就越大。在任何时候，矿工们都在忙于挖掘包含不同交易的、略有差异的区块——这是一场寻找新区块的竞赛——当某个矿工找到一个区块时，他会广播该区块，其他矿工则会放弃自己当前的区块（他们在竞赛中失败了）并开始寻找下一个区块。这些被“放弃”的区块通常称为孤块。\n\
+  \n在本章中，我们将整合之前学到的所有概念，并将它们融入一个能够在点对点网络中运行的全节点。然后，利用上一章的密码学知识，我们将阐明交易是如何创建和验证的。\n\
+  \n## 交易与工作量总结\n\n### 脱离比特币的 UTXO 模型\n\n如果你曾研究过比特币，那么很可能听说过 UTXO，或者更正式的名称——未花费交易输出（UTXO）。这个模型很优雅，因为它类似于现实世界中硬通货的运作方式——没有账户的概念：金钱以“纸币”的形式存在，可能存放在某人的钱包（公钥）中。UTXO\
+  \ 与基于账户的模型形成对比，后者大致类似于你银行账户的工作方式：你给别人你的账号，他们就能向你的账户转账。一些加密货币（最著名的是以太坊）就采用这种基于账户的模型。\n\
+  \n我们将要实现的正是这个模型，因为它易于推理、测试和解释。我们在设计类时将使其能够方便地替换为 UTXO 模型（将此作为练习留给读者）。\n\n### 矿工的角色\n\
+  \n正如我们在第 4 章所见，矿工的角色是通过为区块找到合适的哈希值来生成新的代币。在挖矿过程中，矿工会将收到的交易收集到一个池子中——在比特币中被称为 `mempool`（内存池）——等待被纳入下一个区块。如果等待交易的量超过了区块的容量，矿工会选择手续费最高的交易以增加利润。在\
+  \ 2017 年的加密货币热潮中，由于交易积压严重，比特币交易的手续费一度超过了 40 美元。关于比特币扩容的讨论经常涉及交易内存池和交易费用，其中最关键的问题是区块大小：一个区块中应该存储多少笔交易？在比特币中，限制是\
+  \ 1 兆字节，平均大约能容纳 1700 笔交易。\n\n\n好的，作为一名高级文档工程师和翻译员，我将遵循您的指示，对给定的英文文本进行翻译。翻译将严格遵循注意事项中的格式要求，包括保留粗体、斜体、内联代码、链接、列表、表格和代码块的格式，并翻译其中的内容。\n\
+  \n\n### 我们将如何实现交易\n\n我们将对我们的 funcoin 节点进行一些改动；具体来说，我们必须找出交易如何在整个网络中传播。点对点（P2P）网络的结构方式对于加密货币的可靠性至关重要。比特币被认为是一种“推送”（push）网络：不是节点向对等节点查询新交易，而是当一个节点收到新交易时，它会将该交易*推送*给它的所有对等节点。宽松地说，当一个新节点加入网络时，它应该会产生一种*八卦*（gossip）效应，从而使得对等节点的对等节点也能了解到它的存在，并能够可靠地向它发送未来的交易。\n\
+  \n交易的数据结构很简单，包含以下内容：\n\n![../images/475256_1_En_7_Chapter/475256_1_En_7_Fig1_HTML.jpg](img/475256_1_En_7_Fig1_HTML.jpg)\n\
+  \n图 7-1\n\n使用数字签名创建交易\n\n1.  发送者的公钥\n2.  接收者的公钥\n3.  要转移的金额\n4.  一个公示的费用（可以理解为“小费”，用于激励矿工将这笔交易包含在下一个区块中）\n\
+  \n为了发送或接收 funcoin，我们需要生成一个钱包——一个公私钥对。要发送 funcoin 给 Beatrix，Aldo 必须创建一笔包含他和 Beatrix\
+  \ 的公钥以及要发送的金额的交易。然后，这笔交易会使用 Aldo 的私钥进行签名。\n\n网络中的任何对等节点都可以通过检查 Aldo 的公钥来验证该交易是否真实有效。如果交易通过了验证，那么稍后，当有矿工将其打包时，它就会被添加到区块链中。\n\
+  \n## 勘误与变更\n\n随着依赖项和库的变更，以及人们发现这个初始实现中的错误，随着时间的推移，实际运行的代码与图书内容出现差异是不可避免的，希望这种差异是微小的。如果您需要寻求帮助，请随时查阅公共\
+  \ GitHub 仓库：[`https://github.com/dvf/learn-blockchains-book/`](https://github.com/dvf/learn-blockchains-book/)。\n\
+  \n## 为我们的全节点创建项目\n\n### 安装依赖项\n\n在项目的这个阶段，我们已经涵盖了构建节点所需的所有原子单元：\n\n-   一个用于维护不可变数据链的区块链\n\
+  -   一个允许客户端连接并来回发送数据的服务器\n-   一个用于创建新 funcoin 的挖矿算法\n-   允许我们验证和构建交易的密码学基础知识\n\n\
+  我们现在需要考虑节点的架构，并使用给定的原子单元作为可导入的模块来重构我们的项目。我们将创建一个新的 Python 项目（文件夹）来执行此操作。让我们创建一个新文件夹，并将其初始化为一个空白的\
+  \ Poetry 项目：\n\n```\n$ mkdir funcoin\n$ cd funcoin\n$ poetry init -n\n```\n\n并添加必要的依赖项（我将稍后讨论每个依赖项的用途）：\n\
+  \n```\n$ poetry add pynacl structlog colorama marshmallow marshmallow-oneofschema\
+  \ aiohttp\n```\n\n**注意**\n\n您可能会注意到新增了 *structlog*——稍后，我们将用它来代替代码中散落的 `print()`\
+  \ 语句，以提供更流畅、更有意义的输出。\n\nPoetry 现在将在适当的位置创建一个虚拟环境，并安装依赖项：\n\n```\nCreating virtualenv\
+  \ funcoin-PPSjSr3P-py3.8 in\n/Users/dvf/Library/Caches/pypoetry/virtualenvs\nUsing\
+  \ version ²⁰.1.0 for structlog\nUsing version ¹.3.0 for pynacl\nUpdating dependencies\n\
+  Resolving dependencies... (1.2s)\nWriting lock file\nPackage operations: 22 installs,\
+  \ 0 updates, 0 removals\n- Installing idna (2.9)\n- Installing multidict (4.7.6)\n\
+  - Installing pycparser (2.20)\n- Installing pyparsing (2.4.7)\n- Installing six\
+  \ (1.14.0)\n- Installing async-timeout (3.0.1)\n- Installing attrs (19.3.0)\n- Installing\
+  \ cffi (1.14.0)\n- Installing chardet (3.0.4)\n- Installing colorama (0.4.3)\n-\
+  \ Installing marshmallow (3.6.0)\n- Installing  more-itertools  (8.3.0)\n- Installing\
+  \ packaging (20.3)\n- Installing pluggy (0.13.1)\n- Installing py (1.8.1)\n- Installing\
+  \ wcwidth (0.1.9)\n- Installing yarl (1.4.2)\n- Installing aiohttp (3.6.2)\n- Installing\
+  \ marshmallow-oneofschema (2.0.1)\n- Installing pynacl (1.3.0)\n- Installing pytest\
+  \ (5.4.2)\n- Installing structlog (20.1.0)\n```\n\n现在，您的 funcoin 项目目录中应该已经有了 `pyproject.toml`\
+  \ 和 `poetry.lock` 文件。以下是每个包用途的摘要：\n\n| 包 | 描述 |\n| --- | --- |\n| `Pynacl` | 对交易进行签名和验证\
+  \ |\n| `Structlog` | 日志记录库（优于 `print()` 语句） |\n| `Colorama` | 允许输出彩色内容（在日志记录中） |\n\
+  | `Marshmallow` | 验证数据结构，例如我们的节点将发送和接收的 JSON 消息 |\n| `marshmallow-oneofschema` |\
+  \ 允许 `marshmallow` 验证更复杂的数据结构 |\n| `Aiohttp` | 一个异步 HTTP 客户端（我们将需要它来查找我们的公网 IP 地址）\
+  \ |\n\n### 创建文件结构\n\n现在，我们将创建一个嵌套的 `funcoin` 文件夹来存放我们的“原子”单元——组合起来形成一个完整节点的不同方面或类。为以下内容创建空文件：\n\
+  \n```\ntouch node.py\nmkdir funcoin\ncd funcoin\ntouch __init__.py\ntouch blockchain.py\n\
+  touch connections.py\ntouch transactions.py\ntouch server.py\ntouch types.py\ntouch\
+  \ messages.py\ntouch utils.py\n```\n\n您的完整文件夹结构应如下所示：\n\n```\nfuncoin\n├── funcoin\n\
+  │     ├── __init__.py\n│     ├── blockchain.py\n│     ├── connections.py\n│    \
+  \ ├── messages.py\n│     ├── peers.py\n│     ├── server.py\n│     ├── transactions.py\n\
+  │     ├── types.py\n│     └── utils.py\n├── __init__.py\n├── node.py\n├── poetry.lock\n\
+  └── pyproject.toml\n```\n\n`funcoin/funcoin` 目录下的空文件将包含我们即将从前几章重构的代码。让我们检查一下我们节点的结构。\n\
+  \n## 构建我们的节点结构\n\n\n\n### 职责分配\n\n我们将使用 `node.py` 作为运行节点的入口点。“什么是入口点？”你可能会问。可以将其视为运行节点的规范方式。在设计程序时，我发现尽可能抽象化是有帮助的——在实现任何功能之前，先设计好你希望程序如何运行：\n\
+  \n```python\n#### 使用一些配置实例化服务器\nserver = Server(**some_config)\n#### 启动服务器\nserver.run()\n\
+  ```\n\n请稍作停顿，思考一下我们将要实现的各个部分：你认为我们虚构的 `Server()` 类是否应该负责保存区块链？或者处理交易？如果它负责运行*一切*，那么后续我们如何将交易模型替换为像\
+  \ UTXO 这样的其他模型呢？\n\n设计应用程序时的一个健全原则是：*每个模块应只负责一件事，并且把它做好*。这里有一种更好的方式来抽象我们的服务器：\n\n\
+  ```python\nfrom funcoin.blockchain import Blockchain\nfrom funcoin.pool import ConnectionPool\n\
+  from funcoin.server import Server\n\n#### 实例化区块链和用于“对等节点”的连接池\nblockchain = Blockchain()\n\
+  connection_pool = ConnectionPool()\n\n#### 实例化服务器，并将我们的模块“嵌入”其中\nserver = Server(blockchain,\
+  \ connection_pool)\n\n#### 现在启动服务器\nserver.start()\n```\n\n现在，我们有了一个更加清晰的抽象——服务器完全无需关心区块链；它只需要专注于成为一个服务器。在不对各个模块进行解释的前提下，这是我们最终\
+  \ `node.py` 的模样：\n\n```python\n1  import asyncio\n2  \n3  from funcoin.blockchain\
+  \ import Blockchain\n4  from funcoin.connections import ConnectionPool\n5  from\
+  \ funcoin.peers import P2PProtocol\n6  from funcoin.server import Server\n7  \n\
+  8  blockchain = Blockchain()         ①\n9  connection_pool = ConnectionPool() ②\n\
+  10 \n11 server = Server(blockchain, connection_pool, P2PProtocol)\n12 \n13 async\
+  \ def main():\n14     # 启动服务器\n15     await server.listen()\n16 \n17 asyncio.run(main())\n\
+  ```\n\n*清单 7-1：`funcoin/node.py`*\n\n请注意 `ConnectionPool` ① 和 `Blockchain` ② 类的实例化。这确保了它们是带有状态的单例——意味着任何通过\
+  \ `from node import connection_pool` 导入的模块都将获得同一个已实例化的对象，从而保持状态一致。\n\n在实现它们之前，我们先设定四个关键模块的目标。\n\
+  \n| **模块** | **描述** |\n|---|---|\n| `blockchain` | 用于存放我们 `Blockchain` 类的模块，该类包含我们在前几章构建的区块链实例\
+  \ |\n| `Peers` | 处理对等节点可能发送给我们的消息传播逻辑：即我们如何进行通信。我们将其称为 `P2PProtocol` |\n| `connections`\
+  \ | 处理与我们节点通信的活动连接“池”的逻辑 |\n| `server` | 存放我们基本 TCP `Server` 的地方 |\n\n> **注意** \
+  \ \n> 由于我们使用的是 `asyncio`（而不是线程），我们极大地简化了并发问题：使用线程时，程序员需要担心竞态条件（两个或多个线程争相更新或接收数据）。这种方法的缺点是代码可能变得难以阅读和理解（但根据我的经验，如果你花时间去遵循它，是非常值得的）。\n\
+  \n我们的入口点只有一个函数 `main()`。这是 `asyncio` 程序的典型特征，用于启动我们的服务器。\n\n## 服务器模块\n\n我们将改造在第\
+  \ 5 章创建的聊天服务器，并使其适应我们的目的，代码位于 `funcoin/server.py`。\n\n以下是我们类的粗略框架：\n\n```python\n\
+  class Server:\n    def __init__(self, blockchain, connection_pool, p2p_protocol):\n\
+  \        ...\n\n    async def get_external_ip(self):\n        # 查找我们的“外部 IP”，以便向对等节点广播\n\
+  \        ...\n\n    async def handle_connection(self, reader: StreamReader, writer:\
+  \ StreamWriter):\n        # 当收到新连接时调用此函数\n        # `writer` 对象代表连接的对等节点\n     \
+  \   while True:\n            try:\n                # 处理并/或回复传入的数据\n            \
+  \    ...\n            except (asyncio.exceptions.IncompleteReadError, ConnectionError):\n\
+  \                # 发生错误，跳出等待循环\n                break\n\n    async def listen(self,\
+  \ hostname=\"0.0.0.0\", port=8888):\n        # 这是启动我们服务器的监听方法\n        server =\
+  \ await asyncio.start_server(self.handle_connection, hostname, port)\n        logger.info(f\"\
+  服务器正在监听 {hostname}:{port}\")\n        async with server:\n            await server.serve_forever()\n\
+  ```\n\n*清单 7-2：`server.py`*\n\n让我们依次充实这些方法。如果你在初次检查时没有完全“理解”，不必担心；随着我们不断引导启动各个模块，我们会频繁地回头看这个服务器。\n\
+  \n1. **①** 这就是我们如何将模块“引导”到服务器的方式：服务器类（以及任何附加到其上的内容）将始终能够通过 `self.blockchain` 访问我们的\
+  \ `blockchain`。\n\n2. **②** 虽然我们还没有实现 `get_external_ip()`，但它负责查找我们的外部 IP 地址。\n\n\
+  3. **③** 在这里，我们*永远*等待，直到收到以换行符（`\\n`）结尾的消息。这是你需要留意的第一个潜在漏洞，因为任何人都可能用无休止的消息来淹没我们的服务器。\n\
+  \n4. **④** 我们尝试通过假定消息是以 UTF-8 格式字符串发送的来解码它。\n\n5. **⑤** 也许我们很快了解到的最令人惊讶的事情是使用了 `marshmallow`（我们之前安装的库）来解析和验证来自对等节点的传入消息。\n\
+  \n6. **⑥** 一旦消息被成功解析，后续代码就可以假设所有相关字段都存在，我们可以使用我们的 `p2p_protocol` 来决定如何处理。\n\n7.\
+  \ **⑦** 注意 `structlog` 的导入和使用——我们用它来替换 `print()` 语句。当我们运行整个节点时，它会在控制台输出高度可读的信息。例如，它会告诉你日志来自哪个文件。\n\
+  \n```python\n1  import asyncio\n2  from asyncio import StreamReader, StreamWriter\n\
+  3  \n4  import structlog\n5  from marshmallow.exceptions import MarshmallowError\n\
+  6  \n7  from funcoin.messages import BaseSchema\n8  from funcoin.utils import get_external_ip\n\
+  9  \n10 logger = structlog.getLogger()  ⑦\n11 \n12 \n13 class Server:\n14     def\
+  \ __init__(self, blockchain, connection_pool, p2p_protocol):\n15         self.blockchain\
+  \ = blockchain          ①\n16         self.connection_pool = connection_pool\n17\
+  \         self.p2p_protocol = p2p_protocol\n18         self.external_ip = None\n\
+  19         self.external_port = None\n20 \n21         if not (blockchain and connection_pool\
+  \ and p2p_protocol):\n22             logger.error(\"'blockchain'、'connection_pool'\
+  \ 和 'gossip_protocol' 都必须被实例化\")\n23             raise Exception(\"无法启动\")\n24 \n\
+  25     async def get_external_ip(self):\n26         self.external_ip = await get_external_ip()\
+  \  ②\n27 \n28     async def handle_connection(self, reader: StreamReader, writer:\
+  \ StreamWriter):\n29         while True:\n30             try:\n31              \
+  \   # 永远等待新数据的到来\n32                 data = await reader.readuntil(b\"\\n\")  ③\n\
+  33 \n34                 decoded_data = data.decode(\"utf8\").strip()  ④\n35 \n36\
+  \                 try:\n37                     message = BaseSchema().loads(decoded_data)\
+  \  ⑤\n38                 except MarshmallowError:\n39                     logger.info(\"\
+  收到无法读取的消息\", peer=writer)\n40                     break\n```\n\n\n\n```python\n\
+  ### 从消息中提取地址，并添加到写入器对象中\nwriter.address = message[\"meta\"][\"address\"]\n\n###\
+  \ 将对等节点添加到连接池中\nself.connection_pool.add_peer(writer)\n\n### ...并处理消息\nawait self.p2p_protocol.handle_message(message,\
+  \ writer) \n\nawait writer.drain()\nif writer.is_closing():\n    break\n```\n```python\n\
+  except (asyncio.exceptions.IncompleteReadError, ConnectionError):\n    # 发生错误，跳出等待循环\n\
+  \    break\n```\n```python\n### 连接已关闭，开始清理...\nwriter.close()\nawait writer.wait_closed()\n\
+  self.connection_pool.remove_peer(writer)\n```\n```python\n\nasync def listen(self,\
+  \ hostname=\"0.0.0.0\", port=8888):\n    server = await asyncio.start_server(self.handle_connection,\
+  \ hostname, port)\n    logger.info(f\"服务器正在监听 {hostname}:{port}\")\n    self.external_ip\
+  \ = await self.get_external_ip()\n    self.external_port = 8888\n    async with\
+  \ server:\n        await server.serve_forever()\n```\n*清单 7-3 funcoin/node.py*\n\
+  \n你无需理解我们在 `Server` 类中实现的每一个细节。相反，请从宏观角度把握整体逻辑，思考其中涉及的更重要的原则。\n\n## 区块链模块\n\n让我们回顾一下我们在第\
+  \ 3 章构建的 `Blockchain` 类，并将其粘贴到 `funcoin/blockchain.py` 中。\n\n```python\nimport asyncio\n\
+  import json\nimport math\nimport random\nfrom hashlib import sha256\nfrom time import\
+  \ time\n\nimport structlog\n\nlogger = structlog.getLogger(\"blockchain\")\n\nclass\
+  \ Blockchain(object):\n    def __init__(self):\n        self.chain = []\n      \
+  \  self.pending_transactions = []\n        self.target = \"0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\"\
+  \n        # 创建创世区块\n        logger.info(\"正在创建创世区块\")\n        self.chain.append(self.new_block())\n\
+  \n    def new_block(self):\n        block = self.create_block(\n            height=len(self.chain),\n\
+  \            transactions=self.pending_transactions,\n            previous_hash=self.last_block[\"\
+  hash\"] if self.last_block else None,\n            nonce=format(random.getrandbits(64),\
+  \ \"x\"),\n            target=self.target,\n            timestamp=time(),\n    \
+  \    )\n        # 重置待处理交易列表\n        self.pending_transactions = []\n        return\
+  \ block\n\n    @staticmethod\n    def create_block(\n        height, transactions,\
+  \ previous_hash, nonce, target, timestamp=None\n    ):\n        block = {\n    \
+  \        \"height\": height,\n            \"transactions\": transactions,\n    \
+  \        \"previous_hash\": previous_hash,\n            \"nonce\": nonce,\n    \
+  \        \"target\": target,\n            \"timestamp\": timestamp or time(),\n\
+  \        }\n        # 获取新区块的哈希，并将其添加到区块中\n        block_string = json.dumps(block,\
+  \ sort_keys=True).encode()\n        block[\"hash\"] = sha256(block_string).hexdigest()\n\
+  \        return block\n\n    @staticmethod\n    def hash(block):\n        # 确保字典已排序，否则哈希值会不一致\n\
+  \        block_string = json.dumps(block, sort_keys=True).encode()\n        return\
+  \ sha256(block_string).hexdigest()\n\n    @property\n    def last_block(self):\n\
+  \        # 返回链中的最后一个区块（如果存在区块的话）\n        return self.chain[-1] if self.chain else\
+  \ None\n\n    def valid_block(self, block):\n        # 检查区块的哈希是否小于目标值...\n     \
+  \   return block[\"hash\"] < self.target\n\n    def add_block(self, block):\n  \
+  \      # TODO: 在此处添加适当的验证逻辑！\n        self.chain.append(block)\n\n    def recalculate_target(self,\
+  \ block_index):\n        \"\"\"\n        返回挖掘一个区块所需低于的目标数值\n        \"\"\"\n   \
+  \     # 检查是否需要重新计算目标值\n        if block_index % 10 == 0:\n            # 10 个区块的预期时间跨度\n\
+  \            expected_timespan = 10 * 10\n            # 计算实际时间跨度\n            actual_timespan\
+  \ = self.chain[-1][\"timestamp\"] - self.chain[-10][\"timestamp\"]\n           \
+  \ # 计算偏移比率\n            ratio = actual_timespan / expected_timespan\n          \
+  \  # 调整比率，避免极端情况\n            ratio = max(0.25, ratio)\n            ratio = min(4.00,\
+  \ ratio)\n            # 将当前目标值乘以比率来计算新目标值\n            new_target = int(self.target,\
+  \ 16) * ratio\n            self.target = format(math.floor(new_target), \"x\").zfill(64)\n\
+  \            logger.info(f\"已计算新的挖矿目标值: {self.target}\")\n        return self.target\n\
+  \n    async def get_blocks_after_timestamp(self, timestamp):\n        for index,\
+  \ block in enumerate(self.chain):\n            if timestamp < block[\"timestamp\"\
+  ]:\n                return self.chain[index:]\n\n    async def mine_new_block(self):\n\
+  \        self.recalculate_target(self.last_block[\"index\"] + 1)\n        while\
+  \ True:\n            new_block = self.new_block()\n            if self.valid_block(new_block):\n\
+  \                break\n            await asyncio.sleep(0)\n        self.chain.append(new_block)\n\
+  \        logger.info(\"发现新区块: \", new_block)\n```\n*清单 7-4 funcoin/blockchain.py*\n\
+  \n这里唯一的变化是引入了 `structlog`，我们将每个 `print()` 语句替换为了更实用的 `logger`。\n\n\n\n## `connections`\
+  \ 模块\n\n在 `funcoin/connections.py` 中，我们将存储管理 `ConnectionPool` 的所有逻辑，该逻辑源于我们聊天服务器的第\
+  \ 5 章。以下是该类的概要：\n\n```python\nclass ConnectionPool:\n    def __init__ (self):\n\
+  \        ...\n    def broadcast(self,  message):\n        # 向所有已连接的对等节点广播消息的方法\n\
+  \        ...\n    @staticmethod\n    def get_address_string(writer):\n        #\
+  \ 获取对等节点的 ip:port（地址）\n        ...\n    def add_peer(self, writer):\n        # 将对等节点添加到我们的连接池中\n\
+  \        ...\n    def remove_peer(self, writer):\n        # 从我们的连接池中移除一个对等节点\n \
+  \       ...\n    def get_alive_peers(self, count):\n        # 返回一些已连接的对等节点\n   \
+  \     ...\n```\n\n让我们看看完整实现的样貌。由于大多数方法已经在第 5 章中实现，这里不会有意料之外的内容。主要变化是新增了方法：`get_alive_peers()`\
+  \ 和 `get_address_string()`。\n\n- ① 这里我们使用一个 `dict`，将 `address` 映射到 `writer`（代表对等连接）。\n\
+  - ② 映射中的 `address` 字符串只是对等节点的 `ip:port` 组合——这一点很重要，因为这是我们唯一标识连接的方式。\n- ③ 我们使用 `take()`\
+  \ 函数从池中返回 `count` 数量的对等节点。\n\n```python\n1  import structlog\n2  from more_itertools\
+  \ import take\n\n4  logger = structlog.getLogger(__name__)\n\n7  class ConnectionPool:\n\
+  8      def __init__ (self):\n9          self.connection_pool = dict() ①\n\n11  \
+  \    def broadcast(self,  message):\n12          for user in self.connection_pool:\n\
+  13              user.write(f\"{message}\".encode())\n\n15      @staticmethod\n16\
+  \      def get_address_string(writer):\n17          ip = writer.address[\"ip\"]\n\
+  18          port = writer.address[\"port\"]\n19          return f\"{ip}:{port}\"\
+  \ ②\n\n21      def add_peer(self, writer):\n22          address = self.get_address_string(writer)\n\
+  23          self.connection_pool[address] = writer\n24          logger.info(\"已向池中添加新对等节点\"\
+  , address=address)\n\n26      def remove_peer(self, writer):\n27          address\
+  \ = self.get_address_string(writer)\n28          self.connection_pool.pop(address)\n\
+  29          logger.info(\"已从池中移除对等节点\", address=address)\n\n31      def get_alive_peers(self,\
+  \ count):\n32          # TODO（读者）：按活跃度排序，但这里暂时只获取前 *count* 个\n33          return\
+  \ take(count , self.connection_pool.items()) ③\nListing 7-5\nfuncoin/blockchain.py\n\
+  ```\n\n## `peers` 模块\n\n这可能是目前为止最重要的模块：它代表了在 P2P 网络中发送和接收消息的逻辑。让我们在 `funcoin/peers.py`\
+  \ 中定义这些方法；它们会出乎意料地简单：\n\n- ① 我们需要一个错误类，可以用来从导入代码中“捕获”问题。\n\n```python\nclass P2PError(Exception):\
+  \ ①\n    pass\nclass P2PProtocol:\n    def __init__ (self, server):\n        ...\n\
+  \    @staticmethod\n    async def send_message(writer, message):\n        # 向特定对等节点（writer\
+  \ 对象）发送消息\n        ...\n    async def handle_message(self, message, writer):\n \
+  \       # 处理服务器传入的消息\n        # 将该消息分派给更具体的方法：handle_()\n        ...\n    async\
+  \ def handle_ping(self, message, writer):\n        # 处理传入的 \"ping\" 消息\n       \
+  \ ...\n    async def handle_block(self, message, writer):\n        # 处理传入的 \"block\"\
+  \ 消息\n        ...\n    async def handle_transaction(self, message, writer):\n  \
+  \      # 处理传入的 \"transaction\" 消息\n        ...\n    async def handle_peers(self,\
+  \ message, writer):\n        # 处理传入的 \"peers\" 消息\n        ...\n```\n\n每个方法中的注释说明了我们需要实现的代码。这里最重要的方法是\
+  \ `handle_message()` 方法。我们还没有定义每个对等节点可以发送的消息，所以让我们定义消息的基本形式：\n\n```json\n{\n  \"\
+  meta\": {\n    \"address\": {\n      \"ip\": ,\n      \"port\": \n    },\n    \"\
+  client\": \"funcoin 0.1\"\n  },\n  \"message\": {\n    \"name\": ,\n    \"payload\"\
+  : \n  }\n}\n```\n\n也就是说，*所有*在 P2P 网络中发送的消息都共享此结构。`meta` 键包含关于发送 `message` 的对等节点（即使该对等节点是我们自己）的信息，而\
+  \ `message` 键包含正在发送的消息的 `name` 和 `payload`。对于 `funcoin`，我们将实现四种消息。\n\n| **消息名称**\
+  \ | **描述** |\n| --- | --- |\n| `Ping` | 节点在发起连接时发送给对等节点的初始消息 |\n| `Transaction`\
+  \ | 单个交易，在节点之间传播 |\n| `Peers` | 一组对等节点可能知道或不知道的地址（用于构建他们的网络） |\n| `Block` | 单个区块（可能是最近挖出的），供对等节点添加到其区块链中\
+  \ |\n\n在我们深入讨论这些消息的具体内容之前，让我们先完成 `funcoin/peers.py` 模块，实现给定的方法。\n\n```python\n1\
+  \  import asyncio\n\n3  import structlog\n4  from funcoin.messages import (\n5 \
+  \   create_peers_message,\n6    create_block_message,\n7    create_transaction_message,\n\
+  8    create_ping_message,\n9  )\n10  from funcoin.transactions import validate_transaction\n\
+  \n12  logger = structlog.getLogger(__name__)\n\n15  class P2PError(Exception):\n\
+  16      pass\n\n19  class P2PProtocol:\n20      def __init__ (self, server):\n21\
+  \          self.server = server\n22          self.blockchain = server.blockchain\n\
+  23          self.connection_pool = server.connection_pool\n\n25      @staticmethod\n\
+  26      async def send_message(writer, message):\n27          writer.write(message.encode()\
+  \ + b\"\\n\")\n\n29      async def handle_message(self, message, writer):\n30  \
+  \        message_handlers = {\n31              \"block\": self.handle_block,\n32\
+  \              \"ping\": self.handle_ping,\n33              \"peers\": self.handle_peers,\n\
+  34              \"transaction\": self.handle_transaction,\n35          }\n\n37 \
+  \         handler = message_handlers.get(message[\"name\"])\n38          if not\
+  \ handler:\n39              raise P2PError(\"缺少该消息的处理程序\")\n\n41          await\
+  \ handler(message, writer)\n\n43      async def handle_ping(self, message, writer):\n\
+  44          block_height = message[\"payload\"][\"block_height\"]\n\n46        \
+  \  # 如果他们是矿工，我们将其标记为矿工\n47          writer.is_miner = message[\"payload\"][\"is_miner\"\
+  ]\n\n49          # 让我们向该用户发送我们最“活跃”的 20 个对等节点\n50          peers = self.connection_pool.get_alive_peers(20)\n\
+  51          peers_message = create_peers_message(self.server.external_ip, self.server.external_port,\
+  \ peers\n52          await self.send_message(writer, peers_message)\n```\n\n\n```python\n\
+  ### 如果他们的区块比我们少，就发送给他们\nif block_height < self.blockchain.last_block[\"height\"\
+  ]:\n    # 从他们的高度开始，依次发送每个区块\n    for block in self.blockchain.chain[block_height\
+  \ + 1:]:\n        await self.send_message(\n            writer,\n            create_block_message(\n\
+  \                self.server.external_ip, self.server.external_port, block\n   \
+  \         ),\n        )\n\nasync def handle_transaction(self, message, writer):\n\
+  \    \"\"\"\n    当我们接收到对等节点广播的交易时执行\n    \"\"\"\n    logger.info(\"接收到交易\")\n\n\
+  \    # 验证交易\n    tx = message[\"payload\"]\n\n    if validate_transaction(tx) is\
+  \ True:\n        # 将交易添加到我们的交易池中，并传播给对等节点\n        if tx not in self.blockchain.pending_transactions:\n\
+  \            self.blockchain.pending_transactions.append(tx)\n\n            for\
+  \ peer in self.connection_pool.get_alive_peers(20):\n                await self.send_message(\n\
+  \                    peer,\n                    create_transaction_message(\n  \
+  \                      self.server.external_ip, self.server.external_port, tx\n\
+  \                    ),\n                )\n    else:\n        logger.warning(\"\
+  接收到无效交易\")\n\nasync def handle_block(self, message, writer):\n    \"\"\"\n    当我们接收到对等节点广播的区块时执行\n\
+  \    \"\"\"\n    logger.info(\"接收到新区块\")\n\n    block = message[\"payload\"]\n\n\
+  \    # 将区块交给区块链，如果有效则追加\n    self.blockchain.add_block(block)\n\n    # 将区块传输给我们的对等节点\n\
+  \    for peer in self.connection_pool.get_alive_peers(20):\n        await self.send_message(\n\
+  \            peer,\n            create_block_message(\n                self.server.external_ip,\
+  \ self.server.external_port, block\n            ),\n        )\n\nasync def handle_peers(self,\
+  \ message, writer):\n    \"\"\"\n    当我们接收到对等节点广播的区块时执行\n    \"\"\"\n    logger.info(\"\
+  接收到新对等节点\")\n\n    peers = message[\"payload\"]\n\n    # 构造一个用于发送给每个对等节点的 ping 消息\n\
+  \    ping_message = create_ping_message(\n        self.server.external_ip,\n   \
+  \     self.server.external_port,\n        len(self.blockchain.chain),\n        len(self.connection_pool.get_alive_peers(50)),\n\
+  \        False,\n    )\n\n    for peer in peers:\n        # 建立连接，如果成功则添加到连接池\n \
+  \       reader, writer = await asyncio.open_connection(peer[\"ip\"], peer[\"port\"\
+  ])\n\n        # 我们只对 \"writer\" 感兴趣\n        self.connection_pool.add_peer(writer)\n\
+  \n        # 向对等节点发送 PING 消息\n        await self.send_message(writer, ping_message)\n\
+  ```\n\n*列表 7-6：`funcoin/peers.py`*\n\n请特别注意 `handle_ping` 方法（我已添加注释以便于解释）。但此时，有必要讨论一下我们加密货币中发送的消息结构。\n\
+  \n## 消息传递\n\n之前，我们展示了一个通用消息格式的 JSON 示例；以下是其表格形式：\n\n**表 7-1：通用消息格式**\n\n| 字段名 |\
+  \ 类型 | 描述 |\n| --- | --- | --- |\n| `Meta` | `meta` | — |\n| `Message` | `message`\
+  \ | — |\n\n`meta` 对象包含在每条消息中，并包含与发送者相关的信息。\n\n**表 7-2：`meta` 对象**\n\n| 字段名 | 类型\
+  \ | 描述 |\n| --- | --- | --- |\n| `address` | `Peer` | 包含发送此消息的节点的网络地址信息 |\n| `client`\
+  \ | `String` | 发送消息的客户端名称（或版本）。例如：`funcoin-0.1` |\n\n`peer` 类型也相当通用。它出现在待发送的对等节点列表中，例如，新加入网络的节点，或每条已发送消息的\
+  \ `meta` 块中。\n\n**表 7-3：`peer` 类型（代表一个对等节点）**\n\n| 字段名 | 类型 | 描述 |\n| --- | ---\
+  \ | --- |\n| `Ip` | `string` | 对等节点的公网 IP |\n| `Port` | `Int` | 对等节点监听的端口 |\n| `last_seen`\
+  \ | `Int` | 对等节点上次被看到时间的 UTC 时间戳 |\n\n现在，让我们看看网络中四种消息类型的结构。`message` 键很简单；每条消息都有一个\
+  \ `name` 和一个 `payload`（具体内容取决于发送的消息类型）。\n\n**表 7-4：`message` 对象**\n\n| 字段名 | 类型\
+  \ | 描述 |\n| --- | --- | --- |\n| `Name` | `string` | 消息的名称（以便接收方知道如何解析） |\n| `Payload`\
+  \ | `object` | 与消息类型对应的消息负载。有关不同的负载，请参见下一节 |\n\n让我们定义不同类型的负载。\n\n**表 7-8：`block`\
+  \ 负载**\n\n| 键 | 值 |\n| --- | --- |\n| `Name` | `block` |\n| `Payload` | **键** |\
+  \ **类型** |\n| | `mined_by` | `string` |\n| | `transactions` | `List[transaction]`\
+  \ |\n| | `height` | `int` |\n| | `difficulty` | `int` |\n| | `hash` | `string` |\n\
+  | | `previous_hash` | `string` |\n| | `nonce` | `string` |\n| | `timestamp` | `int`\
+  \ |\n\n**表 7-7：`peers` 负载**\n\n| 键 | 值 |\n| --- | --- |\n| `Name` | `Peers` |\n\
+  | `Payload` | **键** | **类型** |\n| | `Peers` | `List[peer]` |\n\n**表 7-6：`transaction`\
+  \ 负载**\n\n| 键 | 值 |\n| --- | --- |\n| `Name` | `Transaction` |\n| `Payload` | **键**\
+  \ | **类型** | **示例** |\n| | `Hash` | `string` | `<此负载的 sha 256 哈希值>` |\n| | `sender`\
+  \ | `string` | `<发送者的公钥>` |\n| | `signature` | `string` | `<发送者的数字签名密钥>` |\n| |\
+  \ `timestamp` | `string` | `1589135911` |\n| | `Receiver` | `string` | `<接收者的公钥>`\
+  \ |\n| | `Amount` | `int` | `<要发送的 funcoin 数量>` |\n\n**表 7-5：`ping` 负载**\n\n| 键\
+  \ | 值 |\n| --- | --- |\n| `Name` | `Pong` |\n| **Payload** | **键** | **类型** | **示例**\
+  \ |\n| | `block_height` | `int` | `2000` |\n| | `peer_count` | `int` | `23` |\n\
+  | | `is_miner` | `bool` | `False` |\n```\n\n\n### 使用 Marshmallow 验证消息\n\n接下来，我们将使用\
+  \ `marshmallow` 库来验证我们的消息。我们的服务器执行两项操作：读取消息和发送消息。当服务器收到一条消息时，该消息以 JSON 字符串的形式到达，它必须被转换成\
+  \ Python 字典并进行验证；这个过程称为**反序列化**，因为我们是从序列化形式（JSON）转换回原生的 Python `dict`。**序列化**则相反：是从\
+  \ `dict` 转换到 JSON 字符串。总结如下：\n\n1. 服务器读取对等节点发送的消息（反序列化：json → dict）。\n2. 服务器向对等节点发送消息（序列化：dict\
+  \ → json）。\n\n对于每个需要验证的对象，Marshmallow 要求我们定义一个*模式（schema）*。以下是一个 `peer` 对象的模式示例：\n\
+  \n```python\nfrom marshmallow import Schema, fields\nclass Peer(Schema):\n    ip\
+  \ = fields.Str(required=True)\n    port = fields.Int(required=True)\n    last_seen\
+  \ = fields.Int(missing=lambda: int(time()))\n```\n\n请注意，我们需要指定每个字段的类型。当 Marshmallow\
+  \ 接收到一个 JSON 对象时，如果某个字段的类型不匹配，它会抛出一个错误，这为我们节省了大量的时间和精力。以下是一个发送到我们服务器的序列化 JSON 字符串示例：\n\
+  \n```python\npayload = \"{'ip': '192.168.0.1', 'port': 8888, 'last_seen': 1589780748}\"\
+  \n```\n\n现在，我们可以让 Marshmallow 对其进行反序列化：\n\n```python\nresult = Peer().loads(payload)\n"
+- '#  {''last_seen'': 1589780748, ''ip'': ''192.168.0.1'', ''port'': 8888}
+
+  ```
+
+
+  如果某个字段不正确或验证失败，Marshmallow 会抛出一个 `ValidationError`（验证错误）。
+
+
+  让我们尝试对结果进行序列化：
+
+
+  ```python
+
+  serialized = Peer().dumps(some_payload)
+
+  '
+- "# \"{'last_seen': 1589780748, 'ip': '192.168.0.1', 'port': 8888}\"\n```\n\n如果你仍然不确定\
+  \ Marshmallow 的工作原理，或者不明白为什么它能给我们省去很多麻烦，那么很值得去查阅一下它的文档，因为它们的网站上提供了大量的示例：[`https://marshmallow.readthedocs.io`](https://marshmallow.readthedocs.io)\n\
+  \n**注意**\n\n大多数序列化库的一个共同特点是坚持使用 `loads` 和 `dumps` 作为方法名：`loads` 从字符串反序列化；`load`\
+  \ 从对象反序列化；`dumps` 序列化为字符串；`dump` 序列化为对象。\n\n### 实现并验证类型\n\n让我们创建三个新文件：`funcoin/types.py`、`funcoin/messages.py`\
+  \ 和 `funcoin/utils.py`，分别用来存放我们的*类型（types）*、*消息（messages）*和额外的辅助函数。你的文件夹结构应该如下所示：\n\
+  \n```\n.\n├── funcoin\n│     ├── __init__.py\n│     ├── blockchain.py\n│     ├──\
+  \ connections.py\n│     ├── factories.py\n│     ├── messages.py\n│     ├── peers.py\n\
+  │     ├── server.py\n│     ├── transactions.py\n│     ├── types.py\n│     └── utils.py\n\
+  ├──__init__.py\n├── node.py\n├── poetry.lock\n└── pyproject.toml\n```\n\n首先，我们在\
+  \ `funcoin/schema.py` 中定义 Marshmallow 模式。\n\n```python\n1  import json\n2  from\
+  \ time import time\n3  \n4  from marshmallow import Schema, fields, validates_schema,\
+  \ ValidationError\n5  \n6  \n7  class Transaction(Schema):\n8      timestamp = fields.Int()\n\
+  9      sender = fields.Str()\n10     receiver = fields.Str()\n11     amount = fields.Int()\n\
+  12     signature = fields.Str()\n13  \n14     class Meta:\n15         ordered =\
+  \ True\n16  \n17  \n18  class Block(Schema):\n19      mined_by = fields.Str(required=False)\n\
+  20      transactions = fields.Nested(Transaction(), many=True)\n21      height =\
+  \ fields.Int(required=True)\n22      target = fields.Str(required=True)\n23    \
+  \  hash = fields.Str(required=True)\n24      previous_hash = fields.Str(required=True)\n\
+  25      nonce = fields.Str(required=True)\n26      timestamp = fields.Int(required=True)\n\
+  27  \n28      class Meta:\n29          ordered = True\n30  \n31      @validates_schema\n\
+  32      def validate_hash(self, data, **kwargs):\n33          block = data.copy()\n\
+  34          block.pop(\"hash\")\n35  \n36          if data[\"hash\"] != json.dumps(block,\
+  \ sort_keys=True):\n37              raise ValidationError(\"Fraudulent block: hash\
+  \ is wrong\")\n38  \n39  \n40  class Peer(Schema):\n41      ip = fields.Str(required=True)\n\
+  42      port = fields.Int(required=True)\n43      last_seen = fields.Int(missing=lambda:\
+  \ int(time()))\n```\n\n*代码清单 7-7*\n*funcoin/schema.py*\n\n在代码中，我们实现了 `Peer`、`Block`\
+  \ 和 `Transaction` 三个类。\n\n在 `Transaction` 中，我们包含了一个名为 `validate_signature` 的验证方法。它通过\
+  \ `@validates_schema` 装饰器进行标记——这是一个特殊的装饰器，用于指示 Marshmallow 应该在验证过程中运行此函数。这就是我们验证交易的地方：在反序列化时，确保我们反序列化的*任何*交易都是*始终*有效的。\n\
+  \n在 `Block` 中，我们也实现了一个验证方法，以确保*任何*消息中包含的*任何*区块都是始终有效的。\n\n\n\n### 定义消息（及其模式）\n\n\
+  在`funcoin/messages.py`中，我们将实现各种消息及其模式（schema），然后对它们进行测试以确保一致性。这些是我们要实现的类：\n\n* \
+  \  `PeersMessage`\n*   `BlockMessage`\n*   `TransactionMessage`\n*   `PingPayload`\n\
+  *   `PingMessage`\n*   `Base`\n\n请注意，`PeersMessage`的载荷（payload）是一个`Peer`列表；`BlockMessage`的载荷是一个`Block`；`TransactionMessage`的载荷是一个`Transaction`。这就是我们首先在`types.py`中定义它们的原因。\n\
+  \n作为给读者的练习，你可以尝试跳过此处，自行定义每条消息的模式。\n\n以下是完成后它们应有的样子。\n\n```python\n1  from marshmallow\
+  \ import Schema, fields, post_load\n2  from marshmallow_oneofschema import OneOfSchema\n\
+  4  from funcoin.schema import Peer, Block, Transaction, Ping\n7  class PeersMessage(Schema):\n\
+  8      payload = fields.Nested(Peer(many=True))\n10      @post_load\n11      def\
+  \ add_name(self, data, **kwargs):\n12          data[\"name\"] = \"peers\"\n13  \
+  \        return data\n16  class BlockMessage(Schema):\n17      payload = fields.Nested(Block)\n\
+  19      @post_load\n20      def add_name(self, data, **kwargs):\n21          data[\"\
+  name\"] = \"block\"\n22          return data\n25  class TransactionMessage(Schema):\n\
+  26      payload = fields.Nested(Transaction)\n28      @post_load\n29      def add_name(self,\
+  \ data, **kwargs):\n30          data[\"name\"] = \"transaction\"\n31          return\
+  \ data\n34  class PingMessage(Schema):\n35      payload = fields.Nested(Ping)\n\
+  37      @post_load\n38      def add_name(self, data, **kwargs):\n39          data[\"\
+  name\"] = \"ping\"\n40          return data\n43  class MessageDisambiguation(OneOfSchema):\n\
+  44      type_field = \"name\"\n45      type_schemas = {\n46          \"ping\": PingMessage,\n\
+  47          \"peers\": PeersMessage,\n48          \"block\": BlockMessage,\n49 \
+  \         \"transaction\": TransactionMessage,\n50      }\n51      def get_obj_type(self,\
+  \ obj):\n52        if isinstance(obj, dict):\n53            return obj.get(\"name\"\
+  )\n55  class MetaSchema(Schema):\n56      address = fields.Nested(Peer())\n57  \
+  \    client = fields.Str()\n60  class BaseSchema(Schema):\n61      meta = fields.Nested(MetaSchema())\n\
+  62      message = fields.Nested(MessageDisambiguation())\n65  def meta(ip, port,\
+  \ version=\"funcoin-0.1\"):\n66      return {\n67          \"client\": version,\n\
+  68          \"address\": {\n69              \"ip\": ip,\n70              \"port\"\
+  : port\n71          },\n72      }\n75  def create_peers_message(external_ip, external_port,\
+  \ peers):\n76      return BaseSchema().dumps({\n77          \"meta\": meta(external_ip,\
+  \ external_port),\n78          \"message\": {\n79              \"name\": \"peers\"\
+  ,\n80              \"payload\":  peers\n81          }\n82      }\n83      )\n86\
+  \  def create_block_message(external_ip, external_port, block):\n87      return\
+  \ BaseSchema().dumps({\n88          \"meta\": meta(external_ip, external_port),\n\
+  89          \"message\": {\n90              \"name\": \"block\",\n91           \
+  \   \"payload\": block\n92          }\n93      }\n94      )\n96  def create_transaction_message(external_ip,\
+  \ external_port, tx):\n97      return BaseSchema().dumps(\n98          {\n99   \
+  \           \"meta\": meta(external_ip, external_port),\n100             \"message\"\
+  : {\n101                 \"name\": \"transaction\",\n102                 \"payload\"\
+  : tx,\n103             },\n104         }\n105     )\n```\n\n代码清单 7-8: `funcoin/messages.py`\n\
+  \n请注意，我们还包含一些辅助函数来创建消息。例如，在第 89 行，我们包含了`create_block_message`，它生成一个包含区块的消息。让我们针对一个区块来测试它：\n\
+  \n```python\nsome_block = {\n\"mined_by\": \"some public key\",\n\"transactions\"\
+  :   [],\n\"height\": 123,\n\"difficulty\": 10,\n\"hash\": \"some fake hash\", \"\
+  previous_hash\":  0,\n\"nonce\":  23,\n\"timestamp\":  238778621,\n}\n```\n\n如你所见，这不是一个有效的区块；让我们尝试将它加载到`Block()`验证器中：\n\
+  \n```python\nBlock().load(some_block)\nmarshmallow.exceptions.ValidationError: {'transactions':\
+  \ {'_schema': ['Invalid input type.']}, 'previous_hash': ['Not a valid string.'],\
+  \ 'nonce': ['Not a valid string.']}\n```\n\n如你所见，`marshmallow`的描述性相当强，它准确告诉我们区块存在的问题。让我们修复这些问题后再次尝试：\n\
+  \n```python\nsome_block = {\n\"mined_by\": \"some public key\",\n\"transactions\"\
+  : [],\n\"height\": 123,\n\"difficulty\": 10,\n\"hash\": \"some fake hash\",\n\"\
+  previous_hash\":  0,\n\"nonce\":  23,\n\"timestamp\":  238778621,\n}\nBlock().load(some_block)\n\
+  ValidationError: {'_schema': ['Fraudulent block: hash is wrong']}\n```\n\n如你所见，`marshmallow`运行了我们的验证函数，该函数正确地判断出我们那个“some\
+  \ fake hash”哈希值显然是错误的。让我们再次尝试：\n\n```python\nsome_block = {\n\"mined_by\": \"some\
+  \ public key\",\n\"height\": 123,\n\"difficulty\": 10,\n\"previous_hash\": \"some\
+  \ previous hash\",\n\"nonce\": \"213\",\n\"timestamp\": 238778621,\n\"hash\": \"\
+  a52bfa60bc4ad3d3e9571eab8b28370166f2476e0f1026df219bec07a0a9e2e7\"\n}\n"
+- "# Passes validation by not throwing an exception\nBlock().load(some_block)\n```\n\
+  \n现在，我们可以使用辅助方法来生成消息：\n\n```python\nfrom funcoin.messages import create_block_message\n\
+  some_block = {\n\"mined_by\": \"some public key\",\n\"height\":  123,\n\"difficulty\"\
+  : 10,\n\"previous_hash\": \"some previous hash\",\n\"nonce\":  \"213\",\n\"timestamp\"\
+  :  238778621,\n\"hash\": \"a52bfa60bc4ad3d3e9571eab8b28370166f2476e0f1026df219bec07a0a9e2e7\"\
+  \n}\nmessage = create_block_message(some_block, \"127.0.0.1\", 8888)\n```\n\n现在，我们可以将`message`发送给我们的对等节点，从而完整地充实`funcoin/peers.py`模块。\n\
+  \n## 整合所有内容\n\n在我们能够运行节点之前，还有一些准备工作要做：\n\n1.  我们需要找到一种方法来定位我们的外部 IP 地址，即对外部世界可见的\
+  \ IP 地址。\n2.  找到一种在节点启动时“引导”对等节点的方法：毕竟，我们需要构建一个网络。\n3.  决定我们的节点是否要成为矿工；如果是，我们需要指示它开始挖矿（并在挖到一个区块时将其传播给我们的对等节点）。\n\
+  \n让我们依次处理上述要点。\n\n\n\n### 查找你的外部 IP 地址\n\n有一些第三方服务，当你连接它们时，会透露你的外部 IP 地址。这听起来可能很奇怪，但这实际上是比特币节点查找自己外部\
+  \ IP 地址的方式。\n\n打开你的终端，让我们用 `cURL` 访问 `ipinfo.io` 服务：\n\n```\ncurl ipinfo.io\n{\n\
+  \"ip\": \"72.81.18.117\",\n\"hostname\":  \"XX-XX-XXX-XXX.com\",\n\"city\":  \"\
+  New  York  City\",\n\"region\":  \"New  York\",\n\"country\": \"US\",\n\"loc\":\
+  \ \"41.5143,-73.8060\",\n\"org\": \"AS701 MCI Communications Services, Inc. d/b/a\
+  \ Verizon Business\",\n\"postal\": \"10004\",\n\"timezone\": \"America/New_York\"\
+  ,\n\"readme\": \"https://ipinfo.io/missingauth\"\n}\n```\n\n注意它显示了我们的外部 IP 地址（`72.81.18.117`）。当我们的节点启动时，让我们在\
+  \ `funcoin/utils.py` 中编写一个 Python 方法来实现这一点：\n\n```\nimport aiohttp\nimport structlog\n\
+  logger = structlog.getLogger(__name__)\nasync def get_external_ip():\n    async\
+  \ with aiohttp.ClientSession() as session:\n        async with session.get('http://ipinfo.io',\
+  \ headers={\"user-agent\": \"curl/7.64.1\"}) as response:\n            response_json\
+  \ = await response.json(content_type=None)\n            ip = response_json[\"ip\"\
+  ]\n            logger.info(f\"Found external IP: {ip}\")\n            return ip\n\
+  ```\n\n当我们在 `server.py` 中运行服务器的 `listen()` 方法时，我们可以填充 IP 地址。\n\n```\n1  async def\
+  \ listen(self, hostname=\"0.0.0.0\", port=8888):\n2      server = await asyncio.start_server(self.handle_connection,\
+  \ hostname, port)\n3      logger.info(f\"Server listening on {hostname}:{port}\"\
+  )\n\n5      self.external_ip = await self.get_external_ip()\n6      self.external_port\
+  \ = 8888\n\n8      async with server:\n9          await server.serve_forever()\n\
+  Listing 7-9\nfuncoin/server.py\n```\n\n让我们第一次尝试加载服务器：\n\n```\n(venv) $ python node.py\n\
+  2020-05-18  02:42.28 Creating genesis block\n2020-05-18 02:42.28 Server listening\
+  \ on 0.0.0.0:8888\n2020-05-18 02:42.28 Found external IP: 72.81.18.117\n```\n\n\
+  哇，这太棒了！我们的服务器现在正在网络上运行。但是节点无法连接到我们，原因有几个：\n\n1. 你启用了防火墙（除非你非常清楚自己在做什么，否则应该保持启用状态）。\n\
+  2. 你的 Wi-Fi 路由器/接入点不会将外部连接转发到你的本地计算机（你很可能正在这里运行它），而且它也不应该这样做（这是一个重大的安全漏洞）。\n3. 网络上的节点无法找到我们，因为到目前为止我们是唯一的节点。\n\
+  \n**注意**\n\n上述原因应该清楚地说明构建 p2p 网络有多么困难；除了开放传入互联网流量的安全问题外，播种一个由始终在线节点组成的网络也非常困难。如果你认真对待测试，我建议每月花几美元购买\
+  \ AWS EC2 或 DigitalOcean Droplets（推荐），并在一个风险较低的环境中运行节点。\n\n# 8. 与现实世界去中心化网络的比较\n\
+  \n恭喜，你已经拥有了一个可工作的节点（并且你是一个 Funcoinaire）。但它与比特币、以太坊、门罗币，或者任何其他现有的区块链有何不同？除了工作量证明之外，还有哪些替代方案？什么是智能合约？在本章中，我们将探讨\
+  \ Funcoin 与现实生产区块链之间的差异，并尝试量化它们之间的距离。\n\n## 为什么区块链工程很困难\n\n区块链工程产生了计算机科学领域中最困难的一些问题，主要是因为它们是去中心化的：它们将分布式系统、网络、并发、密码学、经济学和博弈论的概念联系在一起。任何修复错误或缺陷的工作都必须在实时系统的背景下进行，同时不能牺牲可用性。更复杂的是，任何装有新版软件的客户端必须仍然能够验证由旧版软件创建的区块，这导致了一个不断增长的\
+  \ `if` 语句列表——这就像在一架满载乘客、正在飞行中的大型喷气式飞机上修复问题一样。\n\n开源软件背后的理念是，任何感兴趣的人都可以贡献修复和改进。从博弈论的角度来看，比特币非常有趣，因为随着时间的推移，随着更多财富投入其中，投资者的警觉目光应该能够更快地对威胁和修复做出反应。但肯定没有多少应用程序像比特币那样高度重视向后兼容性。由于一个错误就可能导致所有财富（在撰写本文时为\
+  \ 1200 亿美元）消失，比特币的理念是谨慎行事，在确定某个方案之前获得开发社区的共识，并在合并之前再次仔细检查以确保万无一失。在某些情况下，错误根本不值得修复，因为修复的成本不值得升级带来的麻烦。例如，在比特币中，中本聪本人引入了著名的“时间扭曲漏洞”，该漏洞导致区块的挖掘时间总是略短于\
+  \ 10 分钟（而不是 10 分钟）：该算法没有对最近 2016 个区块的挖掘时间进行平均，而是错了一位，查看了最近 2015 个区块。这意味着区块的挖掘难度略高于应有的水平。这被认为不是一个主要问题，但修复它的成本远远超过其带来的好处。\n\
+  \n在公有区块链中，变更以两种形式出现：硬分叉和软分叉。硬分叉是当前区块链的分歧。这使得旧客户端无法再理解新客户端遵循的新协议。比特币现金、比特币黄金、比特币\
+  \ XT 和比特币经典都是比特币硬分叉的例子。另一方面，软分叉是向后兼容的：由新客户端生成的新区块能够被旧客户端验证。\n\n不要将硬分叉（一种改变共识规则，对不升级的节点造成安全破坏的变更）、软分叉（一种改变共识规则，削弱不升级节点安全性的变更）、软件分叉（当一个或多个开发者永久性地与其它开发者分开单独开发一个代码库时）、Git\
+  \ 分叉（当一个或多个开发者临时性地与其它开发者分开单独开发一个代码库时）混淆。\n\n![../images/475256_1_En_8_Chapter/475256_1_En_8_Fig2_HTML.jpg](img/475256_1_En_8_Fig2_HTML.jpg)\n\
+  \n图 8-2 一个软分叉\n\n![../images/475256_1_En_8_Chapter/475256_1_En_8_Fig1_HTML.jpg](img/475256_1_En_8_Fig1_HTML.jpg)\n\
+  \n图 8-1 一个硬分叉\n\n**注意**\n\n另一种类型的分叉是软件分叉，因为代码库是开源的，没有什么能阻止你“分叉”比特币的代码库成为你自己的。有很多项目定期这样做，其中最著名的是莱特币。\n\
+  \n\n\n# funcoin 的不足之处\n\n根据您的亲身实践，一个可公开运行的区块链系统大致需要四个关键组件：\n\n*   **共识协议**：使分布式节点能够就系统状态（区块链中存储的数据）达成一致。正是这种神奇机制，让我们得以将区块链称为“去中心化”系统。\n\
+  *   **网络层**：使节点能够通信并在整个网络中传播信息。\n*   **加密安全区块链**（即区块链本身）。\n*   **经济激励方案**（工作量证明）：通过工作量压力来保障链条安全。\n\
+  \n上述任何一个组件出现问题，几乎都会对*所有*组件产生影响。例如，网络层的一个漏洞可能被利用，延迟向网络中的某些节点传播交易，从而影响共识协议。撰写本书对我来说极具挑战，因为我最初的目标是构建一个易于理解的区块链，结果却慢慢意识到，像比特币这样的项目也怀有同样的目标：从某种意义上说，它们*就是*各自协议的最简化体现。\n\
+  \n作为一次思维练习，我想请您花点时间反思一下 funcoin 各组件中的工作，并思考它们抵御攻击的能力如何。网络层是我们系统中一个既困难又复杂的部分；这或许是个不错的切入点。\n\
+  \n## 网络层\n\n我们在网络层做出的第一个假设是使用 JSON 作为消息的序列化格式。出于多种原因，这种选择并非最优，最主要的是它不支持流式传输。换句话说，我们需要知道一个\
+  \ JSON 编码对象的起点和另一个对象的起点在哪里。为了绕过这个障碍，我们制定了以换行符分隔消息的规则。以下是我们 `Server` 类中实现此功能的代码：\n\
+  \n```\n1  async def handle_connection(self, reader: StreamReader, writer: StreamWriter):\n\
+  2      while True:\n3          try:\n4              # 永远等待新数据到达\n5             \
+  \ data = await reader.readuntil(b\"\\n\")\n7              decoded_data = data.decode(\"\
+  utf8\").strip()\n9              try:\n10                  message = BaseSchema().loads(decoded_data)\n\
+  11              except MarshmallowError:\n12                  logger.info(\"Received\
+  \ unreadable message\", peer=writer)\n13                  break\n15            \
+  \  # 从消息中提取地址，添加到 writer 对象中\n16              writer.address = message[\"meta\"\
+  ][\"address\"]\n18              # 将节点添加到连接池中\n19              self.connection_pool.add_peer(writer)\n\
+  21              # ...然后处理消息\n22              await self.p2p_protocol.handle_message(message,\
+  \ writer)\n24              await writer.drain()\n25              if writer.is_closing():\n\
+  26                  break\n28          except (asyncio.exceptions.IncompleteReadError,\
+  \ ConnectionError):\n29              # 发生错误，跳出等待循环\n30              break\n```\n\
+  \n您看到问题所在了吗？这会使我们的节点面临拒绝服务攻击的风险。只需要有人向我们发送一条不带换行符的消息，我们的节点就会保持连接打开状态，等待消息结束。不过，我们可以通过跟踪并限制对等节点可能发送的数据量来轻松缓解这个问题。话虽如此，我们使用基于\
+  \ JSON 的消息是为了简化实现。比特币对消息结构使用以分隔符分隔的字节，这需要冗长繁琐的实现。以下是比特币消息的结构：\n\n| **字段大小** | **描述**\
+  \ | **数据类型** | **备注** |\n| --- | --- | --- | --- |\n| 4 | 魔数 | `uint32` | 标识消息应位于测试网络还是真实网络\
+  \ |\n| 12 | 命令 | `char[12]` | 标识消息内容类型的字符串 |\n| 4 | 长度 | `uint32` | 有效载荷的字节大小 |\n\
+  | 4 | 校验和 | `uint32` | 消息哈希的前 4 个字节 |\n| ? | 有效载荷 | `char[]` | 实际数据 |\n\n我们也没有讨论节点如何排序和存储对等节点。我们没有任何相关的启发式算法。让我举例说明什么是*启发式*算法：当对等节点向我们请求节点列表时，我们可以将*所有*已知节点都发送给它，但这很浪费，并且可以做得更好。如果我们向请求节点随机发送\
+  \ 20 个对等节点会怎样？这样做能使一个节点将交易传播到整个网络吗（假设其他节点也返回随机节点）？这主要属于点对点网络研究领域，此类启发式算法通常被称为*八卦协议*或*节点发现*。在著名的\
+  \ Napster 关闭后，这一研究领域重新引起了人们的兴趣。Napster 是第一个允许人们从点对点网络下载音乐的软件。但 Napster 是中心化的：它提供一个可用节点列表，因此如果\
+  \ Napster 宕机，整个网络也会瘫痪。\n\nBitTorrent 是分布式哈希表的一个例子：一种典型的去中心化键值存储系统，常被用来通过 The Pirate\
+  \ Bay 和 ISOHunt 等网站非法下载电影和电视节目。多年来，各国政府和执法机构一直试图关闭这些所谓的种子网站，但基本上都未能成功——它们至今仍然存在。但这是为什么呢？是什么让它们如此抵制审查？像比特币和以太坊这样的区块链似乎应该从\
+  \ eDonkey 和 Kad 这样的分布式哈希表中学到一些东西。其中的秘密在于这些网络上的节点如何发现和组织它们的对等节点——正确做法能使点对点网络具备可扩展性、抗审查性和高速性。如果您的网络需要支持文件存储，您可能会考虑使用分布式哈希表，因为它们实际上只是管理网络中哪些节点托管哪些文件的规则。如果您正在构建一个去中心化的区块链，则无需担心存储大文件，因为实际上每个人都存储着同一个“大”文件——区块链本身。\n\
+  \n大多数关于点对点协议的研究都处于初期阶段，并且源自文件共享领域。现代去中心化网络存在于应用层，并实现了以下协议：\n\n*   **节点发现**：如何发现网络上的节点\n\
+  *   **路由**：联系节点（消息）所需采取的路由\n*   **命名**：一种统一的节点识别方式\n\n这些协议几乎总是存在于网络协议栈的应用层。\n\n\
+  ![../images/475256_1_En_8_Chapter/475256_1_En_8_Fig3_HTML.jpg](img/475256_1_En_8_Fig3_HTML.jpg)\n\
+  \n图 8-3\n\n典型的网络协议栈\n\n\n\n### 节点发现\n\n**现代的 P2P 网络并非中心化**：曾几何时，它们确实是中心化的——比如 BitTorrent\
+  \ 使用跟踪服务器（像 Napster 那样维护大量 IP 地址列表的服务器）。但如果 P2P 网络依赖跟踪服务器，就很容易遭受一种攻击：瘫痪跟踪服务器。\n\n\
+  想象一下，你我想在没有服务器的情况下通过互联网互相通信。我们如何找到对方的 IP 地址？\n\n*   用电子邮件/短信/Telegram/WhatsApp 把各自的\
+  \ IP 地址发给对方？\n\n这或许可行，但它是**中心化**的——一旦电子邮件服务瘫痪，整个系统就无法运行（有趣的是，比特币早期曾使用 IRC 聊天室来列出\
+  \ IP 地址）。\n\n*   我们可以约定让客户端监听特定端口，并不断向该端口上的随机 IP 地址发送探测包，直到找到对方。\n\n**找到对方的概率微乎其微**——我们得探测大约\
+  \ 2³²-1 个 IPv4 地址和数量难以想象的 2¹²⁸-1 个 IPv6 地址。**但方向是对的！**\n\n*   那么，比特币是如何做到的呢？\n\n\
+  事实证明，如果网络规模足够大，就可以综合运用上述两种方法：当比特币客户端首次启动时，它对整个世界一无所知，也不认识任何其他节点——它依赖于硬编码的 DNS 条目。这些\
+  \ DNS 条目由比特币社区维护，会向客户端返回一系列可信地址供其连接。\n\n**但 DNS 服务器是中心化的**：单个服务器可能被欺骗，返回虚假的 IP 地址，从而将节点隔离，使其接收伪造的交易和虚假的区块链。仅此一点，客户端就不应完全依赖\
+  \ DNS。因此，首次运行客户端存在固有风险，但运行时间越长，维持攻击的成本就越高，风险也因此得以缓解。\n\n![../images/475256_1_En_8_Chapter/475256_1_En_8_Fig4_HTML.jpg](img/475256_1_En_8_Fig4_HTML.jpg)\n\
+  \n图 8-4\n\n节点首次加入网络\n\n在上图中，当我们的比特币客户端`节点 U`找到另一个节点时，便开始与之通信：\n\n```\n你好节点 A，我使用的是比特币协议\
+  \ v0.16.0\n```\n\n`节点 A`随后回应：\n\n```\n你好节点 U！我也在使用 v0.16.0，我的最新区块是 528491，这里还有一些我认识的节点：节点\
+  \ X、节点 Z……\n```\n\n接着，`节点 A`会将我们广播给其他可能也会联系我们的节点。我们就能从新的节点 *集群* 中下载缺失的区块，并向它们询问其相邻节点的信息。\n\
+  \n这就是节点发现的基本原理，也是 P2P 网络具有强大韧性的原因——没有中心故障点，只有一片由节点构成的“云”。想要阻止一个组织良好的网络，无异于试图审查单个网络连接——这是一项不可能完成的任务。\n\
+  \n### 命名\n\n节点的 IP 地址可能会改变，因此我们需要一种在网络中稳定引用它的方式。以太坊使用节点公钥的 256 位哈希值来标识节点。BitTorrent\
+  \ 则使用随机数的 160 位哈希值。无论如何，标识符的位数都足够大，可以保证唯一性。如果网络使用合适的哈希函数，例如 SHA-256，那么我们的网络理论上可以容纳约\
+  \ 2²⁵⁶ 个节点。\n\n### 距离函数\n\n在组织网络之前，我们需要一种方法来测量网络中两个节点之间的“距离”。在数学中，这被称为度量。它意味着“测量距离的一种方式”。需要理解的是，这里指的不是地理（欧几里得）距离，而是一种抽象概念，是网络用来判断两个节点之间亲近程度的通用方法。\n\
+  \n2002 年，两位研究员 Petar Maymounkov 和 David Mazières 发表了一篇开创性的论文《Kademlia》。它描述了当提供一种特定的距离测量方式时，可以如何构建一个去中心化网络，使其变得快速、稳定且具备可路由性。大多数\
+  \ DHT，如 BitTorrent，都采用了 Kademlia 算法。我们来简单谈谈它的工作原理。\n\nKademlia 算法使用异或函数来测量任意两个节点之间的距离。作为复习，异或是两个输入之间的逻辑运算，仅当两个输入不同时输出为真。以下是一些示例：\n\
+  \n```\n1000 XOR 1000 = 0000\n0000 XOR 1111 = 1111\n1011 XOR 0101 = 1110\n```\n\n\
+  在数学上，要被称为度量，距离函数必须满足以下三个条件（异或度量确实满足）：\n\n*   节点到自身的距离为零。\n\n*   节点 A 到节点 B 的距离等于节点\
+  \ B 到节点 A 的距离（对称性）。\n\n*   从节点 A 经节点 B 到节点 C 的距离总是大于或等于从节点 A 直接到节点 C 的距离（三角不等式）。\n\
+  \n此外，异或函数实现简单，计算成本低。重要的是要认识到，异或函数仅仅计算两个节点 ID 之间的距离。\n\n### 路由\n\n下图展示了一个最多包含八个节点的小型网络的网络映射图。节点\
+  \ ID 作为叶子节点列在图表的底部。该图展示了从节点`110`的视角看到的网络结构。可以看到，最近的节点是`111`，因为`110 XOR 111 = 001`。最远的节点是`001`，因为`110\
+  \ XOR 001 = 111`。可以看出，使用异或作为距离函数有几个很好的特性；首先，它保证了有一半的网络节点被存储在最远的集合（或在论文中被称为桶）中。这很方便，因为当某个节点向节点`110`询问其邻居时，`110`只需返回离请求节点最近的节点即可。\n\
+  \n![../images/475256_1_En_8_Chapter/475256_1_En_8_Fig5_HTML.jpg](img/475256_1_En_8_Fig5_HTML.jpg)\n\
+  \n图 8-5\n\nKademlia 算法\n\n### 数据持久化\n\n我们的区块链存储在内存中，也就是说，我们的`Blockchain`类在程序运行期间会清空并维护整条链！\n\
+  \n```python\nclass Blockchain(object):\n    def __init__(self):\n        self.chain\
+  \ = []\n```\n\n这意味着每次重启服务器时，我们的节点都必须从其邻居节点那里下载整个区块链。区块链是单调递增的——其规模在不断增长——所以我们需要一个更好的存储方案。比特币使用谷歌的\
+  \ LevelDB 数据库进行本地存储。LevelDB 是一个简单的键值存储库，可以持久化到磁盘。在撰写本文时，比特币的完整存储空间约为 160GB。\n\n\n\
+  \n### 替代共识：权益证明（Proof of Stake）\n\n在本书中，我们只讨论过*工作量证明*（Proof of Work）：一种保护区块链安全并达成共识的算法。值得一提的是，针对工作量证明存在强烈的批评声音，其中最流行的一种观点认为它*对环境不利*：比特币为进行工作量证明而消耗大量能源已不是什么秘密。但这在很大程度上受到一种博弈论观点的反驳，即正是这种*能耗*才保障了网络的安全性。此外，这还激励比特币矿工将挖矿业务迁移到电力富余或拥有低成本可再生能源的地区，以保持盈利。在宏观层面上，比特币极端主义者将这种能耗与运行法定银行体系所产生的无法估量的成本进行对比——后者需要无数的分支机构、金库、电力、员工、表格以及看似永不枯竭的纸质钞票。\n\
+  \n在权益证明中，下一个区块的矿工是由算法根据特定标准*选择*的。根据具体实现，这些标准可能与矿工的财富、持有余额的时长有关，或者完全是随机的。相比之下，权益证明不需要大量消耗能源来保障网络安全。`NXT`\
+  \ 是一种实现了纯权益证明的加密货币；像 `Peercoin` 等其他加密货币则使用混合系统，而（在撰写本文时）`以太坊` 正处在向权益证明系统迁移的过程中。\n\
+  \n社区中有许多开发者由于多种因素，并不认为权益证明是工作量证明的理想替代方案。首先，工作量证明能提供额外的网络层优势：如果比特币遭受日蚀攻击——网络中存在大量恶意节点试图伪装成另一条链——这些攻击者将被迫重复所有耗费了数万亿兆瓦时电力的*所有*工作量，这使得攻击不可行；其次，权益证明容易受到一种被称为*无利害关系*问题的影响，即矿工（或许更适合称为区块生成者）无需担心自身受损，因此可以恶意行事（为多条区块链历史投票），从而阻止共识达成。这直接源于没有沉没经济成本（如能源），因此同时处理多条链没有任何成本。为了缓解这些漏洞，有人提出了惩罚协议，用于惩处网络中的不良行为者。\n\
+  \n### 智能合约\n\n“智能”合约的概念最初由比特币的 `P2PK`（支付到公钥）和 `P2PH`（支付到公钥哈希）引入。以太坊的突破在于引入了图灵完备的语言来编写智能合约。通俗地讲，图灵完备意味着智能合约语言能够像任何真实世界的计算机一样有效地执行计算操作。\n\
+  \n智能合约的引入最初被视为比特币 `Script` 系统的更全面版本，或者更简单地说，它是可以存储在区块链上并由矿工执行的代码。它之所以被称为*合约*，是因为代码背后的理念是针对账户操作，或作为中间人记录区块链上的事件，或在满足特定条件时采取行动。这在法律领域意义重大，因为它减少了对中间人或中介的需求。在我们的\
+  \ Funcoin 中，区块链存储的是简单的交易，而不是指令（或代码）。从技术上讲，智能合约并不那么“智能”——它是由一种特殊语言编写的一组代码，矿工（和节点）在验证区块时会运行这些代码。这些代码可以指示资金从一个账户转移到另一个账户，或者允许在收到请求时执行特定交易；其可能性似乎是无限的。\n\
+  \n-   **示例 1：公证文件**\n\n假设你想公证一份文件。你首先需要指示你的银行向你的律师付款，然后等待律师处理你的文件。然而，有了智能合约，就不需要银行或任何中介机构。通过智能合约，一旦律师生成满足你代码设定条件的文件，就可以自动获得付款。\n\
+  \n-   **示例 2：购买房屋**\n\n购买房产是一个非常复杂的过程。通常有关注佣金的经纪人分别代表卖方和买方。他们相互协调，并与各自的律师和银行合作来管理纳税过程。在某些情况下，资金还必须存入一个托管账户，以便在所有手续完成后从买方释放给卖方。这个过程在多个环节都依赖于大量的*信任*，来促成本质上简单的交易。在这种情况下，智能合约可以自动充当托管服务和支付提供商——因为当条件满足时，所有各方都可以*自动*进行交易。\n\
+  \n![../images/475256_1_En_8_Chapter/475256_1_En_8_Fig6_HTML.jpg](img/475256_1_En_8_Fig6_HTML.jpg)\n\
+  \n图 8-6 智能合约示例\n\n-   **示例 3：首次代币发行**\n\nICO 可以被视为基于区块链的众筹。如果你想为你新项目或公司的股份进行募资，你可以创建一份智能合约，当有人向指定账户转账时，该合约会授予其一份股份。这些股份通常以代币形式存在。\n\
+  \n### 智能合约长什么样？\n\n在以太坊中，智能合约是用一种名为 `Solidity` 的语言编写的。下面是一个投票合约的例子（来自 [`https://github.com/ethereum/solidity/blob/v0.4.20/docs/solidity-by-example.rst`](https://github.com/ethereum/solidity/blob/v0.4.20/docs/solidity-by-example.rst)\
+  \ 的 `Solidity` 文档）：\n\n```\n/// @title 带委托的投票合约.\ncontract Ballot {\n    // 声明了一个新的复杂类型，将在之后用于变量。\n\
+  \    // 它将代表一个单独的投票者。\n    struct Voter {\n        uint weight; // 通过委托累积的权重\n \
+  \       bool voted;  // 如果为真，表示该人已经投票\n        address delegate; // 被委托的人\n    \
+  \    uint vote; // 所投票提案的索引\n    }\n    // 这是一个表示单个提案的类型。\n    struct Proposal {\n\
+  \        bytes32 name;   // 短名称（最多 32 字节）\n        uint voteCount; // 累积的票数\n  \
+  \  }\n\n    address public chairperson;\n\n    // 声明了一个状态变量，为每个可能的地址存储一个`Voter`结构体。\n\
+  \    mapping(address => Voter) public voters;\n\n    // `Proposal`结构体的动态大小数组。\n\
+  \    Proposal[] public proposals;\n\n    /// 创建一份新选票，从`proposalNames`中选一个。\n   \
+  \ constructor(bytes32[] memory proposalNames) public {\n        chairperson = msg.sender;\n\
+  \        voters[chairperson].weight = 1;\n\n        // 对于提供的每个提案名称，\n        //\
+  \ 创建一个新的提案对象并将其添加到数组末尾。\n        for (uint i = 0; i < proposalNames.length; i++)\
+  \ {\n            // `Proposal({...})` 创建一个临时的\n            // Proposal 对象，而 `proposals.push(...)`\n\
+  \            // 将其追加到 `proposals` 数组的末尾。\n            proposals.push(Proposal({\n\
+  \                name: proposalNames[i],\n                voteCount: 0\n       \
+  \     }));\n        }\n    }\n\n    // 给予 `voter` 在此选票上的投票权。\n    // 只能由 `chairperson`\
+  \ 调用。\n    function giveRightToVote(address voter) public {\n        // 如果 `require`\
+  \ 的第一个参数计算结果为 `false`，\n        // 执行终止，并且所有对状态和以太余额的更改\n        // 都将被撤销。\n   \
+  \     // 在旧版本 EVM 中这曾消耗所有 gas，但现在不再如此。\n        // 使用 `require` 来检查函数是否被正确调用通常是个好主意。\n\
+  \        // 你还可以提供第二个参数来说明哪里出错了。\n        require(\n            msg.sender == chairperson,\n\
+  \            \"只有主席才能授予投票权。\"\n        );\n        require(\n            !voters[voter].voted,\n\
+  \            \"该投票者已经投过票。\"\n        );\n        require(voters[voter].weight ==\
+  \ 0);\n        voters[voter].weight = 1;\n    }\n\n    /// 将你的投票委托给投票者 `to`。\n \
+  \   function delegate(address to) public {\n        // 分配引用\n        Voter storage\
+  \ sender = voters[msg.sender];\n        require(!sender.voted, \"你已经投过票了。\");\n\n\
+  \        require(to != msg.sender, \"不允许自我委托。\");\n\n        // 只要 `to` 也进行了委托，就转发该委托。\n\
+  \        // 通常，这种循环非常危险，\n        // 因为如果它们运行时间过长，可能会消耗超过一个区块中可用的 gas。\n       \
+  \ // 在这种情况下，委托将在同一笔交易中执行，并且只涉及少数几轮。\n        while (voters[to].delegate != address(0))\
+  \ {\n            to = voters[to].delegate;\n\n            // 我们在委托链中发现了一个循环，不允许这样做。\n\
+  \            require(to != msg.sender, \"在委托中发现循环。\");\n        }\n\n        //\
+  \ 由于 `sender` 是一个引用，这会修改 `voters[msg.sender].voted`\n        sender.voted = true;\n\
+  \        sender.delegate = to;\n        Voter storage delegate_ = voters[to];\n\
+  \        if (delegate_.voted) {\n            // 如果被委托人已经投票，\n            // 直接将其票数加到相应的提案上\n\
+  \            proposals[delegate_.vote].voteCount += sender.weight;\n        } else\
+  \ {\n            // 如果被委托人尚未投票，\n            // 则将其权重加到她的权重上。\n            delegate_.weight\
+  \ += sender.weight;\n        }\n    }\n\n    /// 将你的投票（包括委托给你的投票）投给提案 `proposals[proposal].name`。\n\
+  \    function vote(uint proposal) public {\n        Voter storage sender = voters[msg.sender];\n\
+  \        require(!sender.voted, \"已经投过票。\");\n        sender.voted = true;\n   \
+  \     sender.vote = proposal;\n\n        // 如果 `proposal` 超出了数组范围，\n        // 这将自动抛出异常并撤销所有更改。\n\
+  \        proposals[proposal].voteCount += sender.weight;\n    }\n\n    /// @dev\
+  \ 计算获胜提案，考虑所有之前的投票。\n    function winningProposal() public view\n            returns\
+  \ (uint winningProposal_)\n    {\n        uint winningVoteCount = 0;\n        for\
+  \ (uint p = 0; p < proposals.length; p++) {\n            if (proposals[p].voteCount\
+  \ > winningVoteCount) {\n                winningVoteCount = proposals[p].voteCount;\n\
+  \                winningProposal_ = p;\n            }\n        }\n    }\n\n    //\
+  \ 调用 winningProposal() 函数获取提案数组中获胜者的索引\n    // 然后返回获胜者的名称\n    function winnerName()\
+  \ public view\n            returns (bytes32 winnerName_)\n    {\n        winnerName_\
+  \ = proposals[winningProposal()].name;\n    }\n}\n```\n\n当矿工执行这段代码时，计算量以 *gas* 计量。换句话说，*gas*\
+  \ 是对执行合约所需计算工作量的度量。每个操作都会消耗一定量的 gas，矿工根据他们消耗的 gas 总量获得费用（以 Ether 计价）。这种经济模式激励着合约被高效编写。\n\
+  \n\n\n\n# 索引\n\n## A\n- 异步编程\n\n## B\n- 比特币现货价格\n- 区块链数据的不可篡改性/哈希值\n- Python `blockchain.py.code`\
+  \ 类\n- Python 字典\n\n## C\n- 计算\n- 密码学证明\n- 密码学\n\n### 区块链数字签名\n- 验证示例，Python\n-\
+  \ 完整性，发送消息\n- 公钥\n\n## D\n- 去中心化网络\n\n### 区块链工程\n- `funcoin` 组件\n- 数据持久化\n- 网络层\n\
+  - POS\n- 智能合约\n- `solidicity`\n\n### 磁盘空间\n\n## E\n- 电子货币\n\n## F\n- `funcoin/server.py`\n\
+  - `funcoin/utils.py`\n\n## G\n- 赌徒破产问题\n- 八卦协议\n\n## H\n- `handle_message()` 方法\n\
+  - 哈希现金\n- 哈希函数\n\n### 类比\n- 图像\n- 不可逆性\n- 命名约定\n- 工作量证明\n- Python 唯一性\n\n## I, J\n\
+  - 激励机制\n- `ipinfo.io` 服务\n\n## K, L\n- Kademlia 算法\n\n## M\n- `marshmallow` 库\n\n\
+  ### 消息块负载\n- 定义\n- 实现/验证\n- `marshmallow` 库\n- 对象节点负载\n- 节点类型 ping 负载\n- 交易负载\n\n\
+  ## N, O\n- 网络 `asyncio` 库\n- 聊天服务器 `asyncio` 模块\n- 通信协议\n- `handle_connection` 循环方法\n\
+  - 方法存根\n- 终端终端窗口\n- 并发编程互联网\n\n### 点对点网络\n- 协议\n- 不可逆交易\n\n## P, Q\n- 支付验证\n- 点对点区块链\n\
+  - 点对点网络\n- 隐私\n\n### 项目依赖\n- 安装\n- 安装 Poetry\n- 新项目，Poetry\n- 激活 `virtualenv`\n\n\
+  ### 权益证明 (PoS)\n- 工作量证明 (POW) 算法\n- 比特币区块链类，iPython 示例\n- 实现拼图游戏\n\n### 工作量证明系统\n\
+  - Python 安装\n- Linux\n- macOS\n- 程序 Windows\n\n## R\n- `asyncio` 的 `run()` 函数\n\n\
+  ## S\n- 拆分/合并交易\n- 无状态协议\n\n### 对称密码学\n- 凯撒密码\n- 定义\n- 问题\n\n## T\n- 时间戳服务器\n\n\
+  ### 交易\n- 创建文件结构\n- 实现\n- 安装依赖\n- 矿工结构\n- 区块链模块\n- 连接模块\n- 删除职责\n- 节点模块\n- 服务器模块\n\
+  - UTXO\n\n### 传输控制协议 (TCP)\n\n## U, V, W, X, Y, Z\n- 未花费交易输出 (UTXO)\n- 用户数据报协议 (UDP)\n\
+  \n"
