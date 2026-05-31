@@ -1,1 +1,0 @@
-#   REPOSITORY                      TAG              IMAGE ID       SIZE
